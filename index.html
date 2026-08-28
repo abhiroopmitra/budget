@@ -74,7 +74,7 @@
     .month-dropdown {
       position: absolute; top: 70px; left: 20px; right: 20px; background: #161b22;
       border-radius: 10px; padding: 10px; display: none; z-index: 100;
-      max-height: 300px; overflow-y: auto;
+      max-height: 300px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
     .month-dropdown.show { display: block; }
     .month-option {
@@ -319,6 +319,7 @@
     let customWorkCats = JSON.parse(localStorage.getItem('customWorkCats') || '[]');
     let totalPaymentsRecorded = parseFloat(localStorage.getItem('totalPaymentsRecorded') || '0');
     let selectedMonth = getTodayString().substring(0, 7);
+    let lastSelectedMonth = selectedMonth; // Track last month for YTD return
     let isYTD = false;
     let expenseType = 'personal';
     let editingExpenseId = null;
@@ -543,8 +544,6 @@
 
     // ------------------- Expenses Logic -------------------
     function initExpensesTab() {
-      populateMonthDropdown();
-      updateMonthDisplay();
       setExpenseType('personal');
       document.getElementById('expenseDateInput').value = getTodayString();
       updateOweBalance();
@@ -567,12 +566,13 @@
         const d = new Date(m + '-01');
         div.textContent = d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
         div.onclick = () => selectMonth(m);
-        if (m === selectedMonth && !isYTD) div.classList.add('selected');
+        if (m === lastSelectedMonth && !isYTD) div.classList.add('selected');
         dropdown.appendChild(div);
       });
     }
 
     function toggleMonthDropdown() {
+      populateMonthDropdown(); // Repopulate every time to show correct selected state
       monthDropdownOpen = !monthDropdownOpen;
       const dropdown = document.getElementById('monthDropdown');
       dropdown.classList.toggle('show', monthDropdownOpen);
@@ -580,6 +580,7 @@
     }
 
     function selectMonth(month) {
+      lastSelectedMonth = month;
       selectedMonth = month;
       isYTD = false;
       monthDropdownOpen = false;
@@ -646,7 +647,6 @@
       optCustom.textContent = '+ Add custom…'; 
       select.add(optCustom);
       
-      // Restore selection if valid
       if (current && current !== '__custom__' && [...select.options].some(o => o.value === current)) {
         select.value = current;
       } else {
@@ -704,10 +704,7 @@
         const amount = parseFloat(e.amount) || 0;
         const share = parseFloat(e.share) || 100;
         const paidBy = e.paidBy;
-        
-        // Amount the OTHER person owes the payer
         const otherShare = (100 - share) / 100 * amount;
-        
         if (paidBy === 'Abhi') gianOwesAbhi += otherShare;
         else if (paidBy === 'Gian') gianOwesAbhi -= otherShare;
       });
@@ -965,7 +962,6 @@
     document.getElementById('personalCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomPersonalCat(); });
     document.getElementById('workCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomWorkCat(); });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', e => {
       if (!e.target.closest('.month-display') && !e.target.closest('.month-dropdown')) {
         monthDropdownOpen = false;
