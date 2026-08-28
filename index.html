@@ -60,24 +60,73 @@
     .slide-track.completed .slide-handle { background: #2ea043; }
     .slide-track.completed .slide-text { color: #fff; }
 
-    /* Expenses Controls */
-    .control-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
-    .control-row select {
-      flex: 1; padding: 12px; font-size: 16px; border-radius: 10px; border: none;
-      background: #161b22; color: #fff;
+    /* Month Selector */
+    .month-header { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+    .month-display {
+      flex: 1; background: #161b22; padding: 14px; border-radius: 10px;
+      text-align: center; font-size: 18px; font-weight: bold; cursor: pointer;
     }
-    .control-row button {
-      padding: 12px 16px; font-size: 16px; border: none; border-radius: 10px;
-      background: #1f6feb; color: #fff; white-space: nowrap;
+    .ytd-btn {
+      padding: 14px 20px; background: #1f6feb; border: none; border-radius: 10px;
+      color: #fff; font-size: 16px; font-weight: bold;
     }
+    .ytd-btn.active { background: #2ea043; }
+    .month-dropdown {
+      position: absolute; top: 70px; left: 20px; right: 20px; background: #161b22;
+      border-radius: 10px; padding: 10px; display: none; z-index: 100;
+      max-height: 300px; overflow-y: auto;
+    }
+    .month-dropdown.show { display: block; }
+    .month-option {
+      padding: 12px; border-radius: 8px; cursor: pointer;
+    }
+    .month-option:hover { background: #2ea043; }
+    .month-option.selected { background: #1f6feb; }
 
-    /* Cards */
-    .card { background: #161b22; border-radius: 10px; padding: 14px; margin-bottom: 12px; cursor: pointer; }
-    .card-title { font-size: 13px; opacity: 0.7; margin-bottom: 6px; }
-    .card-value { font-size: 22px; font-weight: bold; }
-    .card-value.positive { color: #f85149; }
-    .card-value.negative { color: #7ee787; }
-    .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    /* Outstanding Balance - BIG */
+    .balance-card {
+      background: linear-gradient(135deg, #1f6feb 0%, #0d1117 100%);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+      text-align: center; border: 2px solid #1f6feb;
+    }
+    .balance-label { font-size: 14px; opacity: 0.8; margin-bottom: 8px; }
+    .balance-amount { font-size: 42px; font-weight: bold; margin-bottom: 8px; }
+    .balance-who { font-size: 18px; opacity: 0.9; }
+    .balance-who.positive { color: #f85149; }
+    .balance-who.negative { color: #7ee787; }
+
+    /* Payment Slider */
+    .payment-slider-container {
+      width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px;
+      margin-bottom: 16px; user-select: none; -webkit-user-select: none; touch-action: none;
+    }
+    .payment-slider-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
+    .payment-slider-handle {
+      position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
+      width: 42px; height: 42px; background: #1f6feb; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #fff; pointer-events: none; transition: left 0.15s ease-out;
+    }
+    .payment-slider-track.dragging .payment-slider-handle { transition: none; }
+    .payment-slider-text {
+      position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+      text-align: center; color: rgba(255,255,255,0.7); font-size: 16px; pointer-events: none;
+    }
+    .payment-slider-track.completed .payment-slider-handle { background: #2ea043; }
+    .payment-slider-track.completed .payment-slider-text { color: #fff; }
+
+    /* Work Total Card */
+    .work-card { background: #161b22; border-radius: 10px; padding: 14px; margin-bottom: 16px; cursor: pointer; }
+    .work-card-title { font-size: 13px; opacity: 0.7; margin-bottom: 6px; }
+    .work-card-value { font-size: 22px; font-weight: bold; }
+    .breakdown { margin-top: 10px; padding-top: 10px; border-top: 1px solid #30363d; display: none; }
+    .breakdown.show { display: block; }
+    .breakdown-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
+
+    /* Type Toggle */
+    .type-toggle { display: flex; background: #161b22; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
+    .type-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #8b949e; cursor: pointer; }
+    .type-btn.active { background: #2ea043; color: #fff; }
 
     /* Entry Form */
     .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
@@ -87,29 +136,23 @@
       background: #2ea043; color: #fff; }
     .entry-form #cancelEditBtn { background: #f85149; display: none; }
 
-    /* Type Toggle */
-    .type-toggle { display: flex; background: #161b22; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
-    .type-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #8b949e; cursor: pointer; }
-    .type-btn.active { background: #2ea043; color: #fff; }
-
     .custom-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
     .custom-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #2ea043; color: #fff; }
 
-    /* Lists */
+    /* Lists - Side by Side */
+    .lists-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .list-column { background: #161b22; border-radius: 10px; padding: 12px; max-height: 400px; overflow-y: auto; }
+    .list-header { font-size: 14px; font-weight: bold; opacity: 0.8; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
+    
     ul { list-style: none; }
-    li { background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px;
-         display: flex; align-items: center; gap: 8px; }
-    li .info { flex: 1; }
-    li .amount { font-size: 18px; font-weight: bold; }
-    li .meta { font-size: 13px; opacity: 0.7; }
-    li .actions button { background: none; border: none; color: #f85149; font-size: 16px; padding: 4px; }
+    li { background: #0d1117; padding: 10px; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+    li .amount { font-size: 16px; font-weight: bold; color: #7ee787; }
+    li .meta { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+    li .actions { display: flex; gap: 4px; margin-top: 6px; }
+    li .actions button { background: none; border: none; font-size: 14px; padding: 2px; }
     li .actions button.edit { color: #58a6ff; }
-
-    /* Breakdown */
-    .breakdown { margin-top: 10px; padding-top: 10px; border-top: 1px solid #30363d; display: none; }
-    .breakdown.show { display: block; }
-    .breakdown-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
+    li .actions button.delete { color: #f85149; }
 
     /* Toast */
     #toast {
@@ -121,8 +164,7 @@
     #toast.show { opacity: 1; }
 
     .hidden { display: none; }
-    .section { margin-bottom: 20px; }
-    .label { font-size: 12px; opacity: 0.6; margin-bottom: 4px; }
+    .section { margin-bottom: 12px; }
   </style>
 </head>
 <body>
@@ -172,50 +214,60 @@
   <!-- EXPENSES SECTION -->
   <div id="expensesSection" class="hidden">
     
-    <!-- Month Selector -->
-    <div class="control-row">
-      <select id="monthSelect" onchange="renderExpenseLists()"></select>
+    <!-- Month Header -->
+    <div class="month-header">
+      <div class="month-display" id="monthDisplay" onclick="toggleMonthDropdown()">August 2025 ▼</div>
+      <button class="ytd-btn" id="ytdBtn" onclick="selectYTD()">YTD</button>
+    </div>
+    <div class="month-dropdown" id="monthDropdown"></div>
+
+    <!-- Outstanding Balance -->
+    <div class="balance-card">
+      <div class="balance-label" id="balanceLabel">Gian owes Abhi</div>
+      <div class="balance-amount" id="balanceAmount">$0.00</div>
+      <div class="balance-who" id="balanceWho"></div>
     </div>
 
-    <!-- Owes Card -->
-    <div class="card" style="cursor: default;">
-      <div class="card-title">Outstanding Balance</div>
-      <div class="card-value" id="oweBalanceDisplay">$0.00</div>
-      <div class="label" id="oweBalanceLabel">No balance</div>
-      <button onclick="recordPayment()" style="width:100%; margin-top:10px; padding:10px; background:#1f6feb; border:none; border-radius:8px; color:#fff;">Payment Recorded (Reset)</button>
+    <!-- Payment Slider -->
+    <div class="payment-slider-container" id="paymentSliderContainer">
+      <div class="payment-slider-track" id="paymentSliderTrack">
+        <span class="payment-slider-text" id="paymentSliderText">Slide to Record Payment</span>
+        <div class="payment-slider-handle" id="paymentSliderHandle">💰</div>
+      </div>
     </div>
 
-    <!-- Work Total Card (Clickable) -->
-    <div class="card" onclick="toggleWorkBreakdown()">
-      <div class="card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
-      <div class="card-value" id="workTotalDisplay">$0.00</div>
+    <!-- Work Total Card -->
+    <div class="work-card" onclick="toggleWorkBreakdown()">
+      <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
+      <div class="work-card-value" id="workTotalDisplay">$0.00</div>
       <div id="workBreakdown" class="breakdown"></div>
     </div>
 
-    <!-- Entry Form -->
+    <!-- Type Toggle -->
     <div class="type-toggle">
       <button class="type-btn active" id="typePersonalBtn" onclick="setExpenseType('personal')">Personal</button>
       <button class="type-btn" id="typeWorkBtn" onclick="setExpenseType('work')">Work</button>
     </div>
 
+    <!-- Entry Form -->
     <div class="entry-form">
       <input type="date" id="expenseDateInput">
       <input type="number" id="expenseAmountInput" placeholder="Amount (CAD)" step="0.01" min="0" inputmode="decimal">
-      <select id="expenseCategorySelect"></select>
+      <select id="expenseCategorySelect" onchange="handleCategoryChange()"></select>
       <button id="expenseAddBtn">Add</button>
       <button id="expenseCancelBtn">Cancel</button>
     </div>
 
-    <!-- Personal Specific Fields -->
+    <!-- Personal Fields -->
     <div id="personalFields" class="section">
       <div class="entry-form">
         <select id="personalPaidBySelect">
           <option value="Abhi">Abhi</option>
           <option value="Gian">Gian</option>
         </select>
-        <select id="personalShareSelect">
-          <option value="50">50% Share</option>
-          <option value="100">100% Share</option>
+        <select id="personalShareSelect" onchange="handleShareChange()">
+          <option value="100">100% (full owed)</option>
+          <option value="50">50% (split)</option>
           <option value="__custom__">Custom %</option>
         </select>
       </div>
@@ -229,7 +281,7 @@
       </div>
     </div>
 
-    <!-- Work Specific Fields -->
+    <!-- Work Fields -->
     <div id="workFields" class="section hidden">
       <div id="workCustomCatRow" class="custom-row hidden">
         <input type="text" id="workCustomCatInput" placeholder="New category">
@@ -237,19 +289,23 @@
       </div>
     </div>
 
-    <!-- Lists -->
-    <h3 style="margin: 16px 0 8px; font-size: 16px; opacity: 0.8;">Personal</h3>
-    <ul id="personalList"></ul>
-
-    <h3 style="margin: 16px 0 8px; font-size: 16px; opacity: 0.8;">Work</h3>
-    <ul id="workList"></ul>
+    <!-- Side-by-Side Lists -->
+    <div class="lists-container">
+      <div class="list-column">
+        <div class="list-header">PERSONAL</div>
+        <ul id="personalList"></ul>
+      </div>
+      <div class="list-column">
+        <div class="list-header">WORK</div>
+        <ul id="workList"></ul>
+      </div>
+    </div>
   </div>
 
   <div id="toast"></div>
 
   <script>
     // ------------------------ Data ------------------------
-    // Earnings
     let earnings = JSON.parse(localStorage.getItem('earnings') || '[]');
     let customSources = JSON.parse(localStorage.getItem('customSources') || '[]');
     let currentDay = localStorage.getItem('currentDay') || localStorage.getItem('activeDay') || getTodayString();
@@ -258,15 +314,16 @@
     let editingEarningsId = null;
     let summaryMode = 'day';
 
-    // Expenses
     let expenses = JSON.parse(localStorage.getItem('expenses') || '[]');
     let customPersonalCats = JSON.parse(localStorage.getItem('customPersonalCats') || '[]');
     let customWorkCats = JSON.parse(localStorage.getItem('customWorkCats') || '[]');
     let totalPaymentsRecorded = parseFloat(localStorage.getItem('totalPaymentsRecorded') || '0');
-    let selectedMonth = getTodayString().substring(0, 7); // YYYY-MM
+    let selectedMonth = getTodayString().substring(0, 7);
+    let isYTD = false;
     let expenseType = 'personal';
     let editingExpenseId = null;
     let workBreakdownVisible = false;
+    let monthDropdownOpen = false;
 
     // ------------------- Helpers -------------------
     function getTodayString() {
@@ -279,7 +336,6 @@
       localStorage.setItem('customSources', JSON.stringify(customSources));
       localStorage.setItem('currentDay', currentDay);
       localStorage.setItem('dayOpen', dayOpen ? 'true' : 'false');
-      
       localStorage.setItem('expenses', JSON.stringify(expenses));
       localStorage.setItem('customPersonalCats', JSON.stringify(customPersonalCats));
       localStorage.setItem('customWorkCats', JSON.stringify(customWorkCats));
@@ -309,7 +365,7 @@
       t._timer = setTimeout(() => t.classList.remove('show'), 2600);
     }
 
-    // ------------------- Earnings Logic (Unchanged) -------------------
+    // ------------------- Earnings Logic -------------------
     function showMainTab(tab) {
       const eS = document.getElementById('earningsSection');
       const xS = document.getElementById('expensesSection');
@@ -386,8 +442,8 @@
       const sorted = [...earnings].sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
       sorted.forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = `<div class="info"><div class="amount">$${formatCurrency(e.amount)}</div><div class="meta">${e.source} · ${getReadableDate(e.date)}</div></div>
-          <div class="actions"><button class="edit" onclick="startEditEarnings('${e.id}')">✏️</button><button onclick="deleteEarnings('${e.id}')">🗑️</button></div>`;
+        li.innerHTML = `<div class="amount">$${formatCurrency(e.amount)}</div><div class="meta">${e.source} · ${getReadableDate(e.date)}</div>
+          <div class="actions"><button class="edit" onclick="startEditEarnings('${e.id}')">✏️</button><button class="delete" onclick="deleteEarnings('${e.id}')">🗑️</button></div>`;
         list.appendChild(li);
       });
       if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">No earnings yet.</li>';
@@ -414,7 +470,7 @@
         const i = earnings.findIndex(e => e.id === editingEarningsId);
         if (i !== -1) { earnings[i].amount = amount; earnings[i].source = source; }
         editingEarningsId = null;
-        document.getElementById('earningsAddBtn').textContent = 'Add';
+        document.getElementById('earningsAddBtn').textContent = 'Update';
         document.getElementById('earningsCancelBtn').style.display = 'none';
       } else {
         if (!dayOpen) { currentDay = getTodayString(); dayOpen = true; showToast('New day started'); }
@@ -487,43 +543,69 @@
 
     // ------------------- Expenses Logic -------------------
     function initExpensesTab() {
-      populateMonthSelect();
+      populateMonthDropdown();
+      updateMonthDisplay();
       setExpenseType('personal');
       document.getElementById('expenseDateInput').value = getTodayString();
       updateOweBalance();
       renderExpenseLists();
     }
 
-    function populateMonthSelect() {
-      const select = document.getElementById('monthSelect');
-      select.innerHTML = '';
+    function populateMonthDropdown() {
+      const dropdown = document.getElementById('monthDropdown');
+      dropdown.innerHTML = '';
       
-      // Get all unique months from expenses + current month
       const months = new Set();
       expenses.forEach(e => months.add(e.date.substring(0, 7)));
       months.add(getTodayString().substring(0, 7));
       
       const sorted = Array.from(months).sort().reverse();
       
-      const optYTD = document.createElement('option');
-      optYTD.value = 'YTD';
-      optYTD.textContent = 'Year to Date';
-      select.add(optYTD);
-
       sorted.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
+        const div = document.createElement('div');
+        div.className = 'month-option';
         const d = new Date(m + '-01');
-        opt.textContent = d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
-        select.add(opt);
+        div.textContent = d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+        div.onclick = () => selectMonth(m);
+        if (m === selectedMonth && !isYTD) div.classList.add('selected');
+        dropdown.appendChild(div);
       });
+    }
 
-      if ([...select.options].some(o => o.value === selectedMonth)) {
-        select.value = selectedMonth;
+    function toggleMonthDropdown() {
+      monthDropdownOpen = !monthDropdownOpen;
+      const dropdown = document.getElementById('monthDropdown');
+      dropdown.classList.toggle('show', monthDropdownOpen);
+      document.getElementById('ytdBtn').classList.toggle('active', isYTD);
+    }
+
+    function selectMonth(month) {
+      selectedMonth = month;
+      isYTD = false;
+      monthDropdownOpen = false;
+      document.getElementById('monthDropdown').classList.remove('show');
+      document.getElementById('ytdBtn').classList.remove('active');
+      updateMonthDisplay();
+      renderExpenseLists();
+    }
+
+    function selectYTD() {
+      isYTD = true;
+      monthDropdownOpen = false;
+      document.getElementById('monthDropdown').classList.remove('show');
+      document.getElementById('ytdBtn').classList.add('active');
+      updateMonthDisplay();
+      renderExpenseLists();
+    }
+
+    function updateMonthDisplay() {
+      const display = document.getElementById('monthDisplay');
+      if (isYTD) {
+        display.textContent = 'Year to Date ▼';
       } else {
-        selectedMonth = 'YTD';
-        select.value = 'YTD';
+        display.textContent = getMonthLabel(selectedMonth + '-01') + ' ▼';
       }
+      document.getElementById('workMonthLabel').textContent = isYTD ? 'YTD' : getMonthLabel(selectedMonth + '-01');
     }
 
     function setExpenseType(type) {
@@ -537,29 +619,62 @@
 
     function updateExpenseCategorySelect() {
       const select = document.getElementById('expenseCategorySelect');
+      const current = select.value;
       select.innerHTML = '';
+      
       const defaults = expenseType === 'personal' 
         ? ['Food', 'Rent', 'Utilities', 'Internet', 'Insurance', 'Groceries']
         : ['Gas', 'Insurance', 'Maintenance'];
       const customs = expenseType === 'personal' ? customPersonalCats : customWorkCats;
 
-      defaults.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
-      if (customs.length > 0) {
-        const optSep = document.createElement('option'); optSep.disabled = true; optSep.textContent = '---'; select.add(optSep);
+      defaults.forEach(c => { 
+        const opt = document.createElement('option'); 
+        opt.value = c; 
+        opt.textContent = c; 
+        select.add(opt); 
+      });
+      
+      customs.forEach(c => { 
+        const opt = document.createElement('option'); 
+        opt.value = c; 
+        opt.textContent = c; 
+        select.add(opt); 
+      });
+      
+      const optCustom = document.createElement('option'); 
+      optCustom.value = '__custom__'; 
+      optCustom.textContent = '+ Add custom…'; 
+      select.add(optCustom);
+      
+      // Restore selection if valid
+      if (current && current !== '__custom__' && [...select.options].some(o => o.value === current)) {
+        select.value = current;
+      } else {
+        select.value = expenseType === 'personal' ? 'Food' : 'Gas';
       }
-      customs.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
       
-      const optCustom = document.createElement('option'); optCustom.value = '__custom__'; optCustom.textContent = '+ Add custom…'; select.add(optCustom);
-      
-      const catRow = expenseType === 'personal' ? document.getElementById('personalCustomCatRow') : document.getElementById('workCustomCatRow');
-      catRow.classList.toggle('hidden', select.value !== '__custom__');
+      handleCategoryChange();
+    }
+
+    function handleCategoryChange() {
+      const select = document.getElementById('expenseCategorySelect');
+      const isCustom = select.value === '__custom__';
+      const catRow = expenseType === 'personal' 
+        ? document.getElementById('personalCustomCatRow') 
+        : document.getElementById('workCustomCatRow');
+      catRow.classList.toggle('hidden', !isCustom);
+    }
+
+    function handleShareChange() {
+      const select = document.getElementById('personalShareSelect');
+      document.getElementById('personalCustomShareRow').classList.toggle('hidden', select.value !== '__custom__');
     }
 
     function setCustomShare() {
       const val = document.getElementById('personalCustomShareInput').value;
       if (val) {
         document.getElementById('personalShareSelect').value = '__custom__';
-        document.getElementById('personalCustomShareRow').classList.remove('hidden');
+        handleShareChange();
       }
     }
 
@@ -568,8 +683,9 @@
       const name = input.value.trim(); if (!name) return;
       if (!customPersonalCats.includes(name)) { customPersonalCats.push(name); saveData(); }
       updateExpenseCategorySelect();
-      document.getElementById('expenseCategorySelect').value = name; input.value = '';
-      document.getElementById('personalCustomCatRow').classList.add('hidden');
+      document.getElementById('expenseCategorySelect').value = name; 
+      input.value = '';
+      handleCategoryChange();
     }
 
     function addCustomWorkCat() {
@@ -577,71 +693,116 @@
       const name = input.value.trim(); if (!name) return;
       if (!customWorkCats.includes(name)) { customWorkCats.push(name); saveData(); }
       updateExpenseCategorySelect();
-      document.getElementById('expenseCategorySelect').value = name; input.value = '';
-      document.getElementById('workCustomCatRow').classList.add('hidden');
+      document.getElementById('expenseCategorySelect').value = name; 
+      input.value = '';
+      handleCategoryChange();
     }
 
     function updateOweBalance() {
-      // Calculate total owed based on ALL personal expenses ever (minus payments recorded)
       let gianOwesAbhi = 0;
       expenses.filter(e => e.type === 'personal').forEach(e => {
         const amount = parseFloat(e.amount) || 0;
-        const share = parseFloat(e.share) || 50;
+        const share = parseFloat(e.share) || 100;
         const paidBy = e.paidBy;
         
         // Amount the OTHER person owes the payer
         const otherShare = (100 - share) / 100 * amount;
         
         if (paidBy === 'Abhi') gianOwesAbhi += otherShare;
-        else if (paidBy === 'Gian') gianOwesAbhi -= otherShare; // Abhi owes Gian
+        else if (paidBy === 'Gian') gianOwesAbhi -= otherShare;
       });
 
       const net = gianOwesAbhi - totalPaymentsRecorded;
-      const el = document.getElementById('oweBalanceDisplay');
-      const label = document.getElementById('oweBalanceLabel');
+      const amountEl = document.getElementById('balanceAmount');
+      const labelEl = document.getElementById('balanceLabel');
+      const whoEl = document.getElementById('balanceWho');
       
-      el.textContent = '$' + formatCurrency(Math.abs(net));
+      amountEl.textContent = '$' + formatCurrency(Math.abs(net));
+      
       if (net > 0.01) {
-        el.className = 'card-value positive';
-        label.textContent = 'Gian owes Abhi';
+        labelEl.textContent = 'Gian owes Abhi';
+        whoEl.textContent = '';
+        whoEl.className = 'balance-who positive';
       } else if (net < -0.01) {
-        el.className = 'card-value negative';
-        label.textContent = 'Abhi owes Gian';
+        labelEl.textContent = 'Abhi owes Gian';
+        whoEl.textContent = '';
+        whoEl.className = 'balance-who negative';
       } else {
-        el.className = 'card-value';
-        label.textContent = 'All settled';
+        labelEl.textContent = 'All Settled';
+        whoEl.textContent = '✓';
+        whoEl.className = 'balance-who';
       }
     }
 
+    // Payment Slider
+    let paymentDragging = false, paymentHandleLeft = 4;
+    const paymentTrack = document.getElementById('paymentSliderTrack');
+    const paymentHandle = document.getElementById('paymentSliderHandle');
+    const paymentText = document.getElementById('paymentSliderText');
+
+    function paymentMaxLeft() { return paymentTrack.getBoundingClientRect().width - 4 - paymentHandle.offsetWidth; }
+
+    function resetPaymentSlide() {
+      paymentDragging = false; 
+      paymentHandleLeft = 4; 
+      paymentHandle.style.left = '4px';
+      paymentTrack.classList.remove('completed','dragging');
+      paymentText.textContent = 'Slide to Record Payment';
+    }
+
+    paymentTrack.addEventListener('pointerdown', e => {
+      paymentDragging = true; 
+      paymentTrack.classList.add('dragging'); 
+      paymentTrack.setPointerCapture(e.pointerId);
+    });
+    paymentTrack.addEventListener('pointermove', e => {
+      if (!paymentDragging) return;
+      const rect = paymentTrack.getBoundingClientRect();
+      let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2;
+      left = Math.max(4, Math.min(paymentMaxLeft(), left)); 
+      paymentHandleLeft = left; 
+      paymentHandle.style.left = left + 'px';
+      if (left >= paymentMaxLeft() * 0.92) { 
+        paymentTrack.classList.add('completed'); 
+        paymentText.textContent = 'Release to record'; 
+      } else { 
+        paymentTrack.classList.remove('completed'); 
+        paymentText.textContent = 'Slide to Record Payment'; 
+      }
+    });
+    function finishPaymentSlide() {
+      if (!paymentDragging) return;
+      const done = paymentHandleLeft >= paymentMaxLeft() * 0.92;
+      resetPaymentSlide();
+      if (done) recordPayment();
+    }
+    paymentTrack.addEventListener('pointerup', finishPaymentSlide);
+    paymentTrack.addEventListener('pointercancel', finishPaymentSlide);
+
     function recordPayment() {
-      if (!confirm('Record payment and reset balance to $0? Entries will remain.')) return;
-      // Calculate current net
       let gianOwesAbhi = 0;
       expenses.filter(e => e.type === 'personal').forEach(e => {
         const amount = parseFloat(e.amount) || 0;
-        const share = parseFloat(e.share) || 50;
+        const share = parseFloat(e.share) || 100;
         const paidBy = e.paidBy;
         const otherShare = (100 - share) / 100 * amount;
         if (paidBy === 'Abhi') gianOwesAbhi += otherShare;
         else if (paidBy === 'Gian') gianOwesAbhi -= otherShare;
       });
       const net = gianOwesAbhi - totalPaymentsRecorded;
-      
-      // Add this net amount to totalPaymentsRecorded to zero it out
       totalPaymentsRecorded += net;
       saveData();
       updateOweBalance();
-      showToast('Balance reset');
+      showToast('Payment recorded - balance reset');
     }
 
     function toggleWorkBreakdown() {
       workBreakdownVisible = !workBreakdownVisible;
       const el = document.getElementById('workBreakdown');
       if (workBreakdownVisible) {
-        // Calculate breakdown for selected month
         const breakdown = {};
         let total = 0;
-        expenses.filter(e => e.type === 'work' && (selectedMonth === 'YTD' || e.date.substring(0,7) === selectedMonth)).forEach(e => {
+        expenses.filter(e => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth)).forEach(e => {
           const cat = e.category;
           const amt = parseFloat(e.amount) || 0;
           breakdown[cat] = (breakdown[cat] || 0) + amt;
@@ -660,40 +821,36 @@
     }
 
     function renderExpenseLists() {
-      selectedMonth = document.getElementById('monthSelect').value;
-      document.getElementById('workMonthLabel').textContent = selectedMonth === 'YTD' ? 'YTD' : getMonthLabel(selectedMonth + '-01');
-      
-      const filter = (e) => e.type === 'personal' && (selectedMonth === 'YTD' || e.date.substring(0,7) === selectedMonth);
-      const filterWork = (e) => e.type === 'work' && (selectedMonth === 'YTD' || e.date.substring(0,7) === selectedMonth);
+      const filter = (e) => e.type === 'personal' && (isYTD || e.date.substring(0,7) === selectedMonth);
+      const filterWork = (e) => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth);
 
       const pList = document.getElementById('personalList');
       pList.innerHTML = '';
       expenses.filter(filter).sort((a,b) => b.date.localeCompare(a.date)).forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = `<div class="info"><div class="amount">$${formatCurrency(e.amount)}</div><div class="meta">${e.category} · ${e.paidBy} (${e.share}%) · ${getReadableDate(e.date)}</div></div>
-          <div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
+        li.innerHTML = `<div class="amount">$${formatCurrency(e.amount)}</div>
+          <div class="meta">${e.category} · ${e.paidBy} (${e.share}% owed) · ${getReadableDate(e.date)}</div>
+          <div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
         pList.appendChild(li);
       });
-      if (expenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">No personal expenses.</li>';
+      if (expenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">None</li>';
 
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
       expenses.filter(filterWork).sort((a,b) => b.date.localeCompare(a.date)).forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = `<div class="info"><div class="amount">$${formatCurrency(e.amount)}</div><div class="meta">${e.category} · ${getReadableDate(e.date)}</div></div>
-          <div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
+        li.innerHTML = `<div class="amount">$${formatCurrency(e.amount)}</div>
+          <div class="meta">${e.category} · ${getReadableDate(e.date)}</div>
+          <div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
         wList.appendChild(li);
       });
-      if (expenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">No work expenses.</li>';
+      if (expenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">None</li>';
 
-      // Update Work Total Card
       let workTotal = 0;
       expenses.filter(filterWork).forEach(e => workTotal += parseFloat(e.amount)||0);
       document.getElementById('workTotalDisplay').textContent = '$' + formatCurrency(workTotal);
       
-      // If breakdown is open, re-render it
       if (workBreakdownVisible) toggleWorkBreakdown();
-      
       updateOweBalance();
     }
 
@@ -703,7 +860,7 @@
       const catSelect = document.getElementById('expenseCategorySelect');
       const date = dateInput.value;
       const amount = parseFloat(amountInput.value);
-      const category = catSelect.value;
+      let category = catSelect.value;
 
       if (!date) { alert('Select a date.'); return; }
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
@@ -727,7 +884,7 @@
         const i = expenses.findIndex(e => e.id === editingExpenseId);
         if (i !== -1) expenses[i] = entry;
         editingExpenseId = null;
-        document.getElementById('expenseAddBtn').textContent = 'Add';
+        document.getElementById('expenseAddBtn').textContent = 'Update';
         document.getElementById('expenseCancelBtn').style.display = 'none';
       } else {
         expenses.push(entry);
@@ -737,11 +894,11 @@
       dateInput.value = getTodayString();
       if (expenseType === 'personal') {
         document.getElementById('personalPaidBySelect').value = 'Abhi';
-        document.getElementById('personalShareSelect').value = '50';
+        document.getElementById('personalShareSelect').value = '100';
         document.getElementById('personalCustomShareRow').classList.add('hidden');
       }
       catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
-      updateExpenseCategorySelect();
+      handleCategoryChange();
       
       saveData();
       renderExpenseLists();
@@ -754,17 +911,19 @@
       document.getElementById('expenseDateInput').value = entry.date;
       document.getElementById('expenseAmountInput').value = entry.amount;
       setExpenseType(entry.type);
-      document.getElementById('expenseCategorySelect').value = entry.category;
-      updateExpenseCategorySelect();
+      
+      const catSelect = document.getElementById('expenseCategorySelect');
+      catSelect.value = entry.category;
+      handleCategoryChange();
       
       if (entry.type === 'personal') {
         document.getElementById('personalPaidBySelect').value = entry.paidBy;
         const shareSelect = document.getElementById('personalShareSelect');
         const shareInput = document.getElementById('personalCustomShareInput');
-        if (entry.share == 50) shareSelect.value = '50';
-        else if (entry.share == 100) shareSelect.value = '100';
+        if (entry.share == 100) shareSelect.value = '100';
+        else if (entry.share == 50) shareSelect.value = '50';
         else { shareSelect.value = '__custom__'; shareInput.value = entry.share; }
-        document.getElementById('personalCustomShareRow').classList.toggle('hidden', shareSelect.value !== '__custom__');
+        handleShareChange();
       }
 
       document.getElementById('expenseAddBtn').textContent = 'Update';
@@ -802,13 +961,17 @@
 
     document.getElementById('expenseAddBtn').addEventListener('click', addOrUpdateExpense);
     document.getElementById('expenseCancelBtn').addEventListener('click', cancelEditExpense);
-    document.getElementById('expenseCategorySelect').addEventListener('change', updateExpenseCategorySelect);
-    document.getElementById('personalShareSelect').addEventListener('change', (e) => {
-      document.getElementById('personalCustomShareRow').classList.toggle('hidden', e.target.value !== '__custom__');
-    });
     document.getElementById('expenseAmountInput').addEventListener('keydown', e => { if (e.key === 'Enter') addOrUpdateExpense(); });
     document.getElementById('personalCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomPersonalCat(); });
     document.getElementById('workCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomWorkCat(); });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.month-display') && !e.target.closest('.month-dropdown')) {
+        monthDropdownOpen = false;
+        document.getElementById('monthDropdown').classList.remove('show');
+      }
+    });
 
     // ------------------- Init -------------------
     updateEarningsSourceSelect();
