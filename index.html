@@ -51,6 +51,62 @@
       margin-bottom: 12px;
     }
 
+    /* Slide to End Day */
+    .slide-container {
+      width: 100%;
+      background: #2b3a4a;
+      border-radius: 25px;
+      padding: 4px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;  /* prevent scrolling while dragging */
+    }
+    .slide-track {
+      position: relative;
+      height: 50px;
+      background: #1e2a36;
+      border-radius: 25px;
+      overflow: hidden;
+    }
+    .slide-handle {
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      background: #f85149;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+      cursor: grab;
+      pointer-events: none; /* handle doesn't capture pointer, track does */
+      transition: left 0.1s ease-out;
+    }
+    .slide-text {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: center;
+      color: rgba(255,255,255,0.7);
+      font-size: 16px;
+      pointer-events: none;
+    }
+    .slide-track.completed .slide-handle {
+      left: calc(100% - 46px);
+      background: #2ea043;
+    }
+    .slide-track.completed .slide-text {
+      color: #fff;
+    }
+
     .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px;
       border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
@@ -60,19 +116,6 @@
 
     .custom-source-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-source-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
-
-    .end-day-btn {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      background: #2b3a4a;
-      color: #fff;
-      margin-bottom: 12px;
-      cursor: pointer;
-    }
-    .end-day-btn:hover { background: #3a4d60; }
 
     ul { list-style: none; }
     li { background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px;
@@ -105,7 +148,13 @@
 
     <div class="active-day-label" id="activeDayLabel">Active day: Today</div>
 
-    <button class="end-day-btn" onclick="endDay()">🛑 End Day</button>
+    <!-- Slide to End Day -->
+    <div class="slide-container" id="slideContainer">
+      <div class="slide-track" id="slideTrack">
+        <span class="slide-text">Slide to End Day</span>
+        <div class="slide-handle" id="slideHandle">🛑</div>
+      </div>
+    </div>
 
     <div class="entry-form">
       <input type="number" id="amountInput" placeholder="Amount" step="0.01" min="0" inputmode="decimal">
@@ -135,10 +184,9 @@
     // ------------------------ Data ------------------------
     let earnings = JSON.parse(localStorage.getItem('earnings') || '[]');
     let customSources = JSON.parse(localStorage.getItem('customSources') || '[]');
-    // Active day – stored as 'YYYY-MM-DD' string
     let activeDay = localStorage.getItem('activeDay') || getTodayString();
-    let editingId = null;          // id of entry being edited, null if adding new
-    let summaryMode = 'day';       // 'day', 'week', 'month'
+    let editingId = null;
+    let summaryMode = 'day';
 
     // ------------------- Helper Functions -------------------
     function getTodayString() {
@@ -162,8 +210,8 @@
     function getStartOfWeek(dateStr) {
       const parts = dateStr.split('-');
       const date = new Date(parts[0], parts[1] - 1, parts[2]);
-      const day = date.getDay(); // 0 = Sunday
-      const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+      const day = date.getDay();
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
       date.setDate(diff);
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -172,7 +220,6 @@
     }
 
     function getMonthKey(dateStr) {
-      // returns 'YYYY-MM'
       return dateStr.substring(0, 7);
     }
 
@@ -201,8 +248,8 @@
     function updateSummary() {
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
-
       let total = 0;
+
       if (summaryMode === 'day') {
         total = earnings.filter(e => e.date === activeDay).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
         labelEl.textContent = 'Day Total';
@@ -213,7 +260,6 @@
         total = earnings.filter(e => isSameMonth(e.date, activeDay)).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
         labelEl.textContent = 'Month Total';
       }
-
       amountEl.textContent = formatCurrency(total);
     }
 
@@ -225,7 +271,6 @@
       const list = document.getElementById('earningsList');
       list.innerHTML = '';
 
-      // Sort newest first (by date string, descending)
       const sorted = [...earnings].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
 
       sorted.forEach(e => {
@@ -252,7 +297,6 @@
       const select = document.getElementById('sourceSelect');
       const currentValue = select.value;
 
-      // Remove all options except the first three
       while (select.options.length > 3) {
         select.remove(3);
       }
@@ -297,7 +341,77 @@
       }
     }
 
+    // -------------------- Slide to End Day --------------------
+    let isDragging = false;
+    let startX = 0;
+    let handleLeft = 4; // initial offset
+
+    const slideContainer = document.getElementById('slideContainer');
+    const slideTrack = document.getElementById('slideTrack');
+    const slideHandle = document.getElementById('slideHandle');
+    const slideText = document.querySelector('.slide-text');
+
+    function resetSlide() {
+      isDragging = false;
+      handleLeft = 4;
+      slideHandle.style.left = '4px';
+      slideTrack.classList.remove('completed');
+      slideText.textContent = 'Slide to End Day';
+    }
+
+    function onPointerDown(e) {
+      isDragging = true;
+      startX = e.clientX;
+      slideTrack.setPointerCapture(e.pointerId);
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging) return;
+      const trackRect = slideTrack.getBoundingClientRect();
+      const maxLeft = trackRect.width - 4 - slideHandle.offsetWidth;
+      let newLeft = e.clientX - trackRect.left - slideHandle.offsetWidth / 2;
+      newLeft = Math.max(4, Math.min(maxLeft, newLeft));
+      handleLeft = newLeft;
+      slideHandle.style.left = newLeft + 'px';
+
+      const threshold = maxLeft * 0.95; // almost at the end
+      if (newLeft >= threshold) {
+        slideTrack.classList.add('completed');
+        slideText.textContent = 'Release to End Day';
+      } else {
+        slideTrack.classList.remove('completed');
+        slideText.textContent = 'Slide to End Day';
+      }
+    }
+
+    function onPointerUp(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      const trackRect = slideTrack.getBoundingClientRect();
+      const maxLeft = trackRect.width - 4 - slideHandle.offsetWidth;
+      const threshold = maxLeft * 0.95;
+      if (handleLeft >= threshold) {
+        // Day ended
+        endDay();
+      }
+      resetSlide();
+    }
+
+    slideTrack.addEventListener('pointerdown', onPointerDown);
+    slideTrack.addEventListener('pointermove', onPointerMove);
+    slideTrack.addEventListener('pointerup', onPointerUp);
+    slideTrack.addEventListener('pointercancel', onPointerUp);
+
     // -------------------- Actions --------------------
+    function endDay() {
+      activeDay = getTodayString();
+      saveData();
+      updateActiveDayLabel();
+      updateSummary();
+      // Optional: show a brief toast (we'll just use alert for now to confirm)
+      alert('Day ended. New entries will go to today: ' + getActiveDayLabel());
+    }
+
     function addOrUpdateEarning() {
       const amountInput = document.getElementById('amountInput');
       const sourceSelect = document.getElementById('sourceSelect');
@@ -327,7 +441,7 @@
           id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
           amount: amount,
           source: source,
-          date: activeDay   // <-- using activeDay, not the actual current date
+          date: activeDay
         });
       }
 
@@ -387,17 +501,6 @@
       updateSourceSelect();
     }
 
-    function endDay() {
-      // Set activeDay to today's date
-      activeDay = getTodayString();
-      saveData();
-      updateActiveDayLabel();
-      updateSummary();
-      // Optional: show a confirmation
-      alert('Day ended. New entries will go to today: ' + getActiveDayLabel());
-    }
-
-    // Cycle summary mode
     function cycleSummaryMode() {
       const modes = ['day', 'week', 'month'];
       const currentIndex = modes.indexOf(summaryMode);
@@ -422,6 +525,7 @@
     updateActiveDayLabel();
     updateSummary();
     renderEarningsList();
+    resetSlide();
   </script>
 </body>
 </html>
