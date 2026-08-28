@@ -21,7 +21,6 @@
            border: none; border-radius: 10px; cursor: pointer; }
     .tab.active { background: #2ea043; }
 
-    /* Summary button (Earnings) */
     .summary-btn {
       width: 100%; background: #161b22; color: #fff; border: none;
       border-radius: 12px; padding: 16px; margin-bottom: 10px;
@@ -39,7 +38,6 @@
     .day-status.stale { color: #e3b341; }
     .day-status.closed { color: #8b949e; }
 
-    /* Slide to End Day (Earnings) */
     .slide-container {
       width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px;
       margin-bottom: 14px; user-select: none; -webkit-user-select: none; touch-action: none;
@@ -60,7 +58,6 @@
     .slide-track.completed .slide-handle { background: #2ea043; }
     .slide-track.completed .slide-text { color: #fff; }
 
-    /* Month Selector */
     .month-header { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
     .month-display {
       flex: 1; background: #161b22; padding: 14px; border-radius: 10px;
@@ -83,7 +80,6 @@
     .month-option:hover { background: #2ea043; }
     .month-option.selected { background: #1f6feb; }
 
-    /* Outstanding Balance - BIG */
     .balance-card {
       background: linear-gradient(135deg, #1f6feb 0%, #0d1117 100%);
       border-radius: 12px; padding: 20px; margin-bottom: 16px;
@@ -95,7 +91,6 @@
     .balance-who.positive { color: #f85149; }
     .balance-who.negative { color: #7ee787; }
 
-    /* Payment Slider */
     .payment-slider-container {
       width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px;
       margin-bottom: 16px; user-select: none; -webkit-user-select: none; touch-action: none;
@@ -115,7 +110,6 @@
     .payment-slider-track.completed .payment-slider-handle { background: #2ea043; }
     .payment-slider-track.completed .payment-slider-text { color: #fff; }
 
-    /* Work Total Card */
     .work-card { background: #161b22; border-radius: 10px; padding: 14px; margin-bottom: 16px; cursor: pointer; }
     .work-card-title { font-size: 13px; opacity: 0.7; margin-bottom: 6px; }
     .work-card-value { font-size: 22px; font-weight: bold; }
@@ -123,12 +117,10 @@
     .breakdown.show { display: block; }
     .breakdown-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
 
-    /* Type Toggle */
     .type-toggle { display: flex; background: #161b22; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
     .type-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #8b949e; cursor: pointer; }
     .type-btn.active { background: #2ea043; color: #fff; }
 
-    /* Entry Form */
     .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px;
       border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
@@ -140,7 +132,6 @@
     .custom-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
     .custom-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #2ea043; color: #fff; }
 
-    /* Lists - Side by Side */
     .lists-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .list-column { background: #161b22; border-radius: 10px; padding: 12px; max-height: 400px; overflow-y: auto; }
     .list-header { font-size: 14px; font-weight: bold; opacity: 0.8; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
@@ -154,7 +145,6 @@
     li .actions button.edit { color: #58a6ff; }
     li .actions button.delete { color: #f85149; }
 
-    /* Toast */
     #toast {
       position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
       background: #2ea043; color: #fff; padding: 12px 20px; border-radius: 10px;
@@ -175,7 +165,6 @@
     <button class="tab" id="expensesTabBtn" onclick="showMainTab('expenses')">Expenses</button>
   </div>
 
-  <!-- EARNINGS SECTION -->
   <div id="earningsSection">
     <button class="summary-btn" id="summaryBtn">
       <span class="period-label" id="summaryPeriodLabel">Day Total</span>
@@ -211,24 +200,20 @@
     <ul id="earningsList"></ul>
   </div>
 
-  <!-- EXPENSES SECTION -->
   <div id="expensesSection" class="hidden">
     
-    <!-- Month Header -->
     <div class="month-header">
-      <div class="month-display" id="monthDisplay" onclick="toggleMonthDropdown()">August 2025 ▼</div>
-      <button class="ytd-btn" id="ytdBtn" onclick="selectYTD()">YTD</button>
+      <div class="month-display" id="monthDisplay" onclick="toggleMonthDropdown()">January 2026 ▼</div>
+      <button class="ytd-btn" id="ytdBtn" onclick="toggleYTD()">YTD</button>
     </div>
     <div class="month-dropdown" id="monthDropdown"></div>
 
-    <!-- Outstanding Balance -->
     <div class="balance-card">
       <div class="balance-label" id="balanceLabel">Gian owes Abhi</div>
       <div class="balance-amount" id="balanceAmount">$0.00</div>
       <div class="balance-who" id="balanceWho"></div>
     </div>
 
-    <!-- Payment Slider -->
     <div class="payment-slider-container" id="paymentSliderContainer">
       <div class="payment-slider-track" id="paymentSliderTrack">
         <span class="payment-slider-text" id="paymentSliderText">Slide to Record Payment</span>
@@ -236,20 +221,17 @@
       </div>
     </div>
 
-    <!-- Work Total Card -->
     <div class="work-card" onclick="toggleWorkBreakdown()">
       <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
       <div class="work-card-value" id="workTotalDisplay">$0.00</div>
       <div id="workBreakdown" class="breakdown"></div>
     </div>
 
-    <!-- Type Toggle -->
     <div class="type-toggle">
       <button class="type-btn active" id="typePersonalBtn" onclick="setExpenseType('personal')">Personal</button>
       <button class="type-btn" id="typeWorkBtn" onclick="setExpenseType('work')">Work</button>
     </div>
 
-    <!-- Entry Form -->
     <div class="entry-form">
       <input type="date" id="expenseDateInput">
       <input type="number" id="expenseAmountInput" placeholder="Amount (CAD)" step="0.01" min="0" inputmode="decimal">
@@ -258,7 +240,6 @@
       <button id="expenseCancelBtn">Cancel</button>
     </div>
 
-    <!-- Personal Fields -->
     <div id="personalFields" class="section">
       <div class="entry-form">
         <select id="personalPaidBySelect">
@@ -281,7 +262,6 @@
       </div>
     </div>
 
-    <!-- Work Fields -->
     <div id="workFields" class="section hidden">
       <div id="workCustomCatRow" class="custom-row hidden">
         <input type="text" id="workCustomCatInput" placeholder="New category">
@@ -289,7 +269,6 @@
       </div>
     </div>
 
-    <!-- Side-by-Side Lists -->
     <div class="lists-container">
       <div class="list-column">
         <div class="list-header">PERSONAL</div>
@@ -318,9 +297,12 @@
     let customPersonalCats = JSON.parse(localStorage.getItem('customPersonalCats') || '[]');
     let customWorkCats = JSON.parse(localStorage.getItem('customWorkCats') || '[]');
     let totalPaymentsRecorded = parseFloat(localStorage.getItem('totalPaymentsRecorded') || '0');
-    let selectedMonth = getTodayString().substring(0, 7);
-    let lastSelectedMonth = selectedMonth; // Track last month for YTD return
+    
+    // FIX: Initialize to actual current month
+    let currentMonth = getTodayString().substring(0, 7);
+    let selectedMonth = currentMonth;
     let isYTD = false;
+    
     let expenseType = 'personal';
     let editingExpenseId = null;
     let workBreakdownVisible = false;
@@ -515,7 +497,6 @@
       document.getElementById('earningsSourceSelect').value = name; input.value = ''; updateEarningsSourceSelect();
     }
 
-    // Slide Logic (Earnings)
     let isDragging = false, handleLeft = 4;
     const slideTrack = document.getElementById('slideTrack');
     const slideHandle = document.getElementById('slideHandle');
@@ -546,6 +527,7 @@
     function initExpensesTab() {
       setExpenseType('personal');
       document.getElementById('expenseDateInput').value = getTodayString();
+      updateMonthDisplay();
       updateOweBalance();
       renderExpenseLists();
     }
@@ -556,7 +538,7 @@
       
       const months = new Set();
       expenses.forEach(e => months.add(e.date.substring(0, 7)));
-      months.add(getTodayString().substring(0, 7));
+      months.add(currentMonth);
       
       const sorted = Array.from(months).sort().reverse();
       
@@ -566,21 +548,21 @@
         const d = new Date(m + '-01');
         div.textContent = d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
         div.onclick = () => selectMonth(m);
-        if (m === lastSelectedMonth && !isYTD) div.classList.add('selected');
+        // FIX: Highlight correct month
+        if (m === selectedMonth && !isYTD) div.classList.add('selected');
         dropdown.appendChild(div);
       });
     }
 
     function toggleMonthDropdown() {
-      populateMonthDropdown(); // Repopulate every time to show correct selected state
+      populateMonthDropdown();
       monthDropdownOpen = !monthDropdownOpen;
       const dropdown = document.getElementById('monthDropdown');
       dropdown.classList.toggle('show', monthDropdownOpen);
-      document.getElementById('ytdBtn').classList.toggle('active', isYTD);
     }
 
     function selectMonth(month) {
-      lastSelectedMonth = month;
+      // FIX: Directly set selectedMonth to the clicked month
       selectedMonth = month;
       isYTD = false;
       monthDropdownOpen = false;
@@ -590,11 +572,10 @@
       renderExpenseLists();
     }
 
-    function selectYTD() {
-      isYTD = true;
-      monthDropdownOpen = false;
-      document.getElementById('monthDropdown').classList.remove('show');
-      document.getElementById('ytdBtn').classList.add('active');
+    // FIX: YTD now toggles
+    function toggleYTD() {
+      isYTD = !isYTD;
+      document.getElementById('ytdBtn').classList.toggle('active', isYTD);
       updateMonthDisplay();
       renderExpenseLists();
     }
@@ -731,7 +712,6 @@
       }
     }
 
-    // Payment Slider
     let paymentDragging = false, paymentHandleLeft = 4;
     const paymentTrack = document.getElementById('paymentSliderTrack');
     const paymentHandle = document.getElementById('paymentSliderHandle');
@@ -944,7 +924,6 @@
       saveData(); renderExpenseLists();
     }
 
-    // ------------------- Listeners -------------------
     document.getElementById('earningsAddBtn').addEventListener('click', addOrUpdateEarnings);
     document.getElementById('earningsCancelBtn').addEventListener('click', cancelEditEarnings);
     document.getElementById('earningsSourceSelect').addEventListener('change', updateEarningsSourceSelect);
@@ -969,7 +948,6 @@
       }
     });
 
-    // ------------------- Init -------------------
     updateEarningsSourceSelect();
     updateDayStatus();
     updateEarningsSummary();
