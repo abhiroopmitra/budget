@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Budget App</title>
+
+  <!-- PWA / iPhone -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Budget">
+  <meta name="theme-color" content="#0d1117">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
+    body { background: #0d1117; color: #fff; padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
+
+    h1 { margin-bottom: 8px; font-size: 28px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
+    .tab { flex: 1; padding: 10px; font-size: 16px; background: #161b22; color: #fff;
+           border: none; border-radius: 10px; cursor: pointer; }
+    .tab.active { background: #2ea043; }
+
+    .totals { background: #161b22; padding: 16px; border-radius: 10px; margin-bottom: 16px; }
+    .totals .big { font-size: 24px; font-weight: bold; }
+    .totals .label { font-size: 14px; opacity: 0.7; }
+    .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .totals-grid > div { background: #0d1117; padding: 10px; border-radius: 8px; }
+    .per-source { margin-top: 8px; }
+
+    .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px;
+      border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
+    .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px;
+      background: #2ea043; color: #fff; }
+    .entry-form #cancelEditBtn { background: #f85149; display: none; }
+
+    .custom-source-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
+    .custom-source-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
+
+    ul { list-style: none; }
+    li { background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px;
+         display: flex; align-items: center; gap: 8px; }
+    li .info { flex: 1; }
+    li .amount { font-size: 18px; font-weight: bold; }
+    li .source-date { font-size: 13px; opacity: 0.7; }
+    li .actions button { background: none; border: none; color: #f85149; font-size: 16px; padding: 4px; }
+    li .actions button.edit { color: #58a6ff; }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>💰 Budget</h1>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="earningsTabBtn" onclick="showTab('earnings')">Earnings</button>
+    <button class="tab" id="expensesTabBtn" onclick="showTab('expenses')">Expenses</button>
+  </div>
+
+  <!-- Earnings Section -->
+  <div id="earningsSection">
+    <div class="totals">
+      <div class="label">Total Earnings (all time)</div>
+      <div class="big">$<span id="totalAll">0.00</span></div>
+
+      <div class="totals-grid">
+        <div>
+          <div class="label">This Week</div>
+          <div>$<span id="totalWeek">0.00</span></div>
+        </div>
+        <div>
+          <div class="label">This Month</div>
+          <div>$<span id="totalMonth">0.00</span></div>
+        </div>
+      </div>
+
+      <div class="per-source" id="perSourceTotals"></div>
+    </div>
+
+    <div class="entry-form">
+      <input type="number" id="amountInput" placeholder="Amount" step="0.01" min="0" inputmode="decimal">
+      <select id="sourceSelect">
+        <option value="UberEats">UberEats</option>
+        <option value="DoorDash">DoorDash</option>
+        <!-- custom sources will be added here -->
+        <option value="__custom__">+ Add custom…</option>
+      </select>
+      <button id="addBtn">Add</button>
+      <button id="cancelEditBtn">Cancel</button>
+    </div>
+
+    <div id="customSourceRow" class="custom-source-row hidden">
+      <input type="text" id="customSourceInput" placeholder="New source name">
+      <button onclick="addCustomSource()">Save</button>
+    </div>
+
+    <ul id="earningsList"></ul>
+  </div>
+
+  <!-- Expenses Section (placeholder) -->
+  <div id="expensesSection" class="hidden">
+    <p>Expenses tab coming soon.</p>
+  </div>
+
+  <script>
+    // ------------------------ Data ------------------------
+    let earnings = JSON.parse(localStorage.getItem('earnings') || '[]');
+    let customSources = JSON.parse(localStorage.getItem('customSources') || '[]');
+    let editingId = null;          // id of entry being edited, null if adding new
+
+    // ------------------- Helper Functions -------------------
+    function saveData() {
+      localStorage.setItem('earnings', JSON.stringify(earnings));
+      localStorage.setItem('customSources', JSON.stringify(customSources));
+    }
+
+    function formatCurrency(num) {
+      return Number(num).toFixed(2);
+    }
+
+    function getStartOfWeek(date) {
+      const d = new Date(date);
+      const day = d.getDay(); // 0 = Sunday
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday as first day
+      d.setDate(diff);
+      d.setHours(0,0,0,0);
+      return d;
+    }
+
+    function isThisWeek(dateStr) {
+      const now = new Date();
+      const entryDate = new Date(dateStr);
+      const startOfWeek = getStartOfWeek(now);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 7);
+      return entryDate >= startOfWeek && entryDate < endOfWeek;
+    }
+
+    function isThisMonth(dateStr) {
+      const now = new Date();
+      const entryDate = new Date(dateStr);
+      return entryDate.getMonth() === now.getMonth() &&
+             entryDate.getFullYear() === now.getFullYear();
+    }
+
+    function getReadableDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    // -------------------- UI Updates --------------------
+    function updateTotals() {
+      let totalAll = 0;
+      let totalWeek = 0;
+      let totalMonth = 0;
+      const perSource = {};
+
+      earnings.forEach(e => {
+        const amt = parseFloat(e.amount) || 0;
+        totalAll += amt;
+
+        if (isThisWeek(e.date)) totalWeek += amt;
+        if (isThisMonth(e.date)) totalMonth += amt;
+
+        if (!perSource[e.source]) perSource[e.source] = 0;
+        perSource[e.source] += amt;
+      });
+
+      document.getElementById('totalAll').textContent = formatCurrency(totalAll);
+      document.getElementById('totalWeek').textContent = formatCurrency(totalWeek);
+      document.getElementById('totalMonth').textContent = formatCurrency(totalMonth);
+
+      // Per-source totals
+      const perSourceDiv = document.getElementById('perSourceTotals');
+      perSourceDiv.innerHTML = '';
+      for (const [source, amt] of Object.entries(perSource)) {
+        const row = document.createElement('div');
+        row.className = 'per-source-item';
+        row.innerHTML = `<span>${source}:</span> <strong>$${formatCurrency(amt)}</strong>`;
+        perSourceDiv.appendChild(row);
+      }
+      if (Object.keys(perSource).length === 0) {
+        perSourceDiv.innerHTML = '<div style="opacity:0.6;">No earnings yet</div>';
+      }
+    }
+
+    function renderEarningsList() {
+      const list = document.getElementById('earningsList');
+      list.innerHTML = '';
+
+      // Sort newest first
+      const sorted = [...earnings].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      sorted.forEach(e => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="info">
+            <div class="amount">$${formatCurrency(e.amount)}</div>
+            <div class="source-date">${e.source} · ${getReadableDate(e.date)}</div>
+          </div>
+          <div class="actions">
+            <button class="edit" onclick="startEdit('${e.id}')">✏️</button>
+            <button onclick="deleteEarning('${e.id}')">🗑️</button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+
+      if (earnings.length === 0) {
+        list.innerHTML = '<li style="opacity:0.6;">No earnings added yet.</li>';
+      }
+    }
+
+    function updateSourceSelect() {
+      const select = document.getElementById('sourceSelect');
+      // Preserve currently selected value if possible
+      const currentValue = select.value;
+
+      // Remove all options except the first three (UberEats, DoorDash, custom)
+      while (select.options.length > 3) {
+        select.remove(3);
+      }
+
+      // Add custom sources
+      customSources.forEach(src => {
+        const opt = document.createElement('option');
+        opt.value = src;
+        opt.textContent = src;
+        select.add(opt);
+      });
+
+      // Restore selection or default to UberEats
+      if (currentValue && [...select.options].some(o => o.value === currentValue)) {
+        select.value = currentValue;
+      } else {
+        select.value = 'UberEats';
+      }
+
+      // Toggle custom source input visibility
+      const customRow = document.getElementById('customSourceRow');
+      if (select.value === '__custom__') {
+        customRow.classList.remove('hidden');
+      } else {
+        customRow.classList.add('hidden');
+      }
+    }
+
+    function showTab(tab) {
+      const earningsSection = document.getElementById('earningsSection');
+      const expensesSection = document.getElementById('expensesSection');
+      const earnTab = document.getElementById('earningsTabBtn');
+      const expTab = document.getElementById('expensesTabBtn');
+
+      if (tab === 'earnings') {
+        earningsSection.classList.remove('hidden');
+        expensesSection.classList.add('hidden');
+        earnTab.classList.add('active');
+        expTab.classList.remove('active');
+      } else {
+        earningsSection.classList.add('hidden');
+        expensesSection.classList.remove('hidden');
+        expTab.classList.add('active');
+        earnTab.classList.remove('active');
+      }
+    }
+
+    // -------------------- Actions --------------------
+    function addOrUpdateEarning() {
+      const amountInput = document.getElementById('amountInput');
+      const sourceSelect = document.getElementById('sourceSelect');
+      const amount = parseFloat(amountInput.value);
+      const source = sourceSelect.value;
+
+      if (!amount || amount <= 0) {
+        alert('Please enter a valid amount.');
+        return;
+      }
+      if (source === '__custom__') {
+        alert('Please select a source or add a custom one.');
+        return;
+      }
+
+      if (editingId) {
+        // Update existing
+        const index = earnings.findIndex(e => e.id === editingId);
+        if (index !== -1) {
+          earnings[index].amount = amount;
+          earnings[index].source = source;
+        }
+        editingId = null;
+        document.getElementById('addBtn').textContent = 'Add';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+      } else {
+        // Add new
+        earnings.push({
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+          amount: amount,
+          source: source,
+          date: new Date().toISOString()
+        });
+      }
+
+      amountInput.value = '';
+      sourceSelect.value = 'UberEats';
+      updateSourceSelect(); // this will also hide custom row
+
+      saveData();
+      updateTotals();
+      renderEarningsList();
+    }
+
+    function startEdit(id) {
+      const entry = earnings.find(e => e.id === id);
+      if (!entry) return;
+
+      editingId = id;
+      document.getElementById('amountInput').value = entry.amount;
+      document.getElementById('sourceSelect').value = entry.source;
+      updateSourceSelect(); // refresh custom options and visibility
+
+      document.getElementById('addBtn').textContent = 'Update';
+      document.getElementById('cancelEditBtn').style.display = 'inline-block';
+    }
+
+    function cancelEdit() {
+      editingId = null;
+      document.getElementById('amountInput').value = '';
+      document.getElementById('sourceSelect').value = 'UberEats';
+      document.getElementById('addBtn').textContent = 'Add';
+      document.getElementById('cancelEditBtn').style.display = 'none';
+      updateSourceSelect();
+    }
+
+    function deleteEarning(id) {
+      if (!confirm('Delete this entry?')) return;
+      earnings = earnings.filter(e => e.id !== id);
+      if (editingId === id) cancelEdit();
+      saveData();
+      updateTotals();
+      renderEarningsList();
+    }
+
+    function addCustomSource() {
+      const input = document.getElementById('customSourceInput');
+      const name = input.value.trim();
+      if (!name) return;
+
+      if (!customSources.includes(name)) {
+        customSources.push(name);
+        saveData();
+        updateSourceSelect();
+      }
+
+      // Select the new source
+      document.getElementById('sourceSelect').value = name;
+      input.value = '';
+      updateSourceSelect(); // hide the custom row
+    }
+
+    // -------------------- Event Listeners --------------------
+    document.getElementById('addBtn').addEventListener('click', addOrUpdateEarning);
+    document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+    document.getElementById('sourceSelect').addEventListener('change', updateSourceSelect);
+    document.getElementById('amountInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addOrUpdateEarning();
+    });
+    document.getElementById('customSourceInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addCustomSource();
+    });
+
+    // Initial render
+    updateSourceSelect();
+    updateTotals();
+    renderEarningsList();
+  </script>
+</body>
+</html>
