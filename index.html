@@ -23,89 +23,42 @@
 
     /* Summary button */
     .summary-btn {
-      width: 100%;
-      background: #161b22;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-      text-align: center;
-      cursor: pointer;
+      width: 100%; background: #161b22; color: #fff; border: none;
+      border-radius: 12px; padding: 16px; margin-bottom: 10px;
+      text-align: center; cursor: pointer;
     }
-    .summary-btn .period-label {
-      display: block;
-      font-size: 14px;
-      opacity: 0.7;
-      margin-bottom: 4px;
-    }
-    .summary-btn .big-amount {
-      font-size: 28px;
-      font-weight: bold;
-    }
+    .summary-btn .period-label { display: block; font-size: 14px; opacity: 0.7; margin-bottom: 4px; }
+    .summary-btn .big-amount { font-size: 30px; font-weight: bold; }
+    .summary-btn .hint { display: block; font-size: 11px; opacity: 0.45; margin-top: 6px; }
 
-    .active-day-label {
-      text-align: center;
-      font-size: 13px;
-      opacity: 0.8;
-      margin-bottom: 12px;
+    .day-status {
+      text-align: center; font-size: 13px; margin-bottom: 12px;
+      padding: 8px; border-radius: 8px; background: #161b22;
     }
+    .day-status.open { color: #7ee787; }
+    .day-status.stale { color: #e3b341; }
+    .day-status.closed { color: #8b949e; }
 
     /* Slide to End Day */
     .slide-container {
-      width: 100%;
-      background: #2b3a4a;
-      border-radius: 25px;
-      padding: 4px;
-      margin-bottom: 12px;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: none;  /* prevent scrolling while dragging */
+      width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px;
+      margin-bottom: 14px; user-select: none; -webkit-user-select: none; touch-action: none;
     }
-    .slide-track {
-      position: relative;
-      height: 50px;
-      background: #1e2a36;
-      border-radius: 25px;
-      overflow: hidden;
-    }
+    .slide-container.disabled { opacity: 0.4; }
+    .slide-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
     .slide-handle {
-      position: absolute;
-      left: 4px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 42px;
-      height: 42px;
-      background: #f85149;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: #fff;
-      cursor: grab;
-      pointer-events: none; /* handle doesn't capture pointer, track does */
-      transition: left 0.1s ease-out;
+      position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
+      width: 42px; height: 42px; background: #f85149; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: #fff; pointer-events: none; transition: left 0.15s ease-out;
     }
+    .slide-track.dragging .slide-handle { transition: none; }
     .slide-text {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      text-align: center;
-      color: rgba(255,255,255,0.7);
-      font-size: 16px;
-      pointer-events: none;
+      position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+      text-align: center; color: rgba(255,255,255,0.7); font-size: 16px; pointer-events: none;
     }
-    .slide-track.completed .slide-handle {
-      left: calc(100% - 46px);
-      background: #2ea043;
-    }
-    .slide-track.completed .slide-text {
-      color: #fff;
-    }
+    .slide-track.completed .slide-handle { background: #2ea043; }
+    .slide-track.completed .slide-text { color: #fff; }
 
     .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px;
@@ -116,6 +69,7 @@
 
     .custom-source-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-source-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
+    .custom-source-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #2ea043; color: #fff; }
 
     ul { list-style: none; }
     li { background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px;
@@ -126,32 +80,38 @@
     li .actions button { background: none; border: none; color: #f85149; font-size: 16px; padding: 4px; }
     li .actions button.edit { color: #58a6ff; }
 
+    /* Toast */
+    #toast {
+      position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
+      background: #2ea043; color: #fff; padding: 12px 20px; border-radius: 10px;
+      font-size: 15px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+      max-width: 90%; text-align: center; z-index: 999;
+    }
+    #toast.show { opacity: 1; }
+
     .hidden { display: none; }
   </style>
 </head>
 <body>
   <h1>💰 Budget</h1>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" id="earningsTabBtn" onclick="showTab('earnings')">Earnings</button>
     <button class="tab" id="expensesTabBtn" onclick="showTab('expenses')">Expenses</button>
   </div>
 
-  <!-- Earnings Section -->
   <div id="earningsSection">
-    <!-- Summary button (cycles Day / Week / Month) -->
     <button class="summary-btn" id="summaryBtn">
       <span class="period-label" id="summaryPeriodLabel">Day Total</span>
       <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
+      <span class="hint">tap to switch: day → week → month</span>
     </button>
 
-    <div class="active-day-label" id="activeDayLabel">Active day: Today</div>
+    <div class="day-status open" id="dayStatus">Active day: Today</div>
 
-    <!-- Slide to End Day -->
     <div class="slide-container" id="slideContainer">
       <div class="slide-track" id="slideTrack">
-        <span class="slide-text">Slide to End Day</span>
+        <span class="slide-text" id="slideText">Slide to End Day</span>
         <div class="slide-handle" id="slideHandle">🛑</div>
       </div>
     </div>
@@ -175,103 +135,129 @@
     <ul id="earningsList"></ul>
   </div>
 
-  <!-- Expenses Section (placeholder) -->
   <div id="expensesSection" class="hidden">
     <p>Expenses tab coming soon.</p>
   </div>
+
+  <div id="toast"></div>
 
   <script>
     // ------------------------ Data ------------------------
     let earnings = JSON.parse(localStorage.getItem('earnings') || '[]');
     let customSources = JSON.parse(localStorage.getItem('customSources') || '[]');
-    let activeDay = localStorage.getItem('activeDay') || getTodayString();
+
+    // currentDay = the day entries are tagged with (or the last day used, if closed)
+    let currentDay = localStorage.getItem('currentDay')
+                  || localStorage.getItem('activeDay')   // migrate from old version
+                  || getTodayString();
+
+    // dayOpen = true means entries go to currentDay. false means next entry starts a fresh day.
+    let storedOpen = localStorage.getItem('dayOpen');
+    let dayOpen = (storedOpen === null) ? true : (storedOpen === 'true');
+
     let editingId = null;
     let summaryMode = 'day';
 
-    // ------------------- Helper Functions -------------------
+    // ------------------- Helpers -------------------
     function getTodayString() {
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = String(now.getMonth() + 1).padStart(2, '0');
-      const d = String(now.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      const n = new Date();
+      return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
     }
 
     function saveData() {
       localStorage.setItem('earnings', JSON.stringify(earnings));
       localStorage.setItem('customSources', JSON.stringify(customSources));
-      localStorage.setItem('activeDay', activeDay);
+      localStorage.setItem('currentDay', currentDay);
+      localStorage.setItem('dayOpen', dayOpen ? 'true' : 'false');
     }
 
-    function formatCurrency(num) {
-      return Number(num).toFixed(2);
+    function formatCurrency(n) { return Number(n).toFixed(2); }
+
+    function toDate(dateStr) {
+      const p = dateStr.split('-');
+      return new Date(p[0], p[1] - 1, p[2]);
     }
 
     function getStartOfWeek(dateStr) {
-      const parts = dateStr.split('-');
-      const date = new Date(parts[0], parts[1] - 1, parts[2]);
-      const day = date.getDay();
-      const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-      date.setDate(diff);
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      const d = toDate(dateStr);
+      const day = d.getDay();                          // 0 = Sunday
+      d.setDate(d.getDate() - day + (day === 0 ? -6 : 1)); // Monday start
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    function getMonthKey(dateStr) {
-      return dateStr.substring(0, 7);
-    }
-
-    function isSameWeek(dateStr, refDateStr) {
-      return getStartOfWeek(dateStr) === getStartOfWeek(refDateStr);
-    }
-
-    function isSameMonth(dateStr, refDateStr) {
-      return getMonthKey(dateStr) === getMonthKey(refDateStr);
-    }
+    function isSameWeek(a, b) { return getStartOfWeek(a) === getStartOfWeek(b); }
+    function isSameMonth(a, b) { return a.substring(0,7) === b.substring(0,7); }
 
     function getReadableDate(dateStr) {
-      const parts = dateStr.split('-');
-      const date = new Date(parts[0], parts[1] - 1, parts[2]);
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      return toDate(dateStr).toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
     }
 
-    function getActiveDayLabel() {
-      if (activeDay === getTodayString()) return 'Today';
-      const parts = activeDay.split('-');
-      const date = new Date(parts[0], parts[1] - 1, parts[2]);
-      return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 2600);
     }
 
-    // -------------------- UI Updates --------------------
+    // -------------------- UI --------------------
     function updateSummary() {
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
-      let total = 0;
+      let total = 0, label = '';
 
       if (summaryMode === 'day') {
-        total = earnings.filter(e => e.date === activeDay).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-        labelEl.textContent = 'Day Total';
+        total = earnings.filter(e => e.date === currentDay)
+                        .reduce((s,e) => s + (parseFloat(e.amount)||0), 0);
+        label = dayOpen ? 'Day Total' : 'Last Day Total';
       } else if (summaryMode === 'week') {
-        total = earnings.filter(e => isSameWeek(e.date, activeDay)).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-        labelEl.textContent = 'Week Total';
-      } else if (summaryMode === 'month') {
-        total = earnings.filter(e => isSameMonth(e.date, activeDay)).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
-        labelEl.textContent = 'Month Total';
+        total = earnings.filter(e => isSameWeek(e.date, currentDay))
+                        .reduce((s,e) => s + (parseFloat(e.amount)||0), 0);
+        label = 'Week Total';
+      } else {
+        total = earnings.filter(e => isSameMonth(e.date, currentDay))
+                        .reduce((s,e) => s + (parseFloat(e.amount)||0), 0);
+        label = 'Month Total';
       }
+
+      labelEl.textContent = label;
       amountEl.textContent = formatCurrency(total);
     }
 
-    function updateActiveDayLabel() {
-      document.getElementById('activeDayLabel').textContent = `Active day: ${getActiveDayLabel()}`;
+    function updateDayStatus() {
+      const el = document.getElementById('dayStatus');
+      el.classList.remove('open','stale','closed');
+
+      if (!dayOpen) {
+        el.classList.add('closed');
+        el.textContent = `Day closed (${getReadableDate(currentDay)}) — next entry starts a new day`;
+      } else if (currentDay === getTodayString()) {
+        el.classList.add('open');
+        el.textContent = 'Active day: Today';
+      } else {
+        el.classList.add('stale');
+        el.textContent = `⚠️ Still on ${getReadableDate(currentDay)} — entries go here until you end the day`;
+      }
+      updateSlideState();
+    }
+
+    function updateSlideState() {
+      const container = document.getElementById('slideContainer');
+      const text = document.getElementById('slideText');
+      if (dayOpen) {
+        container.classList.remove('disabled');
+        text.textContent = 'Slide to End Day';
+      } else {
+        container.classList.add('disabled');
+        text.textContent = 'Day already closed';
+      }
     }
 
     function renderEarningsList() {
       const list = document.getElementById('earningsList');
       list.innerHTML = '';
 
-      const sorted = [...earnings].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+      const sorted = [...earnings].sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
 
       sorted.forEach(e => {
         const li = document.createElement('li');
@@ -283,8 +269,7 @@
           <div class="actions">
             <button class="edit" onclick="startEdit('${e.id}')">✏️</button>
             <button onclick="deleteEarning('${e.id}')">🗑️</button>
-          </div>
-        `;
+          </div>`;
         list.appendChild(li);
       });
 
@@ -295,121 +280,44 @@
 
     function updateSourceSelect() {
       const select = document.getElementById('sourceSelect');
-      const currentValue = select.value;
-
-      while (select.options.length > 3) {
-        select.remove(3);
-      }
+      const current = select.value;
+      while (select.options.length > 3) select.remove(3);
 
       customSources.forEach(src => {
         const opt = document.createElement('option');
-        opt.value = src;
-        opt.textContent = src;
+        opt.value = src; opt.textContent = src;
         select.add(opt);
       });
 
-      if (currentValue && [...select.options].some(o => o.value === currentValue)) {
-        select.value = currentValue;
-      } else {
-        select.value = 'UberEats';
-      }
+      if (current && [...select.options].some(o => o.value === current)) select.value = current;
+      else select.value = 'UberEats';
 
-      const customRow = document.getElementById('customSourceRow');
-      if (select.value === '__custom__') {
-        customRow.classList.remove('hidden');
-      } else {
-        customRow.classList.add('hidden');
-      }
+      document.getElementById('customSourceRow')
+              .classList.toggle('hidden', select.value !== '__custom__');
     }
 
     function showTab(tab) {
-      const earningsSection = document.getElementById('earningsSection');
-      const expensesSection = document.getElementById('expensesSection');
-      const earnTab = document.getElementById('earningsTabBtn');
-      const expTab = document.getElementById('expensesTabBtn');
-
+      const eS = document.getElementById('earningsSection');
+      const xS = document.getElementById('expensesSection');
+      const eB = document.getElementById('earningsTabBtn');
+      const xB = document.getElementById('expensesTabBtn');
       if (tab === 'earnings') {
-        earningsSection.classList.remove('hidden');
-        expensesSection.classList.add('hidden');
-        earnTab.classList.add('active');
-        expTab.classList.remove('active');
+        eS.classList.remove('hidden'); xS.classList.add('hidden');
+        eB.classList.add('active'); xB.classList.remove('active');
       } else {
-        earningsSection.classList.add('hidden');
-        expensesSection.classList.remove('hidden');
-        expTab.classList.add('active');
-        earnTab.classList.remove('active');
+        eS.classList.add('hidden'); xS.classList.remove('hidden');
+        xB.classList.add('active'); eB.classList.remove('active');
       }
     }
-
-    // -------------------- Slide to End Day --------------------
-    let isDragging = false;
-    let startX = 0;
-    let handleLeft = 4; // initial offset
-
-    const slideContainer = document.getElementById('slideContainer');
-    const slideTrack = document.getElementById('slideTrack');
-    const slideHandle = document.getElementById('slideHandle');
-    const slideText = document.querySelector('.slide-text');
-
-    function resetSlide() {
-      isDragging = false;
-      handleLeft = 4;
-      slideHandle.style.left = '4px';
-      slideTrack.classList.remove('completed');
-      slideText.textContent = 'Slide to End Day';
-    }
-
-    function onPointerDown(e) {
-      isDragging = true;
-      startX = e.clientX;
-      slideTrack.setPointerCapture(e.pointerId);
-    }
-
-    function onPointerMove(e) {
-      if (!isDragging) return;
-      const trackRect = slideTrack.getBoundingClientRect();
-      const maxLeft = trackRect.width - 4 - slideHandle.offsetWidth;
-      let newLeft = e.clientX - trackRect.left - slideHandle.offsetWidth / 2;
-      newLeft = Math.max(4, Math.min(maxLeft, newLeft));
-      handleLeft = newLeft;
-      slideHandle.style.left = newLeft + 'px';
-
-      const threshold = maxLeft * 0.95; // almost at the end
-      if (newLeft >= threshold) {
-        slideTrack.classList.add('completed');
-        slideText.textContent = 'Release to End Day';
-      } else {
-        slideTrack.classList.remove('completed');
-        slideText.textContent = 'Slide to End Day';
-      }
-    }
-
-    function onPointerUp(e) {
-      if (!isDragging) return;
-      isDragging = false;
-      const trackRect = slideTrack.getBoundingClientRect();
-      const maxLeft = trackRect.width - 4 - slideHandle.offsetWidth;
-      const threshold = maxLeft * 0.95;
-      if (handleLeft >= threshold) {
-        // Day ended
-        endDay();
-      }
-      resetSlide();
-    }
-
-    slideTrack.addEventListener('pointerdown', onPointerDown);
-    slideTrack.addEventListener('pointermove', onPointerMove);
-    slideTrack.addEventListener('pointerup', onPointerUp);
-    slideTrack.addEventListener('pointercancel', onPointerUp);
 
     // -------------------- Actions --------------------
     function endDay() {
-      activeDay = getTodayString();
+      if (!dayOpen) { showToast('Day is already closed'); return; }
+      dayOpen = false;
       saveData();
-      updateActiveDayLabel();
+      updateDayStatus();
       updateSummary();
-      // Optional: show a brief toast (we'll just use alert for now to confirm)
-      alert('Day ended. New entries will go to today: ' + getActiveDayLabel());
+      showToast(`Day closed. Next entry starts a new day.`);
     }
 
     function addOrUpdateEarning() {
@@ -418,30 +326,26 @@
       const amount = parseFloat(amountInput.value);
       const source = sourceSelect.value;
 
-      if (!amount || amount <= 0) {
-        alert('Please enter a valid amount.');
-        return;
-      }
-      if (source === '__custom__') {
-        alert('Please select a source or add a custom one.');
-        return;
-      }
+      if (!amount || amount <= 0) { alert('Please enter a valid amount.'); return; }
+      if (source === '__custom__') { alert('Please pick a source or save your custom one first.'); return; }
 
       if (editingId) {
-        const index = earnings.findIndex(e => e.id === editingId);
-        if (index !== -1) {
-          earnings[index].amount = amount;
-          earnings[index].source = source;
-        }
+        const i = earnings.findIndex(e => e.id === editingId);
+        if (i !== -1) { earnings[i].amount = amount; earnings[i].source = source; }
         editingId = null;
         document.getElementById('addBtn').textContent = 'Add';
         document.getElementById('cancelEditBtn').style.display = 'none';
       } else {
+        // If the day is closed, this entry opens a brand new day using the real date
+        if (!dayOpen) {
+          currentDay = getTodayString();
+          dayOpen = true;
+          showToast('New day started: ' + getReadableDate(currentDay));
+        }
         earnings.push({
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-          amount: amount,
-          source: source,
-          date: activeDay
+          id: Date.now().toString() + Math.random().toString(36).substr(2,5),
+          amount, source,
+          date: currentDay
         });
       }
 
@@ -450,6 +354,7 @@
       updateSourceSelect();
 
       saveData();
+      updateDayStatus();
       updateSummary();
       renderEarningsList();
     }
@@ -457,14 +362,13 @@
     function startEdit(id) {
       const entry = earnings.find(e => e.id === id);
       if (!entry) return;
-
       editingId = id;
       document.getElementById('amountInput').value = entry.amount;
       document.getElementById('sourceSelect').value = entry.source;
       updateSourceSelect();
-
       document.getElementById('addBtn').textContent = 'Update';
       document.getElementById('cancelEditBtn').style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function cancelEdit() {
@@ -489,40 +393,82 @@
       const input = document.getElementById('customSourceInput');
       const name = input.value.trim();
       if (!name) return;
-
-      if (!customSources.includes(name)) {
-        customSources.push(name);
-        saveData();
-        updateSourceSelect();
-      }
-
+      if (!customSources.includes(name)) { customSources.push(name); saveData(); }
+      updateSourceSelect();
       document.getElementById('sourceSelect').value = name;
       input.value = '';
       updateSourceSelect();
     }
 
     function cycleSummaryMode() {
-      const modes = ['day', 'week', 'month'];
-      const currentIndex = modes.indexOf(summaryMode);
-      summaryMode = modes[(currentIndex + 1) % modes.length];
+      const modes = ['day','week','month'];
+      summaryMode = modes[(modes.indexOf(summaryMode) + 1) % modes.length];
       updateSummary();
     }
 
-    // -------------------- Event Listeners --------------------
+    // -------------------- Slide to End Day --------------------
+    let isDragging = false, handleLeft = 4;
+    const slideTrack = document.getElementById('slideTrack');
+    const slideHandle = document.getElementById('slideHandle');
+    const slideText = document.getElementById('slideText');
+
+    function maxLeft() {
+      return slideTrack.getBoundingClientRect().width - 4 - slideHandle.offsetWidth;
+    }
+
+    function resetSlide() {
+      isDragging = false;
+      handleLeft = 4;
+      slideHandle.style.left = '4px';
+      slideTrack.classList.remove('completed','dragging');
+      updateSlideState();
+    }
+
+    slideTrack.addEventListener('pointerdown', e => {
+      if (!dayOpen) return;
+      isDragging = true;
+      slideTrack.classList.add('dragging');
+      slideTrack.setPointerCapture(e.pointerId);
+    });
+
+    slideTrack.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+      const rect = slideTrack.getBoundingClientRect();
+      let left = e.clientX - rect.left - slideHandle.offsetWidth / 2;
+      left = Math.max(4, Math.min(maxLeft(), left));
+      handleLeft = left;
+      slideHandle.style.left = left + 'px';
+
+      if (left >= maxLeft() * 0.92) {
+        slideTrack.classList.add('completed');
+        slideText.textContent = 'Release to end day';
+      } else {
+        slideTrack.classList.remove('completed');
+        slideText.textContent = 'Slide to End Day';
+      }
+    });
+
+    function finishSlide() {
+      if (!isDragging) return;
+      const done = handleLeft >= maxLeft() * 0.92;
+      resetSlide();
+      if (done) endDay();
+    }
+
+    slideTrack.addEventListener('pointerup', finishSlide);
+    slideTrack.addEventListener('pointercancel', finishSlide);
+
+    // -------------------- Listeners --------------------
     document.getElementById('addBtn').addEventListener('click', addOrUpdateEarning);
     document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
     document.getElementById('sourceSelect').addEventListener('change', updateSourceSelect);
-    document.getElementById('amountInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addOrUpdateEarning();
-    });
-    document.getElementById('customSourceInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') addCustomSource();
-    });
+    document.getElementById('amountInput').addEventListener('keydown', e => { if (e.key === 'Enter') addOrUpdateEarning(); });
+    document.getElementById('customSourceInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomSource(); });
     document.getElementById('summaryBtn').addEventListener('click', cycleSummaryMode);
 
-    // Initial render
+    // -------------------- Init --------------------
     updateSourceSelect();
-    updateActiveDayLabel();
+    updateDayStatus();
     updateSummary();
     renderEarningsList();
     resetSlide();
