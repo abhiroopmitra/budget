@@ -1,3 +1,13 @@
+Perfect — I've made two changes:
+
+1. **Summary Button** – One large button at the top. By default it shows **Day** total. Each tap cycles through **Day → Week → Month → Day**.
+2. **Day Boundary** – You now control when your "day" ends. All entries you add are assigned to the current **active day** (initially today). After midnight, if you keep adding entries **without pressing "End Day"**, they still count toward that same day. When you finally press **"End Day"**, the next entries will belong to the new day (today).
+
+I've also added a small label showing which day is currently active, so you always know where your entries are going.
+
+Here's the updated code. **Replace your entire `index.html` with this:**
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +15,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Budget App</title>
 
-  <!-- PWA / iPhone -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,14 +31,37 @@
            border: none; border-radius: 10px; cursor: pointer; }
     .tab.active { background: #2ea043; }
 
-    .totals { background: #161b22; padding: 16px; border-radius: 10px; margin-bottom: 16px; }
-    .totals .big { font-size: 24px; font-weight: bold; }
-    .totals .label { font-size: 14px; opacity: 0.7; }
-    .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .totals-grid > div { background: #0d1117; padding: 10px; border-radius: 8px; }
-    .per-source { margin-top: 8px; }
+    /* Summary button */
+    .summary-btn {
+      width: 100%;
+      background: #161b22;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .summary-btn .period-label {
+      display: block;
+      font-size: 14px;
+      opacity: 0.7;
+      margin-bottom: 4px;
+    }
+    .summary-btn .big-amount {
+      font-size: 28px;
+      font-weight: bold;
+    }
 
-    .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .active-day-label {
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.8;
+      margin-bottom: 12px;
+    }
+
+    .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
     .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px;
       border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
     .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px;
@@ -38,6 +70,19 @@
 
     .custom-source-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-source-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
+
+    .end-day-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #2b3a4a;
+      color: #fff;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .end-day-btn:hover { background: #3a4d60; }
 
     ul { list-style: none; }
     li { background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px;
@@ -62,30 +107,21 @@
 
   <!-- Earnings Section -->
   <div id="earningsSection">
-    <div class="totals">
-      <div class="label">Total Earnings (all time)</div>
-      <div class="big">$<span id="totalAll">0.00</span></div>
+    <!-- Summary button (cycles Day / Week / Month) -->
+    <button class="summary-btn" id="summaryBtn">
+      <span class="period-label" id="summaryPeriodLabel">Day Total</span>
+      <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
+    </button>
 
-      <div class="totals-grid">
-        <div>
-          <div class="label">This Week</div>
-          <div>$<span id="totalWeek">0.00</span></div>
-        </div>
-        <div>
-          <div class="label">This Month</div>
-          <div>$<span id="totalMonth">0.00</span></div>
-        </div>
-      </div>
+    <div class="active-day-label" id="activeDayLabel">Active day: Today</div>
 
-      <div class="per-source" id="perSourceTotals"></div>
-    </div>
+    <button class="end-day-btn" onclick="endDay()">🛑 End Day</button>
 
     <div class="entry-form">
       <input type="number" id="amountInput" placeholder="Amount" step="0.01" min="0" inputmode="decimal">
       <select id="sourceSelect">
         <option value="UberEats">UberEats</option>
         <option value="DoorDash">DoorDash</option>
-        <!-- custom sources will be added here -->
         <option value="__custom__">+ Add custom…</option>
       </select>
       <button id="addBtn">Add</button>
@@ -109,90 +145,98 @@
     // ------------------------ Data ------------------------
     let earnings = JSON.parse(localStorage.getItem('earnings') || '[]');
     let customSources = JSON.parse(localStorage.getItem('customSources') || '[]');
+    // Active day – stored as 'YYYY-MM-DD' string
+    let activeDay = localStorage.getItem('activeDay') || getTodayString();
     let editingId = null;          // id of entry being edited, null if adding new
+    let summaryMode = 'day';       // 'day', 'week', 'month'
 
     // ------------------- Helper Functions -------------------
+    function getTodayString() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
     function saveData() {
       localStorage.setItem('earnings', JSON.stringify(earnings));
       localStorage.setItem('customSources', JSON.stringify(customSources));
+      localStorage.setItem('activeDay', activeDay);
     }
 
     function formatCurrency(num) {
       return Number(num).toFixed(2);
     }
 
-    function getStartOfWeek(date) {
-      const d = new Date(date);
-      const day = d.getDay(); // 0 = Sunday
-      const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday as first day
-      d.setDate(diff);
-      d.setHours(0,0,0,0);
-      return d;
+    function getStartOfWeek(dateStr) {
+      const parts = dateStr.split('-');
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      const day = date.getDay(); // 0 = Sunday
+      const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+      date.setDate(diff);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
-    function isThisWeek(dateStr) {
-      const now = new Date();
-      const entryDate = new Date(dateStr);
-      const startOfWeek = getStartOfWeek(now);
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(endOfWeek.getDate() + 7);
-      return entryDate >= startOfWeek && entryDate < endOfWeek;
+    function getMonthKey(dateStr) {
+      // returns 'YYYY-MM'
+      return dateStr.substring(0, 7);
     }
 
-    function isThisMonth(dateStr) {
-      const now = new Date();
-      const entryDate = new Date(dateStr);
-      return entryDate.getMonth() === now.getMonth() &&
-             entryDate.getFullYear() === now.getFullYear();
+    function isSameWeek(dateStr, refDateStr) {
+      return getStartOfWeek(dateStr) === getStartOfWeek(refDateStr);
+    }
+
+    function isSameMonth(dateStr, refDateStr) {
+      return getMonthKey(dateStr) === getMonthKey(refDateStr);
     }
 
     function getReadableDate(dateStr) {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const parts = dateStr.split('-');
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function getActiveDayLabel() {
+      if (activeDay === getTodayString()) return 'Today';
+      const parts = activeDay.split('-');
+      const date = new Date(parts[0], parts[1] - 1, parts[2]);
+      return date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
     }
 
     // -------------------- UI Updates --------------------
-    function updateTotals() {
-      let totalAll = 0;
-      let totalWeek = 0;
-      let totalMonth = 0;
-      const perSource = {};
+    function updateSummary() {
+      const labelEl = document.getElementById('summaryPeriodLabel');
+      const amountEl = document.getElementById('summaryAmount');
 
-      earnings.forEach(e => {
-        const amt = parseFloat(e.amount) || 0;
-        totalAll += amt;
-
-        if (isThisWeek(e.date)) totalWeek += amt;
-        if (isThisMonth(e.date)) totalMonth += amt;
-
-        if (!perSource[e.source]) perSource[e.source] = 0;
-        perSource[e.source] += amt;
-      });
-
-      document.getElementById('totalAll').textContent = formatCurrency(totalAll);
-      document.getElementById('totalWeek').textContent = formatCurrency(totalWeek);
-      document.getElementById('totalMonth').textContent = formatCurrency(totalMonth);
-
-      // Per-source totals
-      const perSourceDiv = document.getElementById('perSourceTotals');
-      perSourceDiv.innerHTML = '';
-      for (const [source, amt] of Object.entries(perSource)) {
-        const row = document.createElement('div');
-        row.className = 'per-source-item';
-        row.innerHTML = `<span>${source}:</span> <strong>$${formatCurrency(amt)}</strong>`;
-        perSourceDiv.appendChild(row);
+      let total = 0;
+      if (summaryMode === 'day') {
+        total = earnings.filter(e => e.date === activeDay).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+        labelEl.textContent = 'Day Total';
+      } else if (summaryMode === 'week') {
+        total = earnings.filter(e => isSameWeek(e.date, activeDay)).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+        labelEl.textContent = 'Week Total';
+      } else if (summaryMode === 'month') {
+        total = earnings.filter(e => isSameMonth(e.date, activeDay)).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+        labelEl.textContent = 'Month Total';
       }
-      if (Object.keys(perSource).length === 0) {
-        perSourceDiv.innerHTML = '<div style="opacity:0.6;">No earnings yet</div>';
-      }
+
+      amountEl.textContent = formatCurrency(total);
+    }
+
+    function updateActiveDayLabel() {
+      document.getElementById('activeDayLabel').textContent = `Active day: ${getActiveDayLabel()}`;
     }
 
     function renderEarningsList() {
       const list = document.getElementById('earningsList');
       list.innerHTML = '';
 
-      // Sort newest first
-      const sorted = [...earnings].sort((a, b) => new Date(b.date) - new Date(a.date));
+      // Sort newest first (by date string, descending)
+      const sorted = [...earnings].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
 
       sorted.forEach(e => {
         const li = document.createElement('li');
@@ -216,15 +260,13 @@
 
     function updateSourceSelect() {
       const select = document.getElementById('sourceSelect');
-      // Preserve currently selected value if possible
       const currentValue = select.value;
 
-      // Remove all options except the first three (UberEats, DoorDash, custom)
+      // Remove all options except the first three
       while (select.options.length > 3) {
         select.remove(3);
       }
 
-      // Add custom sources
       customSources.forEach(src => {
         const opt = document.createElement('option');
         opt.value = src;
@@ -232,14 +274,12 @@
         select.add(opt);
       });
 
-      // Restore selection or default to UberEats
       if (currentValue && [...select.options].some(o => o.value === currentValue)) {
         select.value = currentValue;
       } else {
         select.value = 'UberEats';
       }
 
-      // Toggle custom source input visibility
       const customRow = document.getElementById('customSourceRow');
       if (select.value === '__custom__') {
         customRow.classList.remove('hidden');
@@ -284,7 +324,6 @@
       }
 
       if (editingId) {
-        // Update existing
         const index = earnings.findIndex(e => e.id === editingId);
         if (index !== -1) {
           earnings[index].amount = amount;
@@ -294,21 +333,20 @@
         document.getElementById('addBtn').textContent = 'Add';
         document.getElementById('cancelEditBtn').style.display = 'none';
       } else {
-        // Add new
         earnings.push({
           id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
           amount: amount,
           source: source,
-          date: new Date().toISOString()
+          date: activeDay   // <-- using activeDay, not the actual current date
         });
       }
 
       amountInput.value = '';
       sourceSelect.value = 'UberEats';
-      updateSourceSelect(); // this will also hide custom row
+      updateSourceSelect();
 
       saveData();
-      updateTotals();
+      updateSummary();
       renderEarningsList();
     }
 
@@ -319,7 +357,7 @@
       editingId = id;
       document.getElementById('amountInput').value = entry.amount;
       document.getElementById('sourceSelect').value = entry.source;
-      updateSourceSelect(); // refresh custom options and visibility
+      updateSourceSelect();
 
       document.getElementById('addBtn').textContent = 'Update';
       document.getElementById('cancelEditBtn').style.display = 'inline-block';
@@ -339,7 +377,7 @@
       earnings = earnings.filter(e => e.id !== id);
       if (editingId === id) cancelEdit();
       saveData();
-      updateTotals();
+      updateSummary();
       renderEarningsList();
     }
 
@@ -354,10 +392,27 @@
         updateSourceSelect();
       }
 
-      // Select the new source
       document.getElementById('sourceSelect').value = name;
       input.value = '';
-      updateSourceSelect(); // hide the custom row
+      updateSourceSelect();
+    }
+
+    function endDay() {
+      // Set activeDay to today's date
+      activeDay = getTodayString();
+      saveData();
+      updateActiveDayLabel();
+      updateSummary();
+      // Optional: show a confirmation
+      alert('Day ended. New entries will go to today: ' + getActiveDayLabel());
+    }
+
+    // Cycle summary mode
+    function cycleSummaryMode() {
+      const modes = ['day', 'week', 'month'];
+      const currentIndex = modes.indexOf(summaryMode);
+      summaryMode = modes[(currentIndex + 1) % modes.length];
+      updateSummary();
     }
 
     // -------------------- Event Listeners --------------------
@@ -370,11 +425,15 @@
     document.getElementById('customSourceInput').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addCustomSource();
     });
+    document.getElementById('summaryBtn').addEventListener('click', cycleSummaryMode);
 
     // Initial render
     updateSourceSelect();
-    updateTotals();
+    updateActiveDayLabel();
+    updateSummary();
     renderEarningsList();
   </script>
 </body>
 </html>
+```
+
