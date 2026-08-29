@@ -25,10 +25,14 @@
     .login-btn.primary { background: #2ea043; color: #fff; }
     .login-btn.secondary { background: #1f6feb; color: #fff; }
     .login-error { background: #f85149; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; display: none; }
+    .login-success { background: #2ea043; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; display: none; }
     .household-input-group { display: none; }
     .household-input-group.show { display: block; }
+    .household-info { background: #1f6feb; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; display: none; }
     .app-container { display: none; }
     .app-container.show { display: block; }
+    .no-household-banner { background: #f85149; color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 16px; text-align: center; display: none; }
+    .no-household-banner.show { display: block; }
     .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
     .tab { flex: 1; padding: 10px; font-size: 16px; background: #161b22; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
     .tab.active { background: #2ea043; }
@@ -111,6 +115,7 @@
     .section { margin-bottom: 12px; }
     .user-info { font-size: 12px; opacity: 0.6; margin-top: 10px; text-align: center; }
     .household-id { font-size: 11px; opacity: 0.5; margin-top: 5px; text-align: center; font-family: monospace; }
+    .content-disabled { opacity: 0.3; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -118,6 +123,8 @@
     <div class="login-box">
       <div class="login-title" id="loginTitle">Sign In</div>
       <div class="login-error" id="loginError"></div>
+      <div class="login-success" id="loginSuccess"></div>
+      <div class="household-info" id="householdInfo"></div>
       <input type="email" class="login-input" id="loginEmail" placeholder="Email">
       <input type="password" class="login-input" id="loginPassword" placeholder="Password">
       <div class="household-input-group" id="householdInputGroup">
@@ -133,6 +140,9 @@
   </div>
 
   <div class="app-container" id="appContainer">
+    <div class="no-household-banner" id="noHouseholdBanner">
+      ⚠️ <strong>No Household!</strong> Please create or join a household in Settings to start adding data.
+    </div>
     <div class="header">
       <h1>💰 Budget</h1>
       <button class="lang-toggle" id="langToggle">EN</button>
@@ -141,7 +151,7 @@
       <button class="tab active" id="earningsTabBtn">Earnings</button>
       <button class="tab" id="expensesTabBtn">Expenses</button>
     </div>
-    <div id="earningsSection">
+    <div id="earningsSection" class="content-disabled">
       <button class="summary-btn" id="summaryBtn">
         <span class="period-label" id="summaryPeriodLabel">Day Total</span>
         <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
@@ -170,7 +180,7 @@
       </div>
       <ul id="earningsList"></ul>
     </div>
-    <div id="expensesSection" class="hidden">
+    <div id="expensesSection" class="hidden content-disabled">
       <div class="month-header">
         <div class="month-display" id="monthDisplay">January 2026 ▼</div>
         <button class="ytd-btn" id="ytdBtn">YTD</button>
@@ -258,7 +268,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script>
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCw-VlPowIAzY0ylq2-WK39Jo-L0ELn414",
       authDomain: "budget-275ac.firebaseapp.com",
@@ -268,12 +277,10 @@
       appId: "1:176646041982:web:b8ab6615a2bb8fb72b432f"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Global State
     let currentUser = null;
     let householdId = null;
     let earnings = [];
@@ -295,7 +302,6 @@
     let isLoginMode = true;
     let currentLang = localStorage.getItem('appLang') || 'en';
 
-    // Translations
     const translations = {
       en: { earnings: "Earnings", expenses: "Expenses", add: "Add", update: "Update", cancel: "Cancel", save: "Save", dayTotal: "Day Total", weekTotal: "Week Total", monthTotal: "Month Total", owes1: "Gian owes Abhi", owes2: "Abhi owes Gian", settled: "All Settled", noEarnings: "No earnings yet.", noPersonal: "No personal expenses.", noWork: "No work expenses." },
       es: { earnings: "Ganancias", expenses: "Gastos", add: "Agregar", update: "Actualizar", cancel: "Cancelar", save: "Guardar", dayTotal: "Total del Día", weekTotal: "Total de la Semana", monthTotal: "Total del Mes", owes1: "Gian le debe a Abhi", owes2: "Abhi le debe a Gian", settled: "Todo Pagado", noEarnings: "Sin ganancias aún.", noPersonal: "Sin gastos personales.", noWork: "Sin gastos de trabajo." }
@@ -303,7 +309,6 @@
 
     function t(key) { return translations[currentLang][key] || key; }
 
-    // Toast
     function showToast(msg, isError = false) {
       const el = document.getElementById('toast');
       el.textContent = msg;
@@ -312,7 +317,13 @@
       el._timer = setTimeout(() => el.classList.remove('show'), 2600);
     }
 
-    // Auth State
+    function updateContentAccess() {
+      const hasHousehold = householdId !== null && householdId !== '';
+      document.getElementById('earningsSection').classList.toggle('content-disabled', !hasHousehold);
+      document.getElementById('expensesSection').classList.toggle('content-disabled', !hasHousehold);
+      document.getElementById('noHouseholdBanner').classList.toggle('show', !hasHousehold);
+    }
+
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
@@ -326,26 +337,39 @@
         document.getElementById('loginContainer').classList.add('show');
         document.getElementById('appContainer').classList.remove('show');
       }
+      updateContentAccess();
     });
 
-    // Load Household
     async function loadHousehold() {
       if (!currentUser) return;
       try {
         const userDoc = await db.collection('users').doc(currentUser.uid).get();
         if (userDoc.exists) {
           householdId = userDoc.data().householdId;
-          document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
-          loadHouseholdData();
+          if (householdId) {
+            document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
+            loadHouseholdData();
+          }
         } else {
-          document.getElementById('householdInputGroup').classList.add('show');
-          document.getElementById('createHouseholdBtn').classList.remove('hidden');
-          document.getElementById('loginSubmitBtn').textContent = 'Join Household';
+          showHouseholdSetup();
         }
-      } catch (e) { console.error(e); }
+        updateContentAccess();
+      } catch (e) { 
+        console.error('Error loading household:', e);
+        showHouseholdSetup();
+        updateContentAccess();
+      }
     }
 
-    // Load Household Data (Real-time)
+    function showHouseholdSetup() {
+      document.getElementById('householdInputGroup').classList.add('show');
+      document.getElementById('createHouseholdBtn').classList.remove('hidden');
+      document.getElementById('loginSubmitBtn').textContent = 'Join Household';
+      const infoEl = document.getElementById('householdInfo');
+      infoEl.style.display = 'block';
+      infoEl.textContent = '📝 First time? Click "Create New Household" to start. If your partner already created one, enter their Household ID above and click "Join Household".';
+    }
+
     function loadHouseholdData() {
       if (!householdId) return;
       db.collection('households').doc(householdId).onSnapshot(doc => {
@@ -360,36 +384,44 @@
           updateDayStatus();
           updateEarningsSourceSelect();
           updateExpenseCategorySelect();
+          updateContentAccess();
         }
+      }, error => {
+        console.error('Error listening to household:', error);
+        showToast('Error loading data', true);
       });
       db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderEarningsList();
         updateEarningsSummary();
-      });
+      }, error => console.error('Error loading earnings:', error));
       db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
         updateOweBalance();
-      });
+      }, error => console.error('Error loading expenses:', error));
     }
 
-    // Login/Signup
     document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
+      const successEl = document.getElementById('loginSuccess');
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
       if (!email || !password) { errorEl.textContent = 'Enter email and password'; errorEl.style.display = 'block'; return; }
       try {
         if (document.getElementById('householdInputGroup').classList.contains('show')) {
-          await joinHousehold();
+          const hid = document.getElementById('householdIdInput').value.trim();
+          if (!hid) { errorEl.textContent = 'Enter Household ID to join'; errorEl.style.display = 'block'; return; }
+          await joinHousehold(hid);
+          successEl.textContent = 'Joined household successfully!';
+          successEl.style.display = 'block';
         } else if (isLoginMode) {
           await auth.signInWithEmailAndPassword(email, password);
         } else {
           await auth.createUserWithEmailAndPassword(email, password);
-          document.getElementById('householdInputGroup').classList.add('show');
-          document.getElementById('createHouseholdBtn').classList.remove('hidden');
-          document.getElementById('loginSubmitBtn').textContent = 'Join Household';
+          showHouseholdSetup();
           errorEl.textContent = 'Account created! Now create or join a household.';
           errorEl.style.display = 'block';
         }
@@ -398,8 +430,11 @@
 
     document.getElementById('createHouseholdBtn').addEventListener('click', async () => {
       if (!currentUser) return;
-      const newHouseholdId = 'hh_' + Math.random().toString(36).substr(2, 9);
+      const btn = document.getElementById('createHouseholdBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
       try {
+        const newHouseholdId = 'hh_' + Math.random().toString(36).substr(2, 9);
         await db.collection('households').doc(newHouseholdId).set({
           members: [currentUser.email],
           createdAt: new Date().toISOString(),
@@ -417,17 +452,26 @@
         });
         householdId = newHouseholdId;
         document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
+        const infoEl = document.getElementById('householdInfo');
+        infoEl.style.display = 'block';
+        infoEl.textContent = '✅ Household created! Share this ID with your partner: ' + newHouseholdId;
         loadHouseholdData();
+        updateContentAccess();
         showToast('Household created! Share ID: ' + newHouseholdId);
-      } catch (e) { console.error(e); showToast('Error creating household', true); }
+      } catch (e) { 
+        console.error(e); 
+        showToast('Error creating household: ' + e.message, true); 
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Create New Household';
+      }
     });
 
-    async function joinHousehold() {
-      const hid = document.getElementById('householdIdInput').value.trim();
-      if (!hid || !currentUser) return;
+    async function joinHousehold(hid) {
+      if (!currentUser) return;
       try {
         const hDoc = await db.collection('households').doc(hid).get();
-        if (!hDoc.exists) { showToast('Household not found', true); return; }
+        if (!hDoc.exists) { throw new Error('Household not found'); }
         await db.collection('households').doc(hid).update({ members: firebase.firestore.FieldValue.arrayUnion(currentUser.email) });
         await db.collection('users').doc(currentUser.uid).set({
           email: currentUser.email,
@@ -437,8 +481,8 @@
         householdId = hid;
         document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
         loadHouseholdData();
-        showToast('Joined household!');
-      } catch (e) { console.error(e); showToast('Error joining household', true); }
+        updateContentAccess();
+      } catch (e) { throw e; }
     }
 
     document.getElementById('loginSwitchText').addEventListener('click', () => {
@@ -448,12 +492,13 @@
       document.getElementById('loginSwitchText').textContent = isLoginMode ? "Don't have an account? Sign Up" : 'Already have an account? Sign In';
       document.getElementById('householdInputGroup').classList.remove('show');
       document.getElementById('createHouseholdBtn').classList.add('hidden');
+      document.getElementById('householdInfo').style.display = 'none';
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
-    // Tab Switching
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
+      if (!householdId) { showToast('Create or join a household first!', true); return; }
       document.getElementById('earningsSection').classList.remove('hidden');
       document.getElementById('expensesSection').classList.add('hidden');
       document.getElementById('earningsTabBtn').classList.add('active');
@@ -461,6 +506,7 @@
     });
 
     document.getElementById('expensesTabBtn').addEventListener('click', () => {
+      if (!householdId) { showToast('Create or join a household first!', true); return; }
       document.getElementById('earningsSection').classList.add('hidden');
       document.getElementById('expensesSection').classList.remove('hidden');
       document.getElementById('expensesTabBtn').classList.add('active');
@@ -469,8 +515,8 @@
       renderExpenseLists();
     });
 
-    // Add Earnings
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
+      if (!householdId) { showToast('Create or join a household first!', true); return; }
       const amountInput = document.getElementById('earningsAmountInput');
       const sourceSelect = document.getElementById('earningsSourceSelect');
       const amount = parseFloat(amountInput.value);
@@ -478,17 +524,23 @@
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
       if (source === '__custom__') { alert('Save custom source first.'); return; }
       const entry = { amount, source, date: currentDay, addedBy: currentUser.email, timestamp: new Date().toISOString() };
-      if (editingEarningsId) {
-        await db.collection('households').doc(householdId).collection('earnings').doc(editingEarningsId).update(entry);
-        editingEarningsId = null;
-        document.getElementById('earningsAddBtn').textContent = t('add');
-        document.getElementById('earningsCancelBtn').style.display = 'none';
-      } else {
-        await db.collection('households').doc(householdId).collection('earnings').add(entry);
+      try {
+        if (editingEarningsId) {
+          await db.collection('households').doc(householdId).collection('earnings').doc(editingEarningsId).update(entry);
+          editingEarningsId = null;
+          document.getElementById('earningsAddBtn').textContent = t('add');
+          document.getElementById('earningsCancelBtn').style.display = 'none';
+        } else {
+          await db.collection('households').doc(householdId).collection('earnings').add(entry);
+        }
+        amountInput.value = '';
+        sourceSelect.value = 'UberEats';
+        updateEarningsSourceSelect();
+        showToast('Earning added!');
+      } catch (e) {
+        console.error(e);
+        showToast('Error adding earning: ' + e.message, true);
       }
-      amountInput.value = '';
-      sourceSelect.value = 'UberEats';
-      updateEarningsSourceSelect();
     });
 
     document.getElementById('earningsCancelBtn').addEventListener('click', () => {
@@ -500,8 +552,8 @@
       updateEarningsSourceSelect();
     });
 
-    // Add Expense
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
+      if (!householdId) { showToast('Create or join a household first!', true); return; }
       const dateInput = document.getElementById('expenseDateInput');
       const amountInput = document.getElementById('expenseAmountInput');
       const catSelect = document.getElementById('expenseCategorySelect');
@@ -519,23 +571,29 @@
         entry.paidBy = paidBy;
         entry.share = share;
       }
-      if (editingExpenseId) {
-        await db.collection('households').doc(householdId).collection('expenses').doc(editingExpenseId).update(entry);
-        editingExpenseId = null;
-        document.getElementById('expenseAddBtn').textContent = t('add');
-        document.getElementById('expenseCancelBtn').style.display = 'none';
-      } else {
-        await db.collection('households').doc(householdId).collection('expenses').add(entry);
+      try {
+        if (editingExpenseId) {
+          await db.collection('households').doc(householdId).collection('expenses').doc(editingExpenseId).update(entry);
+          editingExpenseId = null;
+          document.getElementById('expenseAddBtn').textContent = t('add');
+          document.getElementById('expenseCancelBtn').style.display = 'none';
+        } else {
+          await db.collection('households').doc(householdId).collection('expenses').add(entry);
+        }
+        amountInput.value = '';
+        dateInput.value = new Date().toISOString().split('T')[0];
+        if (expenseType === 'personal') {
+          document.getElementById('personalPaidBySelect').value = 'Abhi';
+          document.getElementById('personalShareSelect').value = '100';
+          document.getElementById('personalCustomShareRow').classList.add('hidden');
+        }
+        catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
+        handleCategoryChange();
+        showToast('Expense added!');
+      } catch (e) {
+        console.error(e);
+        showToast('Error adding expense: ' + e.message, true);
       }
-      amountInput.value = '';
-      dateInput.value = new Date().toISOString().split('T')[0];
-      if (expenseType === 'personal') {
-        document.getElementById('personalPaidBySelect').value = 'Abhi';
-        document.getElementById('personalShareSelect').value = '100';
-        document.getElementById('personalCustomShareRow').classList.add('hidden');
-      }
-      catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
-      handleCategoryChange();
     });
 
     document.getElementById('expenseCancelBtn').addEventListener('click', () => {
@@ -547,18 +605,24 @@
       setExpenseType('personal');
     });
 
-    // Delete
     window.deleteEarnings = async (id) => {
+      if (!householdId) return;
       if (!confirm('Delete?')) return;
-      await db.collection('households').doc(householdId).collection('earnings').doc(id).delete();
+      try {
+        await db.collection('households').doc(householdId).collection('earnings').doc(id).delete();
+        showToast('Deleted');
+      } catch (e) { showToast('Error deleting', true); }
     };
 
     window.deleteExpense = async (id) => {
+      if (!householdId) return;
       if (!confirm('Delete?')) return;
-      await db.collection('households').doc(householdId).collection('expenses').doc(id).delete();
+      try {
+        await db.collection('households').doc(householdId).collection('expenses').doc(id).delete();
+        showToast('Deleted');
+      } catch (e) { showToast('Error deleting', true); }
     };
 
-    // Edit
     window.startEditEarnings = (id) => {
       const entry = earnings.find(e => e.id === id);
       if (!entry) return;
@@ -591,8 +655,8 @@
       document.getElementById('expenseCancelBtn').style.display = 'inline-block';
     };
 
-    // Custom Sources/Categories
     document.getElementById('saveCustomSourceBtn').addEventListener('click', async () => {
+      if (!householdId) return;
       const input = document.getElementById('earningsCustomInput');
       const name = input.value.trim();
       if (!name) return;
@@ -606,6 +670,7 @@
     });
 
     document.getElementById('savePersonalCatBtn').addEventListener('click', async () => {
+      if (!householdId) return;
       const input = document.getElementById('personalCustomCatInput');
       const name = input.value.trim();
       if (!name) return;
@@ -620,6 +685,7 @@
     });
 
     document.getElementById('saveWorkCatBtn').addEventListener('click', async () => {
+      if (!householdId) return;
       const input = document.getElementById('workCustomCatInput');
       const name = input.value.trim();
       if (!name) return;
@@ -692,7 +758,6 @@
       handleCategoryChange();
     }
 
-    // Render Lists
     function renderEarningsList() {
       const list = document.getElementById('earningsList');
       list.innerHTML = '';
@@ -789,6 +854,7 @@
     }
 
     document.getElementById('monthDisplay').addEventListener('click', () => {
+      if (!householdId) return;
       monthDropdownOpen = !monthDropdownOpen;
       const dropdown = document.getElementById('monthDropdown');
       if (monthDropdownOpen) {
@@ -808,9 +874,10 @@
       } else { dropdown.classList.remove('show'); }
     });
 
-    document.getElementById('ytdBtn').addEventListener('click', () => { isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); });
+    document.getElementById('ytdBtn').addEventListener('click', () => { if (!householdId) return; isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); });
 
     document.getElementById('workCard').addEventListener('click', () => {
+      if (!householdId) return;
       workBreakdownVisible = !workBreakdownVisible;
       const el = document.getElementById('workBreakdown');
       if (workBreakdownVisible) {
@@ -822,16 +889,15 @@
       } else { el.classList.remove('show'); }
     });
 
-    // Slides
     let isDragging = false, handleLeft = 4;
     const slideTrack = document.getElementById('slideTrack');
     const slideHandle = document.getElementById('slideHandle');
     const slideText = document.getElementById('slideText');
     function maxLeft() { return slideTrack.getBoundingClientRect().width - 4 - slideHandle.offsetWidth; }
     function resetSlide() { isDragging = false; handleLeft = 4; slideHandle.style.left = '4px'; slideTrack.classList.remove('completed','dragging'); updateSlideState(); }
-    slideTrack.addEventListener('pointerdown', e => { if (!dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
+    slideTrack.addEventListener('pointerdown', e => { if (!householdId || !dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
     slideTrack.addEventListener('pointermove', e => { if (!isDragging) return; const rect = slideTrack.getBoundingClientRect(); let left = e.clientX - rect.left - slideHandle.offsetWidth / 2; left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px'; if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; } else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; } });
-    slideTrack.addEventListener('pointerup', async () => { if (!isDragging) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
+    slideTrack.addEventListener('pointerup', async () => { if (!isDragging || !householdId) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
     slideTrack.addEventListener('pointercancel', resetSlide);
 
     let paymentDragging = false, paymentHandleLeft = 4;
@@ -840,12 +906,11 @@
     const paymentText = document.getElementById('paymentSliderText');
     function paymentMaxLeft() { return paymentTrack.getBoundingClientRect().width - 4 - paymentHandle.offsetWidth; }
     function resetPaymentSlide() { paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px'; paymentTrack.classList.remove('completed','dragging'); paymentText.textContent = 'Slide to Record Payment'; }
-    paymentTrack.addEventListener('pointerdown', e => { paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
+    paymentTrack.addEventListener('pointerdown', e => { if (!householdId) return; paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
     paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
-    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (100 - share) / 100 * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
+    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (100 - share) / 100 * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
-    // Export/Import/Clear
     document.getElementById('exportBtn').addEventListener('click', () => {
       const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
       const dataStr = JSON.stringify(backup, null, 2);
@@ -862,6 +927,7 @@
     });
 
     document.getElementById('fileInput').addEventListener('change', async (event) => {
+      if (!householdId) return;
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -872,13 +938,14 @@
           if (!confirm('This will replace ALL data. Continue?')) { event.target.value = ''; return; }
           await db.collection('households').doc(householdId).update({ customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || new Date().toISOString().split('T')[0], dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
           showToast('Data imported!');
-        } catch (err) { showToast('Invalid file', true); }
+        } catch (err) { showToast('Invalid file: ' + err.message, true); }
         event.target.value = '';
       };
       reader.readAsText(file);
     });
 
     document.getElementById('clearBtn').addEventListener('click', async () => {
+      if (!householdId) return;
       if (!confirm('⚠️ DELETE ALL DATA? This cannot be undone.')) return;
       if (!confirm('Are you ABSOLUTELY SURE?')) return;
       await db.collection('households').doc(householdId).update({ customSources: [], customPersonalCats: [], customWorkCats: [], totalPaymentsRecorded: 0, currentDay: new Date().toISOString().split('T')[0], dayOpen: true });
@@ -887,7 +954,6 @@
       showToast('All data cleared');
     });
 
-    // Language
     document.getElementById('langToggle').addEventListener('click', () => {
       currentLang = currentLang === 'en' ? 'es' : 'en';
       localStorage.setItem('appLang', currentLang);
@@ -900,7 +966,6 @@
       updateOweBalance();
     });
 
-    // Init
     document.getElementById('expenseDateInput').value = new Date().toISOString().split('T')[0];
   </script>
 </body>
