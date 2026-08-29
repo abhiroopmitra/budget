@@ -114,7 +114,6 @@
   </style>
 </head>
 <body>
-  <!-- Login Screen -->
   <div class="login-container" id="loginContainer">
     <div class="login-box">
       <div class="login-title" id="loginTitle">Sign In</div>
@@ -124,24 +123,23 @@
       <div class="household-input-group" id="householdInputGroup">
         <input type="text" class="login-input" id="householdIdInput" placeholder="Household ID (from partner)">
       </div>
-      <button class="login-btn primary" id="loginSubmitBtn" onclick="handleLoginSubmit()">Sign In</button>
-      <button class="login-btn secondary hidden" id="createHouseholdBtn" onclick="createHousehold()">Create New Household</button>
+      <button class="login-btn primary" id="loginSubmitBtn">Sign In</button>
+      <button class="login-btn secondary hidden" id="createHouseholdBtn">Create New Household</button>
       <div style="text-align: center; margin-top: 15px; color: #8b949e;">
-        <span id="loginSwitchText" onclick="toggleLoginMode()" style="color: #1f6feb; cursor: pointer; text-decoration: underline;">Don't have an account? Sign Up</span>
+        <span id="loginSwitchText" style="color: #1f6feb; cursor: pointer; text-decoration: underline;">Don't have an account? Sign Up</span>
       </div>
       <div class="user-info" id="userInfo"></div>
     </div>
   </div>
 
-  <!-- Main App -->
   <div class="app-container" id="appContainer">
     <div class="header">
       <h1>💰 Budget</h1>
-      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
+      <button class="lang-toggle" id="langToggle">EN</button>
     </div>
     <div class="tabs">
-      <button class="tab active" id="earningsTabBtn" onclick="showMainTab('earnings')">Earnings</button>
-      <button class="tab" id="expensesTabBtn" onclick="showMainTab('expenses')">Expenses</button>
+      <button class="tab active" id="earningsTabBtn">Earnings</button>
+      <button class="tab" id="expensesTabBtn">Expenses</button>
     </div>
     <div id="earningsSection">
       <button class="summary-btn" id="summaryBtn">
@@ -168,14 +166,14 @@
       </div>
       <div id="earningsCustomRow" class="custom-row hidden">
         <input type="text" id="earningsCustomInput" placeholder="New source name">
-        <button onclick="addCustomSource()">Save</button>
+        <button id="saveCustomSourceBtn">Save</button>
       </div>
       <ul id="earningsList"></ul>
     </div>
     <div id="expensesSection" class="hidden">
       <div class="month-header">
-        <div class="month-display" id="monthDisplay" onclick="toggleMonthDropdown()">January 2026 ▼</div>
-        <button class="ytd-btn" id="ytdBtn" onclick="toggleYTD()">YTD</button>
+        <div class="month-display" id="monthDisplay">January 2026 ▼</div>
+        <button class="ytd-btn" id="ytdBtn">YTD</button>
       </div>
       <div class="month-dropdown" id="monthDropdown"></div>
       <div class="balance-card">
@@ -189,19 +187,19 @@
           <div class="payment-slider-handle" id="paymentSliderHandle">💰</div>
         </div>
       </div>
-      <div class="work-card" onclick="toggleWorkBreakdown()">
+      <div class="work-card" id="workCard">
         <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
         <div class="work-card-value" id="workTotalDisplay">$0.00</div>
         <div id="workBreakdown" class="breakdown"></div>
       </div>
       <div class="type-toggle">
-        <button class="type-btn active" id="typePersonalBtn" onclick="setExpenseType('personal')">Personal</button>
-        <button class="type-btn" id="typeWorkBtn" onclick="setExpenseType('work')">Work</button>
+        <button class="type-btn active" id="typePersonalBtn">Personal</button>
+        <button class="type-btn" id="typeWorkBtn">Work</button>
       </div>
       <div class="entry-form">
         <input type="date" id="expenseDateInput">
         <input type="number" id="expenseAmountInput" placeholder="Amount (CAD)" step="0.01" min="0">
-        <select id="expenseCategorySelect" onchange="handleCategoryChange()"></select>
+        <select id="expenseCategorySelect"></select>
         <button id="expenseAddBtn">Add</button>
         <button id="expenseCancelBtn" style="display:none;">Cancel</button>
       </div>
@@ -211,7 +209,7 @@
             <option value="Abhi">Abhi</option>
             <option value="Gian">Gian</option>
           </select>
-          <select id="personalShareSelect" onchange="handleShareChange()">
+          <select id="personalShareSelect">
             <option value="100">100% (full owed)</option>
             <option value="50">50% (split)</option>
             <option value="__custom__">Custom %</option>
@@ -219,17 +217,17 @@
         </div>
         <div id="personalCustomShareRow" class="custom-row hidden">
           <input type="number" id="personalCustomShareInput" placeholder="%" step="1" min="0" max="100">
-          <button onclick="setCustomShare()">Set</button>
+          <button id="setCustomShareBtn">Set</button>
         </div>
         <div id="personalCustomCatRow" class="custom-row hidden">
           <input type="text" id="personalCustomCatInput" placeholder="New category">
-          <button onclick="addCustomPersonalCat()">Save</button>
+          <button id="savePersonalCatBtn">Save</button>
         </div>
       </div>
       <div id="workFields" class="section hidden">
         <div id="workCustomCatRow" class="custom-row hidden">
           <input type="text" id="workCustomCatInput" placeholder="New category">
-          <button onclick="addCustomWorkCat()">Save</button>
+          <button id="saveWorkCatBtn">Save</button>
         </div>
       </div>
       <div class="lists-container">
@@ -245,21 +243,22 @@
       <div class="settings-section">
         <div class="settings-title">⚙️ Settings</div>
         <div class="settings-grid">
-          <button class="settings-btn export" onclick="exportData()">📤 Export</button>
-          <button class="settings-btn danger" onclick="clearAllData()">⚠️ Clear All</button>
-          <button class="settings-btn logout" onclick="logout()">🚪 Logout</button>
+          <button class="settings-btn export" id="exportBtn">📤 Export</button>
+          <button class="settings-btn danger" id="clearBtn">⚠️ Clear All</button>
+          <button class="settings-btn logout" id="logoutBtn">🚪 Logout</button>
         </div>
-        <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
+        <input type="file" id="fileInput" accept=".json">
         <div class="household-id" id="householdIdDisplay"></div>
       </div>
     </div>
   </div>
   <div id="toast"></div>
-    <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-    import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot, addDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCw-VlPowIAzY0ylq2-WK39Jo-L0ELn414",
       authDomain: "budget-275ac.firebaseapp.com",
@@ -269,42 +268,52 @@
       appId: "1:176646041982:web:b8ab6615a2bb8fb72b432f"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    let currentUser = null, householdId = null, earnings = [], expenses = [];
-    let customSources = [], customPersonalCats = [], customWorkCats = [];
-    let totalPaymentsRecorded = 0, currentDay = new Date().toISOString().split('T')[0];
-    let dayOpen = true, editingEarningsId = null, editingExpenseId = null;
-    let summaryMode = 'day', expenseType = 'personal', selectedMonth = new Date().toISOString().slice(0, 7);
-    let isYTD = false, workBreakdownVisible = false, monthDropdownOpen = false, isLoginMode = true;
+    // Global State
+    let currentUser = null;
+    let householdId = null;
+    let earnings = [];
+    let expenses = [];
+    let customSources = [];
+    let customPersonalCats = [];
+    let customWorkCats = [];
+    let totalPaymentsRecorded = 0;
+    let currentDay = new Date().toISOString().split('T')[0];
+    let dayOpen = true;
+    let editingEarningsId = null;
+    let editingExpenseId = null;
+    let summaryMode = 'day';
+    let expenseType = 'personal';
+    let selectedMonth = new Date().toISOString().slice(0, 7);
+    let isYTD = false;
+    let workBreakdownVisible = false;
+    let monthDropdownOpen = false;
+    let isLoginMode = true;
     let currentLang = localStorage.getItem('appLang') || 'en';
 
+    // Translations
     const translations = {
-      en: { tab_earnings: "Earnings", tab_expenses: "Expenses", summary_day: "Day Total", summary_week: "Week Total", summary_month: "Month Total", btn_add: "Add", btn_update: "Update", btn_cancel: "Cancel", btn_save: "Save", balance_label_owes: "Gian owes Abhi", balance_label_owes_rev: "Abhi owes Gian", balance_label_settled: "All Settled", list_no_earnings: "No earnings yet.", list_no_personal: "No personal expenses.", list_no_work: "No work expenses." },
-      es: { tab_earnings: "Ganancias", tab_expenses: "Gastos", summary_day: "Total del Día", summary_week: "Total de la Semana", summary_month: "Total del Mes", btn_add: "Agregar", btn_update: "Actualizar", btn_cancel: "Cancelar", btn_save: "Guardar", balance_label_owes: "Gian le debe a Abhi", balance_label_owes_rev: "Abhi le debe a Gian", balance_label_settled: "Todo Pagado", list_no_earnings: "Sin ganancias aún.", list_no_personal: "Sin gastos personales.", list_no_work: "Sin gastos de trabajo." }
+      en: { earnings: "Earnings", expenses: "Expenses", add: "Add", update: "Update", cancel: "Cancel", save: "Save", dayTotal: "Day Total", weekTotal: "Week Total", monthTotal: "Month Total", owes1: "Gian owes Abhi", owes2: "Abhi owes Gian", settled: "All Settled", noEarnings: "No earnings yet.", noPersonal: "No personal expenses.", noWork: "No work expenses." },
+      es: { earnings: "Ganancias", expenses: "Gastos", add: "Agregar", update: "Actualizar", cancel: "Cancelar", save: "Guardar", dayTotal: "Total del Día", weekTotal: "Total de la Semana", monthTotal: "Total del Mes", owes1: "Gian le debe a Abhi", owes2: "Abhi le debe a Gian", settled: "Todo Pagado", noEarnings: "Sin ganancias aún.", noPersonal: "Sin gastos personales.", noWork: "Sin gastos de trabajo." }
     };
 
-    window.t = (key) => translations[currentLang][key] || key;
+    function t(key) { return translations[currentLang][key] || key; }
 
-    window.toggleLanguage = () => {
-      currentLang = currentLang === 'en' ? 'es' : 'en';
-      localStorage.setItem('appLang', currentLang);
-      document.getElementById('langToggle').textContent = currentLang.toUpperCase();
-      updateLanguageUI();
-    };
-
-    function updateLanguageUI() {
-      document.getElementById('earningsTabBtn').textContent = t('tab_earnings');
-      document.getElementById('expensesTabBtn').textContent = t('tab_expenses');
-      document.getElementById('earningsAddBtn').textContent = editingEarningsId ? t('btn_update') : t('btn_add');
-      document.getElementById('expenseAddBtn').textContent = editingExpenseId ? t('btn_update') : t('btn_add');
-      updateEarningsSummary();
-      updateOweBalance();
+    // Toast
+    function showToast(msg, isError = false) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'show' + (isError ? ' error' : '');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('show'), 2600);
     }
 
-    onAuthStateChanged(auth, async (user) => {
+    // Auth State
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
         document.getElementById('loginContainer').classList.remove('show');
@@ -319,25 +328,29 @@
       }
     });
 
+    // Load Household
     async function loadHousehold() {
       if (!currentUser) return;
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-      if (userDoc.exists()) {
-        householdId = userDoc.data().householdId;
-        document.getElementById('householdIdDisplay').textContent = `Household ID: ${householdId}`;
-        loadHouseholdData();
-      } else {
-        document.getElementById('householdInputGroup').classList.add('show');
-        document.getElementById('createHouseholdBtn').classList.remove('hidden');
-        document.getElementById('loginSubmitBtn').textContent = 'Join Household';
-      }
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists) {
+          householdId = userDoc.data().householdId;
+          document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
+          loadHouseholdData();
+        } else {
+          document.getElementById('householdInputGroup').classList.add('show');
+          document.getElementById('createHouseholdBtn').classList.remove('hidden');
+          document.getElementById('loginSubmitBtn').textContent = 'Join Household';
+        }
+      } catch (e) { console.error(e); }
     }
 
+    // Load Household Data (Real-time)
     function loadHouseholdData() {
       if (!householdId) return;
-      onSnapshot(doc(db, 'households', householdId), (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+      db.collection('households').doc(householdId).onSnapshot(doc => {
+        if (doc.exists) {
+          const data = doc.data();
           totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
           currentDay = data.currentDay || new Date().toISOString().split('T')[0];
           dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
@@ -349,95 +362,115 @@
           updateExpenseCategorySelect();
         }
       });
-      const qEarnings = query(collection(db, 'households', householdId, 'earnings'), orderBy('timestamp', 'desc'));
-      onSnapshot(qEarnings, (snapshot) => {
+      db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderEarningsList();
         updateEarningsSummary();
       });
-      const qExpenses = query(collection(db, 'households', householdId, 'expenses'), orderBy('timestamp', 'desc'));
-      onSnapshot(qExpenses, (snapshot) => {
+      db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
         updateOweBalance();
       });
     }
 
-    window.handleLoginSubmit = async () => {
+    // Login/Signup
+    document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
       if (!email || !password) { errorEl.textContent = 'Enter email and password'; errorEl.style.display = 'block'; return; }
       try {
-        if (isLoginMode) {
-          await signInWithEmailAndPassword(auth, email, password);
+        if (document.getElementById('householdInputGroup').classList.contains('show')) {
+          await joinHousehold();
+        } else if (isLoginMode) {
+          await auth.signInWithEmailAndPassword(email, password);
         } else {
-          await createUserWithEmailAndPassword(auth, email, password);
+          await auth.createUserWithEmailAndPassword(email, password);
           document.getElementById('householdInputGroup').classList.add('show');
           document.getElementById('createHouseholdBtn').classList.remove('hidden');
           document.getElementById('loginSubmitBtn').textContent = 'Join Household';
           errorEl.textContent = 'Account created! Now create or join a household.';
           errorEl.style.display = 'block';
         }
-      } catch (error) { errorEl.textContent = error.message; errorEl.style.display = 'block'; }
-    };
+      } catch (e) { errorEl.textContent = e.message; errorEl.style.display = 'block'; }
+    });
 
-    window.toggleLoginMode = () => {
+    document.getElementById('createHouseholdBtn').addEventListener('click', async () => {
+      if (!currentUser) return;
+      const newHouseholdId = 'hh_' + Math.random().toString(36).substr(2, 9);
+      try {
+        await db.collection('households').doc(newHouseholdId).set({
+          members: [currentUser.email],
+          createdAt: new Date().toISOString(),
+          totalPaymentsRecorded: 0,
+          currentDay: new Date().toISOString().split('T')[0],
+          dayOpen: true,
+          customSources: [],
+          customPersonalCats: [],
+          customWorkCats: []
+        });
+        await db.collection('users').doc(currentUser.uid).set({
+          email: currentUser.email,
+          householdId: newHouseholdId,
+          joinedAt: new Date().toISOString()
+        });
+        householdId = newHouseholdId;
+        document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
+        loadHouseholdData();
+        showToast('Household created! Share ID: ' + newHouseholdId);
+      } catch (e) { console.error(e); showToast('Error creating household', true); }
+    });
+
+    async function joinHousehold() {
+      const hid = document.getElementById('householdIdInput').value.trim();
+      if (!hid || !currentUser) return;
+      try {
+        const hDoc = await db.collection('households').doc(hid).get();
+        if (!hDoc.exists) { showToast('Household not found', true); return; }
+        await db.collection('households').doc(hid).update({ members: firebase.firestore.FieldValue.arrayUnion(currentUser.email) });
+        await db.collection('users').doc(currentUser.uid).set({
+          email: currentUser.email,
+          householdId: hid,
+          joinedAt: new Date().toISOString()
+        });
+        householdId = hid;
+        document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
+        loadHouseholdData();
+        showToast('Joined household!');
+      } catch (e) { console.error(e); showToast('Error joining household', true); }
+    }
+
+    document.getElementById('loginSwitchText').addEventListener('click', () => {
       isLoginMode = !isLoginMode;
       document.getElementById('loginTitle').textContent = isLoginMode ? 'Sign In' : 'Sign Up';
       document.getElementById('loginSubmitBtn').textContent = isLoginMode ? 'Sign In' : 'Sign Up';
       document.getElementById('loginSwitchText').textContent = isLoginMode ? "Don't have an account? Sign Up" : 'Already have an account? Sign In';
       document.getElementById('householdInputGroup').classList.remove('show');
       document.getElementById('createHouseholdBtn').classList.add('hidden');
-    };
+    });
 
-    window.createHousehold = async () => {
-      if (!currentUser) return;
-      const newHouseholdId = 'hh_' + Math.random().toString(36).substr(2, 9);
-      try {
-        await setDoc(doc(db, 'households', newHouseholdId), { members: [currentUser.email], createdAt: new Date().toISOString(), totalPaymentsRecorded: 0, currentDay: new Date().toISOString().split('T')[0], dayOpen: true, customSources: [], customPersonalCats: [], customWorkCats: [] });
-        await setDoc(doc(db, 'users', currentUser.uid), { email: currentUser.email, householdId: newHouseholdId, joinedAt: new Date().toISOString() });
-        householdId = newHouseholdId;
-        document.getElementById('householdIdDisplay').textContent = `Household ID: ${householdId}`;
-        loadHouseholdData();
-        showToast('Household created! Share ID: ' + newHouseholdId);
-      } catch (error) { console.error(error); showToast('Error creating household', true); }
-    };
+    document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
-    window.joinHousehold = async () => {
-      const hid = document.getElementById('householdIdInput').value.trim();
-      if (!hid || !currentUser) return;
-      try {
-        const hDoc = await getDoc(doc(db, 'households', hid));
-        if (!hDoc.exists()) { showToast('Household not found', true); return; }
-        await updateDoc(doc(db, 'households', hid), { members: arrayUnion(currentUser.email) });
-        await setDoc(doc(db, 'users', currentUser.uid), { email: currentUser.email, householdId: hid, joinedAt: new Date().toISOString() });
-        householdId = hid;
-        document.getElementById('householdIdDisplay').textContent = `Household ID: ${householdId}`;
-        loadHouseholdData();
-        showToast('Joined household!');
-      } catch (error) { console.error(error); showToast('Error joining household', true); }
-    };
+    // Tab Switching
+    document.getElementById('earningsTabBtn').addEventListener('click', () => {
+      document.getElementById('earningsSection').classList.remove('hidden');
+      document.getElementById('expensesSection').classList.add('hidden');
+      document.getElementById('earningsTabBtn').classList.add('active');
+      document.getElementById('expensesTabBtn').classList.remove('active');
+    });
 
-    window.logout = async () => { try { await signOut(auth); } catch (e) { console.error(e); } };
+    document.getElementById('expensesTabBtn').addEventListener('click', () => {
+      document.getElementById('earningsSection').classList.add('hidden');
+      document.getElementById('expensesSection').classList.remove('hidden');
+      document.getElementById('expensesTabBtn').classList.add('active');
+      document.getElementById('earningsTabBtn').classList.remove('active');
+      updateMonthDisplay();
+      renderExpenseLists();
+    });
 
-    window.showMainTab = (tab) => {
-      const eS = document.getElementById('earningsSection');
-      const xS = document.getElementById('expensesSection');
-      const eB = document.getElementById('earningsTabBtn');
-      const xB = document.getElementById('expensesTabBtn');
-      if (tab === 'earnings') {
-        eS.classList.remove('hidden'); xS.classList.add('hidden');
-        eB.classList.add('active'); xB.classList.remove('active');
-      } else {
-        eS.classList.add('hidden'); xS.classList.remove('hidden');
-        xB.classList.add('active'); eB.classList.remove('active');
-        updateMonthDisplay();
-        renderExpenseLists();
-      }
-    };
-
-    window.addOrUpdateEarnings = async () => {
+    // Add Earnings
+    document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       const amountInput = document.getElementById('earningsAmountInput');
       const sourceSelect = document.getElementById('earningsSourceSelect');
       const amount = parseFloat(amountInput.value);
@@ -446,19 +479,29 @@
       if (source === '__custom__') { alert('Save custom source first.'); return; }
       const entry = { amount, source, date: currentDay, addedBy: currentUser.email, timestamp: new Date().toISOString() };
       if (editingEarningsId) {
-        await updateDoc(doc(db, 'households', householdId, 'earnings', editingEarningsId), entry);
+        await db.collection('households').doc(householdId).collection('earnings').doc(editingEarningsId).update(entry);
         editingEarningsId = null;
-        document.getElementById('earningsAddBtn').textContent = t('btn_add');
+        document.getElementById('earningsAddBtn').textContent = t('add');
         document.getElementById('earningsCancelBtn').style.display = 'none';
       } else {
-        await addDoc(collection(db, 'households', householdId, 'earnings'), entry);
+        await db.collection('households').doc(householdId).collection('earnings').add(entry);
       }
       amountInput.value = '';
       sourceSelect.value = 'UberEats';
       updateEarningsSourceSelect();
-    };
+    });
 
-    window.addOrUpdateExpense = async () => {
+    document.getElementById('earningsCancelBtn').addEventListener('click', () => {
+      editingEarningsId = null;
+      document.getElementById('earningsAmountInput').value = '';
+      document.getElementById('earningsSourceSelect').value = 'UberEats';
+      document.getElementById('earningsAddBtn').textContent = t('add');
+      document.getElementById('earningsCancelBtn').style.display = 'none';
+      updateEarningsSourceSelect();
+    });
+
+    // Add Expense
+    document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       const dateInput = document.getElementById('expenseDateInput');
       const amountInput = document.getElementById('expenseAmountInput');
       const catSelect = document.getElementById('expenseCategorySelect');
@@ -477,12 +520,12 @@
         entry.share = share;
       }
       if (editingExpenseId) {
-        await updateDoc(doc(db, 'households', householdId, 'expenses', editingExpenseId), entry);
+        await db.collection('households').doc(householdId).collection('expenses').doc(editingExpenseId).update(entry);
         editingExpenseId = null;
-        document.getElementById('expenseAddBtn').textContent = t('btn_add');
+        document.getElementById('expenseAddBtn').textContent = t('add');
         document.getElementById('expenseCancelBtn').style.display = 'none';
       } else {
-        await addDoc(collection(db, 'households', householdId, 'expenses'), entry);
+        await db.collection('households').doc(householdId).collection('expenses').add(entry);
       }
       amountInput.value = '';
       dateInput.value = new Date().toISOString().split('T')[0];
@@ -493,35 +536,37 @@
       }
       catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
       handleCategoryChange();
-    };
+    });
 
+    document.getElementById('expenseCancelBtn').addEventListener('click', () => {
+      editingExpenseId = null;
+      document.getElementById('expenseAmountInput').value = '';
+      document.getElementById('expenseDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('expenseAddBtn').textContent = t('add');
+      document.getElementById('expenseCancelBtn').style.display = 'none';
+      setExpenseType('personal');
+    });
+
+    // Delete
     window.deleteEarnings = async (id) => {
       if (!confirm('Delete?')) return;
-      await deleteDoc(doc(db, 'households', householdId, 'earnings', id));
+      await db.collection('households').doc(householdId).collection('earnings').doc(id).delete();
     };
 
     window.deleteExpense = async (id) => {
       if (!confirm('Delete?')) return;
-      await deleteDoc(doc(db, 'households', householdId, 'expenses', id));
+      await db.collection('households').doc(householdId).collection('expenses').doc(id).delete();
     };
 
+    // Edit
     window.startEditEarnings = (id) => {
       const entry = earnings.find(e => e.id === id);
       if (!entry) return;
       editingEarningsId = id;
       document.getElementById('earningsAmountInput').value = entry.amount;
       document.getElementById('earningsSourceSelect').value = entry.source;
-      document.getElementById('earningsAddBtn').textContent = t('btn_update');
+      document.getElementById('earningsAddBtn').textContent = t('update');
       document.getElementById('earningsCancelBtn').style.display = 'inline-block';
-    };
-
-    window.cancelEditEarnings = () => {
-      editingEarningsId = null;
-      document.getElementById('earningsAmountInput').value = '';
-      document.getElementById('earningsSourceSelect').value = 'UberEats';
-      document.getElementById('earningsAddBtn').textContent = t('btn_add');
-      document.getElementById('earningsCancelBtn').style.display = 'none';
-      updateEarningsSourceSelect();
     };
 
     window.startEditExpense = (id) => {
@@ -542,88 +587,86 @@
         else { shareSelect.value = '__custom__'; shareInput.value = entry.share; }
         handleShareChange();
       }
-      document.getElementById('expenseAddBtn').textContent = t('btn_update');
+      document.getElementById('expenseAddBtn').textContent = t('update');
       document.getElementById('expenseCancelBtn').style.display = 'inline-block';
     };
 
-    window.cancelEditExpense = () => {
-      editingExpenseId = null;
-      document.getElementById('expenseAmountInput').value = '';
-      document.getElementById('expenseDateInput').value = new Date().toISOString().split('T')[0];
-      document.getElementById('expenseAddBtn').textContent = t('btn_add');
-      document.getElementById('expenseCancelBtn').style.display = 'none';
-      setExpenseType('personal');
-    };
-
-    window.addCustomSource = async () => {
+    // Custom Sources/Categories
+    document.getElementById('saveCustomSourceBtn').addEventListener('click', async () => {
       const input = document.getElementById('earningsCustomInput');
       const name = input.value.trim();
       if (!name) return;
       if (!customSources.includes(name)) {
         customSources.push(name);
-        await updateDoc(doc(db, 'households', householdId), { customSources });
+        await db.collection('households').doc(householdId).update({ customSources });
       }
       updateEarningsSourceSelect();
       document.getElementById('earningsSourceSelect').value = name;
       input.value = '';
-    };
+    });
 
-    window.addCustomPersonalCat = async () => {
+    document.getElementById('savePersonalCatBtn').addEventListener('click', async () => {
       const input = document.getElementById('personalCustomCatInput');
       const name = input.value.trim();
       if (!name) return;
       if (!customPersonalCats.includes(name)) {
         customPersonalCats.push(name);
-        await updateDoc(doc(db, 'households', householdId), { customPersonalCats });
+        await db.collection('households').doc(householdId).update({ customPersonalCats });
       }
       updateExpenseCategorySelect();
       document.getElementById('expenseCategorySelect').value = name;
       input.value = '';
       handleCategoryChange();
-    };
+    });
 
-    window.addCustomWorkCat = async () => {
+    document.getElementById('saveWorkCatBtn').addEventListener('click', async () => {
       const input = document.getElementById('workCustomCatInput');
       const name = input.value.trim();
       if (!name) return;
       if (!customWorkCats.includes(name)) {
         customWorkCats.push(name);
-        await updateDoc(doc(db, 'households', householdId), { customWorkCats });
+        await db.collection('households').doc(householdId).update({ customWorkCats });
       }
       updateExpenseCategorySelect();
       document.getElementById('expenseCategorySelect').value = name;
       input.value = '';
       handleCategoryChange();
-    };
+    });
 
-    window.setExpenseType = (type) => {
+    document.getElementById('setCustomShareBtn').addEventListener('click', () => {
+      const val = document.getElementById('personalCustomShareInput').value;
+      if (val) {
+        document.getElementById('personalShareSelect').value = '__custom__';
+        handleShareChange();
+      }
+    });
+
+    function setExpenseType(type) {
       expenseType = type;
       document.getElementById('typePersonalBtn').classList.toggle('active', type === 'personal');
       document.getElementById('typeWorkBtn').classList.toggle('active', type === 'work');
       document.getElementById('personalFields').classList.toggle('hidden', type !== 'personal');
       document.getElementById('workFields').classList.toggle('hidden', type !== 'work');
       updateExpenseCategorySelect();
-    };
+    }
 
-    window.handleCategoryChange = () => {
+    document.getElementById('typePersonalBtn').addEventListener('click', () => setExpenseType('personal'));
+    document.getElementById('typeWorkBtn').addEventListener('click', () => setExpenseType('work'));
+
+    function handleCategoryChange() {
       const select = document.getElementById('expenseCategorySelect');
       const isCustom = select.value === '__custom__';
       const catRow = expenseType === 'personal' ? document.getElementById('personalCustomCatRow') : document.getElementById('workCustomCatRow');
       catRow.classList.toggle('hidden', !isCustom);
-    };
+    }
 
-    window.handleShareChange = () => {
+    function handleShareChange() {
       const select = document.getElementById('personalShareSelect');
       document.getElementById('personalCustomShareRow').classList.toggle('hidden', select.value !== '__custom__');
-    };
+    }
 
-    window.setCustomShare = () => {
-      const val = document.getElementById('personalCustomShareInput').value;
-      if (val) {
-        document.getElementById('personalShareSelect').value = '__custom__';
-        handleShareChange();
-      }
-    };
+    document.getElementById('personalShareSelect').addEventListener('change', handleShareChange);
+    document.getElementById('expenseCategorySelect').addEventListener('change', handleCategoryChange);
 
     function updateEarningsSourceSelect() {
       const select = document.getElementById('earningsSourceSelect');
@@ -649,15 +692,16 @@
       handleCategoryChange();
     }
 
+    // Render Lists
     function renderEarningsList() {
       const list = document.getElementById('earningsList');
       list.innerHTML = '';
       earnings.forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = `<div class="amount">$${e.amount.toFixed(2)}</div><div class="meta">${e.source} · ${e.date}</div><div class="actions"><button class="edit" onclick="startEditEarnings('${e.id}')">✏️</button><button class="delete" onclick="deleteEarnings('${e.id}')">🗑️</button></div>`;
+        li.innerHTML = '<div class="amount">$' + e.amount.toFixed(2) + '</div><div class="meta">' + e.source + ' · ' + e.date + '</div><div class="actions"><button class="edit" onclick="startEditEarnings(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteEarnings(\'' + e.id + '\')">🗑️</button></div>';
         list.appendChild(li);
       });
-      if (earnings.length === 0) list.innerHTML = `<li style="opacity:0.6;">${t('list_no_earnings')}</li>`;
+      if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">' + t('noEarnings') + '</li>';
     }
 
     function renderExpenseLists() {
@@ -667,18 +711,18 @@
       pList.innerHTML = '';
       expenses.filter(filter).forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = `<div class="amount">$${e.amount.toFixed(2)}</div><div class="meta">${e.category} · ${e.paidBy} (${e.share}%) · ${e.date}</div><div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
+        li.innerHTML = '<div class="amount">$' + e.amount.toFixed(2) + '</div><div class="meta">' + e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date + '</div><div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         pList.appendChild(li);
       });
-      if (expenses.filter(filter).length === 0) pList.innerHTML = `<li style="opacity:0.6;">${t('list_no_personal')}</li>`;
+      if (expenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">' + t('noPersonal') + '</li>';
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
       expenses.filter(filterWork).forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = `<div class="amount">$${e.amount.toFixed(2)}</div><div class="meta">${e.category} · ${e.date}</div><div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
+        li.innerHTML = '<div class="amount">$' + e.amount.toFixed(2) + '</div><div class="meta">' + e.category + ' · ' + e.date + '</div><div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         wList.appendChild(li);
       });
-      if (expenses.filter(filterWork).length === 0) wList.innerHTML = `<li style="opacity:0.6;">${t('list_no_work')}</li>`;
+      if (expenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">' + t('noWork') + '</li>';
       let workTotal = 0;
       expenses.filter(filterWork).forEach(e => workTotal += parseFloat(e.amount)||0);
       document.getElementById('workTotalDisplay').textContent = '$' + workTotal.toFixed(2);
@@ -689,13 +733,19 @@
     function updateEarningsSummary() {
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
-      let total = 0, label = t('summary_day');
-      if (summaryMode === 'week') { label = t('summary_week'); }
-      else if (summaryMode === 'month') { label = t('summary_month'); }
+      let total = 0, label = t('dayTotal');
+      if (summaryMode === 'week') label = t('weekTotal');
+      else if (summaryMode === 'month') label = t('monthTotal');
       earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount)||0);
       labelEl.textContent = label;
       amountEl.textContent = total.toFixed(2);
     }
+
+    document.getElementById('summaryBtn').addEventListener('click', () => {
+      const modes = ['day','week','month'];
+      summaryMode = modes[(modes.indexOf(summaryMode) + 1) % modes.length];
+      updateEarningsSummary();
+    });
 
     function updateOweBalance() {
       let gianOwesAbhi = 0;
@@ -712,9 +762,9 @@
       const labelEl = document.getElementById('balanceLabel');
       const whoEl = document.getElementById('balanceWho');
       amountEl.textContent = '$' + Math.abs(net).toFixed(2);
-      if (net > 0.01) { labelEl.textContent = t('balance_label_owes'); whoEl.textContent = ''; whoEl.className = 'balance-who positive'; }
-      else if (net < -0.01) { labelEl.textContent = t('balance_label_owes_rev'); whoEl.textContent = ''; whoEl.className = 'balance-who negative'; }
-      else { labelEl.textContent = t('balance_label_settled'); whoEl.textContent = '✓'; whoEl.className = 'balance-who'; }
+      if (net > 0.01) { labelEl.textContent = t('owes1'); whoEl.textContent = ''; whoEl.className = 'balance-who positive'; }
+      else if (net < -0.01) { labelEl.textContent = t('owes2'); whoEl.textContent = ''; whoEl.className = 'balance-who negative'; }
+      else { labelEl.textContent = t('settled'); whoEl.textContent = '✓'; whoEl.className = 'balance-who'; }
     }
 
     function updateDayStatus() {
@@ -738,7 +788,7 @@
       document.getElementById('workMonthLabel').textContent = isYTD ? 'YTD' : 'This Month';
     }
 
-    window.toggleMonthDropdown = () => {
+    document.getElementById('monthDisplay').addEventListener('click', () => {
       monthDropdownOpen = !monthDropdownOpen;
       const dropdown = document.getElementById('monthDropdown');
       if (monthDropdownOpen) {
@@ -751,28 +801,28 @@
           div.className = 'month-option' + (m === selectedMonth && !isYTD ? ' selected' : '');
           const d = new Date(m + '-01');
           div.textContent = d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
-          div.onclick = () => { selectedMonth = m; isYTD = false; monthDropdownOpen = false; dropdown.classList.remove('show'); document.getElementById('ytdBtn').classList.remove('active'); updateMonthDisplay(); renderExpenseLists(); };
+          div.addEventListener('click', () => { selectedMonth = m; isYTD = false; monthDropdownOpen = false; dropdown.classList.remove('show'); document.getElementById('ytdBtn').classList.remove('active'); updateMonthDisplay(); renderExpenseLists(); });
           dropdown.appendChild(div);
         });
         dropdown.classList.add('show');
       } else { dropdown.classList.remove('show'); }
-    };
+    });
 
-    window.toggleYTD = () => { isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); };
+    document.getElementById('ytdBtn').addEventListener('click', () => { isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); });
 
-    window.toggleWorkBreakdown = () => {
+    document.getElementById('workCard').addEventListener('click', () => {
       workBreakdownVisible = !workBreakdownVisible;
       const el = document.getElementById('workBreakdown');
       if (workBreakdownVisible) {
         const breakdown = {};
         expenses.filter(e => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth)).forEach(e => { breakdown[e.category] = (breakdown[e.category] || 0) + (parseFloat(e.amount)||0); });
         el.innerHTML = '';
-        for (const [cat, amt] of Object.entries(breakdown)) { el.innerHTML += `<div class="breakdown-row"><span>${cat}</span><span>$${amt.toFixed(2)}</span></div>`; }
+        for (const [cat, amt] of Object.entries(breakdown)) { el.innerHTML += '<div class="breakdown-row"><span>' + cat + '</span><span>$' + amt.toFixed(2) + '</span></div>'; }
         el.classList.add('show');
       } else { el.classList.remove('show'); }
-    };
+    });
 
-    // Slide to End Day
+    // Slides
     let isDragging = false, handleLeft = 4;
     const slideTrack = document.getElementById('slideTrack');
     const slideHandle = document.getElementById('slideHandle');
@@ -781,10 +831,9 @@
     function resetSlide() { isDragging = false; handleLeft = 4; slideHandle.style.left = '4px'; slideTrack.classList.remove('completed','dragging'); updateSlideState(); }
     slideTrack.addEventListener('pointerdown', e => { if (!dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
     slideTrack.addEventListener('pointermove', e => { if (!isDragging) return; const rect = slideTrack.getBoundingClientRect(); let left = e.clientX - rect.left - slideHandle.offsetWidth / 2; left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px'; if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; } else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; } });
-    slideTrack.addEventListener('pointerup', async () => { if (!isDragging) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; await updateDoc(doc(db, 'households', householdId), { dayOpen: false, currentDay }); updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
+    slideTrack.addEventListener('pointerup', async () => { if (!isDragging) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
     slideTrack.addEventListener('pointercancel', resetSlide);
 
-    // Payment Slider
     let paymentDragging = false, paymentHandleLeft = 4;
     const paymentTrack = document.getElementById('paymentSliderTrack');
     const paymentHandle = document.getElementById('paymentSliderHandle');
@@ -793,25 +842,26 @@
     function resetPaymentSlide() { paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px'; paymentTrack.classList.remove('completed','dragging'); paymentText.textContent = 'Slide to Record Payment'; }
     paymentTrack.addEventListener('pointerdown', e => { paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
     paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
-    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (100 - share) / 100 * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await updateDoc(doc(db, 'households', householdId), { totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
+    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (100 - share) / 100 * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
-    window.exportData = () => {
+    // Export/Import/Clear
+    document.getElementById('exportBtn').addEventListener('click', () => {
       const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
       const dataStr = JSON.stringify(backup, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `budget-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = 'budget-backup-' + new Date().toISOString().split('T')[0] + '.json';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       showToast('Data exported!');
-    };
+    });
 
-    window.importData = (event) => {
+    document.getElementById('fileInput').addEventListener('change', async (event) => {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -820,45 +870,38 @@
           const backup = JSON.parse(e.target.result);
           if (!backup.earnings || !backup.expenses) throw new Error('Invalid file');
           if (!confirm('This will replace ALL data. Continue?')) { event.target.value = ''; return; }
-          await updateDoc(doc(db, 'households', householdId), { customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || new Date().toISOString().split('T')[0], dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
+          await db.collection('households').doc(householdId).update({ customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || new Date().toISOString().split('T')[0], dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
           showToast('Data imported!');
         } catch (err) { showToast('Invalid file', true); }
         event.target.value = '';
       };
       reader.readAsText(file);
-    };
+    });
 
-    window.clearAllData = async () => {
+    document.getElementById('clearBtn').addEventListener('click', async () => {
       if (!confirm('⚠️ DELETE ALL DATA? This cannot be undone.')) return;
       if (!confirm('Are you ABSOLUTELY SURE?')) return;
-      await updateDoc(doc(db, 'households', householdId), { customSources: [], customPersonalCats: [], customWorkCats: [], totalPaymentsRecorded: 0, currentDay: new Date().toISOString().split('T')[0], dayOpen: true });
-      earnings.forEach(e => deleteDoc(doc(db, 'households', householdId, 'earnings', e.id)));
-      expenses.forEach(e => deleteDoc(doc(db, 'households', householdId, 'expenses', e.id)));
+      await db.collection('households').doc(householdId).update({ customSources: [], customPersonalCats: [], customWorkCats: [], totalPaymentsRecorded: 0, currentDay: new Date().toISOString().split('T')[0], dayOpen: true });
+      earnings.forEach(e => db.collection('households').doc(householdId).collection('earnings').doc(e.id).delete());
+      expenses.forEach(e => db.collection('households').doc(householdId).collection('expenses').doc(e.id).delete());
       showToast('All data cleared');
-    };
+    });
 
-    window.showToast = (msg, isError = false) => {
-      const tEl = document.getElementById('toast');
-      tEl.textContent = msg;
-      tEl.className = 'show' + (isError ? ' error' : '');
-      clearTimeout(tEl._timer);
-      tEl._timer = setTimeout(() => tEl.classList.remove('show'), 2600);
-    };
+    // Language
+    document.getElementById('langToggle').addEventListener('click', () => {
+      currentLang = currentLang === 'en' ? 'es' : 'en';
+      localStorage.setItem('appLang', currentLang);
+      document.getElementById('langToggle').textContent = currentLang.toUpperCase();
+      document.getElementById('earningsTabBtn').textContent = t('earnings');
+      document.getElementById('expensesTabBtn').textContent = t('expenses');
+      document.getElementById('earningsAddBtn').textContent = editingEarningsId ? t('update') : t('add');
+      document.getElementById('expenseAddBtn').textContent = editingExpenseId ? t('update') : t('add');
+      updateEarningsSummary();
+      updateOweBalance();
+    });
 
-    document.getElementById('earningsAddBtn').addEventListener('click', addOrUpdateEarnings);
-    document.getElementById('earningsCancelBtn').addEventListener('click', cancelEditEarnings);
-    document.getElementById('earningsSourceSelect').addEventListener('change', updateEarningsSourceSelect);
-    document.getElementById('earningsAmountInput').addEventListener('keydown', e => { if (e.key === 'Enter') addOrUpdateEarnings(); });
-    document.getElementById('earningsCustomInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomSource(); });
-    document.getElementById('summaryBtn').addEventListener('click', () => { const modes = ['day','week','month']; summaryMode = modes[(modes.indexOf(summaryMode) + 1) % modes.length]; updateEarningsSummary(); });
-    document.getElementById('expenseAddBtn').addEventListener('click', addOrUpdateExpense);
-    document.getElementById('expenseCancelBtn').addEventListener('click', cancelEditExpense);
-    document.getElementById('expenseAmountInput').addEventListener('keydown', e => { if (e.key === 'Enter') addOrUpdateExpense(); });
-    document.getElementById('personalCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomPersonalCat(); });
-    document.getElementById('workCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomWorkCat(); });
-    document.addEventListener('click', e => { if (!e.target.closest('.month-display') && !e.target.closest('.month-dropdown')) { monthDropdownOpen = false; document.getElementById('monthDropdown').classList.remove('show'); } });
-
-    document.getElementById('loginSubmitBtn').addEventListener('click', () => { if (document.getElementById('householdInputGroup').classList.contains('show')) joinHousehold(); else handleLoginSubmit(); });
+    // Init
+    document.getElementById('expenseDateInput').value = new Date().toISOString().split('T')[0];
   </script>
 </body>
 </html>
