@@ -10,6 +10,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Budget">
   <meta name="theme-color" content="#0d1117">
+  
+  <!-- App Icon (embedded) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%232ea043' rx='40'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='100' font-family='Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji'%3E💰%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%232ea043' rx='40'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='100' font-family='Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji'%3E💰%3C/text%3E%3C/svg%3E">
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
@@ -145,6 +149,22 @@
     li .actions button.edit { color: #58a6ff; }
     li .actions button.delete { color: #f85149; }
 
+    /* Settings Section */
+    .settings-section {
+      background: #161b22; border-radius: 10px; padding: 16px; margin-top: 20px;
+    }
+    .settings-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; opacity: 0.9; }
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .settings-btn {
+      padding: 12px; border: none; border-radius: 8px; font-size: 14px;
+      cursor: pointer; text-align: center;
+    }
+    .settings-btn.export { background: #1f6feb; color: #fff; }
+    .settings-btn.import { background: #8b949e; color: #fff; }
+    .settings-btn.danger { background: #f85149; color: #fff; grid-column: span 2; }
+    
+    #fileInput { display: none; }
+
     #toast {
       position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
       background: #2ea043; color: #fff; padding: 12px 20px; border-radius: 10px;
@@ -152,6 +172,7 @@
       max-width: 90%; text-align: center; z-index: 999;
     }
     #toast.show { opacity: 1; }
+    #toast.error { background: #f85149; }
 
     .hidden { display: none; }
     .section { margin-bottom: 12px; }
@@ -279,6 +300,17 @@
         <ul id="workList"></ul>
       </div>
     </div>
+
+    <!-- Settings Section -->
+    <div class="settings-section">
+      <div class="settings-title">⚙️ Settings & Backup</div>
+      <div class="settings-grid">
+        <button class="settings-btn export" onclick="exportData()">📤 Export Data</button>
+        <button class="settings-btn import" onclick="document.getElementById('fileInput').click()">📥 Import Data</button>
+        <button class="settings-btn danger" onclick="clearAllData()">⚠️ Clear All Data</button>
+      </div>
+      <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
+    </div>
   </div>
 
   <div id="toast"></div>
@@ -298,7 +330,6 @@
     let customWorkCats = JSON.parse(localStorage.getItem('customWorkCats') || '[]');
     let totalPaymentsRecorded = parseFloat(localStorage.getItem('totalPaymentsRecorded') || '0');
     
-    // FIX: Initialize to actual current month
     let currentMonth = getTodayString().substring(0, 7);
     let selectedMonth = currentMonth;
     let isYTD = false;
@@ -340,12 +371,123 @@
       return toDate(dateStr).toLocaleDateString(undefined, { month:'long', year:'numeric' });
     }
 
-    function showToast(msg) {
+    function showToast(msg, isError = false) {
       const t = document.getElementById('toast');
       t.textContent = msg;
-      t.classList.add('show');
+      t.className = 'show' + (isError ? ' error' : '');
       clearTimeout(t._timer);
       t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+    }
+
+    // ------------------- Export/Import Functions -------------------
+    function exportData() {
+      const backup = {
+        version: 1,
+        exportDate: new Date().toISOString(),
+        earnings,
+        expenses,
+        customSources,
+        customPersonalCats,
+        customWorkCats,
+        totalPaymentsRecorded,
+        currentDay,
+        dayOpen
+      };
+      
+      const dataStr = JSON.stringify(backup, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `budget-backup-${getTodayString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('Data exported successfully!');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const backup = JSON.parse(e.target.result);
+          
+          // Validate backup structure
+          if (!backup.earnings || !backup.expenses) {
+            throw new Error('Invalid backup file');
+          }
+          
+          // Confirm before importing
+          if (!confirm('This will replace ALL current data with the backup. Continue?')) {
+            event.target.value = '';
+            return;
+          }
+          
+          // Restore all data
+          earnings = backup.earnings || [];
+          expenses = backup.expenses || [];
+          customSources = backup.customSources || [];
+          customPersonalCats = backup.customPersonalCats || [];
+          customWorkCats = backup.customWorkCats || [];
+          totalPaymentsRecorded = backup.totalPaymentsRecorded || 0;
+          currentDay = backup.currentDay || getTodayString();
+          dayOpen = backup.dayOpen !== undefined ? backup.dayOpen : true;
+          
+          saveData();
+          
+          // Refresh UI
+          updateEarningsSummary();
+          renderEarningsList();
+          renderExpenseLists();
+          updateOweBalance();
+          updateDayStatus();
+          
+          showToast('Data imported successfully!');
+        } catch (err) {
+          showToast('Invalid backup file', true);
+          console.error(err);
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllData() {
+      if (!confirm('⚠️ WARNING: This will DELETE ALL your data permanently. This cannot be undone.\n\nMake sure you have exported a backup first.\n\nContinue?')) {
+        return;
+      }
+      
+      // Double confirmation
+      if (!confirm('Are you ABSOLUTELY SURE? All earnings, expenses, and balances will be lost.')) {
+        return;
+      }
+      
+      // Clear everything
+      earnings = [];
+      expenses = [];
+      customSources = [];
+      customPersonalCats = [];
+      customWorkCats = [];
+      totalPaymentsRecorded = 0;
+      currentDay = getTodayString();
+      dayOpen = true;
+      
+      saveData();
+      
+      // Refresh UI
+      updateEarningsSummary();
+      renderEarningsList();
+      renderExpenseLists();
+      updateOweBalance();
+      updateDayStatus();
+      
+      showToast('All data cleared');
     }
 
     // ------------------- Earnings Logic -------------------
@@ -548,7 +690,6 @@
         const d = new Date(m + '-01');
         div.textContent = d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
         div.onclick = () => selectMonth(m);
-        // FIX: Highlight correct month
         if (m === selectedMonth && !isYTD) div.classList.add('selected');
         dropdown.appendChild(div);
       });
@@ -562,7 +703,6 @@
     }
 
     function selectMonth(month) {
-      // FIX: Directly set selectedMonth to the clicked month
       selectedMonth = month;
       isYTD = false;
       monthDropdownOpen = false;
@@ -572,7 +712,6 @@
       renderExpenseLists();
     }
 
-    // FIX: YTD now toggles
     function toggleYTD() {
       isYTD = !isYTD;
       document.getElementById('ytdBtn').classList.toggle('active', isYTD);
