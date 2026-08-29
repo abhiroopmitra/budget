@@ -4,182 +4,90 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Budget App</title>
-
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Budget">
   <meta name="theme-color" content="#0d1117">
-  
-  <!-- App Icon -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%232ea043' rx='40'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='100' font-family='Apple Color Emoji'%3E💰%3C/text%3E%3C/svg%3E">
-
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%232ea043' rx='40'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-size='100'%3E💰%3C/text%3E%3C/svg%3E">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
     body { background: #0d1117; color: #fff; padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
-
-    /* Header & Lang Toggle */
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     h1 { font-size: 28px; }
-    .lang-toggle {
-      background: #161b22; border: 1px solid #30363d; color: #fff;
-      padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer;
-    }
-
-    /* Login Screen */
-    .login-container {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: #0d1117; z-index: 1000; padding: 40px 20px;
-      align-items: center; justify-content: center; flex-direction: column;
-    }
+    .lang-toggle { background: #161b22; border: 1px solid #30363d; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .login-container { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0d1117; z-index: 1000; padding: 40px 20px; align-items: center; justify-content: center; flex-direction: column; }
     .login-container.show { display: flex; }
-    .login-box {
-      background: #161b22; padding: 30px; border-radius: 16px; width: 100%; max-width: 400px;
-      border: 1px solid #30363d;
-    }
+    .login-box { background: #161b22; padding: 30px; border-radius: 16px; width: 100%; max-width: 400px; border: 1px solid #30363d; }
     .login-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center; }
-    .login-input {
-      width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; border: 1px solid #30363d;
-      background: #0d1117; color: #fff; font-size: 16px;
-    }
-    .login-btn {
-      width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px;
-      font-weight: bold; cursor: pointer; margin-bottom: 10px;
-    }
+    .login-input { width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 10px; border: 1px solid #30363d; background: #0d1117; color: #fff; font-size: 16px; }
+    .login-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
     .login-btn.primary { background: #2ea043; color: #fff; }
     .login-btn.secondary { background: #1f6feb; color: #fff; }
-    .login-btn.text { background: transparent; color: #8b949e; }
-    .login-switch { text-align: center; margin-top: 15px; color: #8b949e; }
-    .login-switch span { color: #1f6feb; cursor: pointer; text-decoration: underline; }
-    .login-error {
-      background: #f85149; color: #fff; padding: 10px; border-radius: 8px;
-      margin-bottom: 15px; font-size: 14px; display: none;
-    }
+    .login-error { background: #f85149; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; display: none; }
     .household-input-group { display: none; }
     .household-input-group.show { display: block; }
-
-    /* Main App */
     .app-container { display: none; }
     .app-container.show { display: block; }
-
     .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
-    .tab { flex: 1; padding: 10px; font-size: 16px; background: #161b22; color: #fff;
-           border: none; border-radius: 10px; cursor: pointer; }
+    .tab { flex: 1; padding: 10px; font-size: 16px; background: #161b22; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
     .tab.active { background: #2ea043; }
-
-    .summary-btn {
-      width: 100%; background: #161b22; color: #fff; border: none;
-      border-radius: 12px; padding: 16px; margin-bottom: 10px;
-      text-align: center; cursor: pointer;
-    }
+    .summary-btn { width: 100%; background: #161b22; color: #fff; border: none; border-radius: 12px; padding: 16px; margin-bottom: 10px; text-align: center; cursor: pointer; }
     .summary-btn .period-label { display: block; font-size: 14px; opacity: 0.7; margin-bottom: 4px; }
     .summary-btn .big-amount { font-size: 30px; font-weight: bold; }
     .summary-btn .hint { display: block; font-size: 11px; opacity: 0.45; margin-top: 6px; }
-
-    .day-status {
-      text-align: center; font-size: 13px; margin-bottom: 12px;
-      padding: 8px; border-radius: 8px; background: #161b22;
-    }
+    .day-status { text-align: center; font-size: 13px; margin-bottom: 12px; padding: 8px; border-radius: 8px; background: #161b22; }
     .day-status.open { color: #7ee787; }
-    .day-status.stale { color: #e3b341; }
     .day-status.closed { color: #8b949e; }
-
-    .slide-container {
-      width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px;
-      margin-bottom: 14px; user-select: none; -webkit-user-select: none; touch-action: none;
-    }
+    .slide-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 14px; user-select: none; touch-action: none; }
     .slide-container.disabled { opacity: 0.4; }
     .slide-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
-    .slide-handle {
-      position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
-      width: 42px; height: 42px; background: #f85149; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; color: #fff; pointer-events: none; transition: left 0.15s ease-out;
-    }
+    .slide-handle { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; background: #f85149; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; pointer-events: none; transition: left 0.15s ease-out; }
     .slide-track.dragging .slide-handle { transition: none; }
-    .slide-text {
-      position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-      text-align: center; color: rgba(255,255,255,0.7); font-size: 16px; pointer-events: none;
-    }
+    .slide-text { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; color: rgba(255,255,255,0.7); font-size: 16px; pointer-events: none; }
     .slide-track.completed .slide-handle { background: #2ea043; }
     .slide-track.completed .slide-text { color: #fff; }
-
     .month-header { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
-    .month-display {
-      flex: 1; background: #161b22; padding: 14px; border-radius: 10px;
-      text-align: center; font-size: 18px; font-weight: bold; cursor: pointer;
-    }
-    .ytd-btn {
-      padding: 14px 20px; background: #1f6feb; border: none; border-radius: 10px;
-      color: #fff; font-size: 16px; font-weight: bold;
-    }
+    .month-display { flex: 1; background: #161b22; padding: 14px; border-radius: 10px; text-align: center; font-size: 18px; font-weight: bold; cursor: pointer; }
+    .ytd-btn { padding: 14px 20px; background: #1f6feb; border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: bold; }
     .ytd-btn.active { background: #2ea043; }
-    .month-dropdown {
-      position: absolute; top: 70px; left: 20px; right: 20px; background: #161b22;
-      border-radius: 10px; padding: 10px; display: none; z-index: 100;
-      max-height: 300px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
+    .month-dropdown { position: absolute; top: 70px; left: 20px; right: 20px; background: #161b22; border-radius: 10px; padding: 10px; display: none; z-index: 100; max-height: 300px; overflow-y: auto; }
     .month-dropdown.show { display: block; }
     .month-option { padding: 12px; border-radius: 8px; cursor: pointer; }
     .month-option:hover { background: #2ea043; }
     .month-option.selected { background: #1f6feb; }
-
-    .balance-card {
-      background: linear-gradient(135deg, #1f6feb 0%, #0d1117 100%);
-      border-radius: 12px; padding: 20px; margin-bottom: 16px;
-      text-align: center; border: 2px solid #1f6feb;
-    }
+    .balance-card { background: linear-gradient(135deg, #1f6feb 0%, #0d1117 100%); border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center; border: 2px solid #1f6feb; }
     .balance-label { font-size: 14px; opacity: 0.8; margin-bottom: 8px; }
     .balance-amount { font-size: 42px; font-weight: bold; margin-bottom: 8px; }
     .balance-who { font-size: 18px; opacity: 0.9; }
     .balance-who.positive { color: #f85149; }
     .balance-who.negative { color: #7ee787; }
-
-    .payment-slider-container {
-      width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px;
-      margin-bottom: 16px; user-select: none; -webkit-user-select: none; touch-action: none;
-    }
+    .payment-slider-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 16px; user-select: none; touch-action: none; }
     .payment-slider-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
-    .payment-slider-handle {
-      position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
-      width: 42px; height: 42px; background: #1f6feb; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; color: #fff; pointer-events: none; transition: left 0.15s ease-out;
-    }
+    .payment-slider-handle { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; background: #1f6feb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; pointer-events: none; transition: left 0.15s ease-out; }
     .payment-slider-track.dragging .payment-slider-handle { transition: none; }
-    .payment-slider-text {
-      position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-      text-align: center; color: rgba(255,255,255,0.7); font-size: 16px; pointer-events: none;
-    }
+    .payment-slider-text { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; color: rgba(255,255,255,0.7); font-size: 16px; pointer-events: none; }
     .payment-slider-track.completed .payment-slider-handle { background: #2ea043; }
     .payment-slider-track.completed .payment-slider-text { color: #fff; }
-
     .work-card { background: #161b22; border-radius: 10px; padding: 14px; margin-bottom: 16px; cursor: pointer; }
     .work-card-title { font-size: 13px; opacity: 0.7; margin-bottom: 6px; }
     .work-card-value { font-size: 22px; font-weight: bold; }
     .breakdown { margin-top: 10px; padding-top: 10px; border-top: 1px solid #30363d; display: none; }
     .breakdown.show { display: block; }
     .breakdown-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
-
     .type-toggle { display: flex; background: #161b22; border-radius: 10px; padding: 4px; margin-bottom: 12px; }
     .type-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: #8b949e; cursor: pointer; }
     .type-btn.active { background: #2ea043; color: #fff; }
-
     .entry-form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-    .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px;
-      border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
-    .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px;
-      background: #2ea043; color: #fff; }
+    .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px; border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
+    .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px; background: #2ea043; color: #fff; }
     .entry-form #cancelEditBtn { background: #f85149; display: none; }
-
     .custom-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
     .custom-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #2ea043; color: #fff; }
-
     .lists-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .list-column { background: #161b22; border-radius: 10px; padding: 12px; max-height: 400px; overflow-y: auto; }
     .list-header { font-size: 14px; font-weight: bold; opacity: 0.8; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
-    
     ul { list-style: none; }
     li { background: #0d1117; padding: 10px; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
     li .amount { font-size: 16px; font-weight: bold; color: #7ee787; }
@@ -188,37 +96,21 @@
     li .actions button { background: none; border: none; font-size: 14px; padding: 2px; }
     li .actions button.edit { color: #58a6ff; }
     li .actions button.delete { color: #f85149; }
-
-    .settings-section {
-      background: #161b22; border-radius: 10px; padding: 16px; margin-top: 20px;
-    }
+    .settings-section { background: #161b22; border-radius: 10px; padding: 16px; margin-top: 20px; }
     .settings-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; opacity: 0.9; }
     .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .settings-btn {
-      padding: 12px; border: none; border-radius: 8px; font-size: 14px;
-      cursor: pointer; text-align: center;
-    }
+    .settings-btn { padding: 12px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; text-align: center; }
     .settings-btn.export { background: #1f6feb; color: #fff; }
-    .settings-btn.import { background: #8b949e; color: #fff; }
     .settings-btn.danger { background: #f85149; color: #fff; grid-column: span 2; }
     .settings-btn.logout { background: #30363d; color: #fff; grid-column: span 2; }
-    
     #fileInput { display: none; }
-
-    #toast {
-      position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%);
-      background: #2ea043; color: #fff; padding: 12px 20px; border-radius: 10px;
-      font-size: 15px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
-      max-width: 90%; text-align: center; z-index: 999;
-    }
+    #toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); background: #2ea043; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 15px; opacity: 0; pointer-events: none; transition: opacity 0.25s; max-width: 90%; text-align: center; z-index: 999; }
     #toast.show { opacity: 1; }
     #toast.error { background: #f85149; }
-
     .hidden { display: none; }
     .section { margin-bottom: 12px; }
     .user-info { font-size: 12px; opacity: 0.6; margin-top: 10px; text-align: center; }
     .household-id { font-size: 11px; opacity: 0.5; margin-top: 5px; text-align: center; font-family: monospace; }
-    .loading { text-align: center; padding: 40px; opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -227,21 +119,16 @@
     <div class="login-box">
       <div class="login-title" id="loginTitle">Sign In</div>
       <div class="login-error" id="loginError"></div>
-      
-      <input type="email" class="login-input" id="loginEmail" placeholder="Email" autocomplete="email">
-      <input type="password" class="login-input" id="loginPassword" placeholder="Password" autocomplete="current-password">
-      
+      <input type="email" class="login-input" id="loginEmail" placeholder="Email">
+      <input type="password" class="login-input" id="loginPassword" placeholder="Password">
       <div class="household-input-group" id="householdInputGroup">
         <input type="text" class="login-input" id="householdIdInput" placeholder="Household ID (from partner)">
       </div>
-      
       <button class="login-btn primary" id="loginSubmitBtn" onclick="handleLoginSubmit()">Sign In</button>
       <button class="login-btn secondary hidden" id="createHouseholdBtn" onclick="createHousehold()">Create New Household</button>
-      
-      <div class="login-switch">
-        <span id="loginSwitchText" onclick="toggleLoginMode()">Don't have an account? Sign Up</span>
+      <div style="text-align: center; margin-top: 15px; color: #8b949e;">
+        <span id="loginSwitchText" onclick="toggleLoginMode()" style="color: #1f6feb; cursor: pointer; text-decoration: underline;">Don't have an account? Sign Up</span>
       </div>
-      
       <div class="user-info" id="userInfo"></div>
     </div>
   </div>
@@ -252,87 +139,72 @@
       <h1>💰 Budget</h1>
       <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
     </div>
-
     <div class="tabs">
-      <button class="tab active" id="earningsTabBtn" onclick="showMainTab('earnings')" data-i18n="tab_earnings">Earnings</button>
-      <button class="tab" id="expensesTabBtn" onclick="showMainTab('expenses')" data-i18n="tab_expenses">Expenses</button>
+      <button class="tab active" id="earningsTabBtn" onclick="showMainTab('earnings')">Earnings</button>
+      <button class="tab" id="expensesTabBtn" onclick="showMainTab('expenses')">Expenses</button>
     </div>
-
     <div id="earningsSection">
       <button class="summary-btn" id="summaryBtn">
-        <span class="period-label" id="summaryPeriodLabel" data-i18n="summary_day">Day Total</span>
+        <span class="period-label" id="summaryPeriodLabel">Day Total</span>
         <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
-        <span class="hint" data-i18n="summary_hint">tap to switch: day → week → month</span>
+        <span class="hint">tap to switch: day → week → month</span>
       </button>
-
-      <div class="day-status open" id="dayStatus" data-i18n="day_status_open">Active day: Today</div>
-
+      <div class="day-status open" id="dayStatus">Active day: Today</div>
       <div class="slide-container" id="slideContainer">
         <div class="slide-track" id="slideTrack">
-          <span class="slide-text" id="slideText" data-i18n="slide_end_day">Slide to End Day</span>
+          <span class="slide-text" id="slideText">Slide to End Day</span>
           <div class="slide-handle" id="slideHandle">🛑</div>
         </div>
       </div>
-
       <div class="entry-form">
-        <input type="number" id="earningsAmountInput" data-i18n-ph="placeholder_amount" placeholder="Amount" step="0.01" min="0" inputmode="decimal">
+        <input type="number" id="earningsAmountInput" placeholder="Amount" step="0.01" min="0">
         <select id="earningsSourceSelect">
           <option value="UberEats">UberEats</option>
           <option value="DoorDash">DoorDash</option>
-          <option value="__custom__" data-i18n="btn_add_custom">+ Add custom…</option>
+          <option value="__custom__">+ Add custom…</option>
         </select>
-        <button id="earningsAddBtn" data-i18n="btn_add">Add</button>
-        <button id="earningsCancelBtn" data-i18n="btn_cancel">Cancel</button>
+        <button id="earningsAddBtn">Add</button>
+        <button id="earningsCancelBtn" style="display:none;">Cancel</button>
       </div>
-
       <div id="earningsCustomRow" class="custom-row hidden">
-        <input type="text" id="earningsCustomInput" data-i18n-ph="placeholder_new_source" placeholder="New source name">
-        <button onclick="addCustomSource()" data-i18n="btn_save">Save</button>
+        <input type="text" id="earningsCustomInput" placeholder="New source name">
+        <button onclick="addCustomSource()">Save</button>
       </div>
-
       <ul id="earningsList"></ul>
     </div>
-
     <div id="expensesSection" class="hidden">
-      
       <div class="month-header">
         <div class="month-display" id="monthDisplay" onclick="toggleMonthDropdown()">January 2026 ▼</div>
-        <button class="ytd-btn" id="ytdBtn" onclick="toggleYTD()" data-i18n="month_ytd">YTD</button>
+        <button class="ytd-btn" id="ytdBtn" onclick="toggleYTD()">YTD</button>
       </div>
       <div class="month-dropdown" id="monthDropdown"></div>
-
       <div class="balance-card">
-        <div class="balance-label" id="balanceLabel" data-i18n="balance_label_owes">Gian owes Abhi</div>
+        <div class="balance-label" id="balanceLabel">Gian owes Abhi</div>
         <div class="balance-amount" id="balanceAmount">$0.00</div>
         <div class="balance-who" id="balanceWho"></div>
       </div>
-
       <div class="payment-slider-container" id="paymentSliderContainer">
         <div class="payment-slider-track" id="paymentSliderTrack">
-          <span class="payment-slider-text" id="paymentSliderText" data-i18n="payment_slide_text">Slide to Record Payment</span>
+          <span class="payment-slider-text" id="paymentSliderText">Slide to Record Payment</span>
           <div class="payment-slider-handle" id="paymentSliderHandle">💰</div>
         </div>
       </div>
-
       <div class="work-card" onclick="toggleWorkBreakdown()">
-        <div class="work-card-title"><span data-i18n="work_card_title">Work Expenses</span> (<span id="workMonthLabel" data-i18n="work_card_suffix">This Month</span>)</div>
+        <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
         <div class="work-card-value" id="workTotalDisplay">$0.00</div>
         <div id="workBreakdown" class="breakdown"></div>
       </div>
-
       <div class="type-toggle">
-        <button class="type-btn active" id="typePersonalBtn" onclick="setExpenseType('personal')" data-i18n="type_personal">Personal</button>
-        <button class="type-btn" id="typeWorkBtn" onclick="setExpenseType('work')" data-i18n="type_work">Work</button>
+        <button class="type-btn active" id="typePersonalBtn" onclick="setExpenseType('personal')">Personal</button>
+        <button class="type-btn" id="typeWorkBtn" onclick="setExpenseType('work')">Work</button>
       </div>
-
       <div class="entry-form">
         <input type="date" id="expenseDateInput">
-        <input type="number" id="expenseAmountInput" data-i18n-ph="placeholder_amount_cad" placeholder="Amount (CAD)" step="0.01" min="0" inputmode="decimal">
+        <input type="number" id="expenseAmountInput" placeholder="Amount (CAD)" step="0.01" min="0">
         <select id="expenseCategorySelect" onchange="handleCategoryChange()"></select>
-        <button id="expenseAddBtn" data-i18n="btn_add">Add</button>
-        <button id="expenseCancelBtn" data-i18n="btn_cancel">Cancel</button>
+        <button id="expenseAddBtn">Add</button>
+        <button id="expenseCancelBtn" style="display:none;">Cancel</button>
       </div>
-
       <div id="personalFields" class="section">
         <div class="entry-form">
           <select id="personalPaidBySelect">
@@ -340,63 +212,54 @@
             <option value="Gian">Gian</option>
           </select>
           <select id="personalShareSelect" onchange="handleShareChange()">
-            <option value="100" data-i18n="share_100">100% (full owed)</option>
-            <option value="50" data-i18n="share_50">50% (split)</option>
-            <option value="__custom__" data-i18n="share_custom">Custom %</option>
+            <option value="100">100% (full owed)</option>
+            <option value="50">50% (split)</option>
+            <option value="__custom__">Custom %</option>
           </select>
         </div>
         <div id="personalCustomShareRow" class="custom-row hidden">
-          <input type="number" id="personalCustomShareInput" data-i18n-ph="placeholder_percent" placeholder="%" step="1" min="0" max="100">
-          <button onclick="setCustomShare()" data-i18n="btn_set">Set</button>
+          <input type="number" id="personalCustomShareInput" placeholder="%" step="1" min="0" max="100">
+          <button onclick="setCustomShare()">Set</button>
         </div>
         <div id="personalCustomCatRow" class="custom-row hidden">
-          <input type="text" id="personalCustomCatInput" data-i18n-ph="placeholder_new_category" placeholder="New category">
-          <button onclick="addCustomPersonalCat()" data-i18n="btn_save">Save</button>
+          <input type="text" id="personalCustomCatInput" placeholder="New category">
+          <button onclick="addCustomPersonalCat()">Save</button>
         </div>
       </div>
-
       <div id="workFields" class="section hidden">
         <div id="workCustomCatRow" class="custom-row hidden">
-          <input type="text" id="workCustomCatInput" data-i18n-ph="placeholder_new_category" placeholder="New category">
-          <button onclick="addCustomWorkCat()" data-i18n="btn_save">Save</button>
+          <input type="text" id="workCustomCatInput" placeholder="New category">
+          <button onclick="addCustomWorkCat()">Save</button>
         </div>
       </div>
-
       <div class="lists-container">
         <div class="list-column">
-          <div class="list-header" data-i18n="type_personal">PERSONAL</div>
+          <div class="list-header">PERSONAL</div>
           <ul id="personalList"></ul>
         </div>
         <div class="list-column">
-          <div class="list-header" data-i18n="type_work">WORK</div>
+          <div class="list-header">WORK</div>
           <ul id="workList"></ul>
         </div>
       </div>
-
-      <!-- Settings Section -->
       <div class="settings-section">
-        <div class="settings-title" data-i18n="settings_title">⚙️ Settings & Backup</div>
+        <div class="settings-title">⚙️ Settings</div>
         <div class="settings-grid">
-          <button class="settings-btn export" onclick="exportData()" data-i18n="btn_export">📤 Export Data</button>
-          <button class="settings-btn import" onclick="document.getElementById('fileInput').click()" data-i18n="btn_import">📥 Import Data</button>
-          <button class="settings-btn danger" onclick="clearAllData()" data-i18n="btn_clear">⚠️ Clear All Data</button>
-          <button class="settings-btn logout" onclick="logout()" data-i18n="btn_logout">🚪 Logout</button>
+          <button class="settings-btn export" onclick="exportData()">📤 Export</button>
+          <button class="settings-btn danger" onclick="clearAllData()">⚠️ Clear All</button>
+          <button class="settings-btn logout" onclick="logout()">🚪 Logout</button>
         </div>
         <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
         <div class="household-id" id="householdIdDisplay"></div>
       </div>
     </div>
   </div>
-
   <div id="toast"></div>
-
-  <!-- Firebase SDK -->
-  <script type="module">
+    <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
     import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, arrayUnion, onSnapshot, addDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyCw-VlPowIAzY0ylq2-WK39Jo-L0ELn414",
       authDomain: "budget-275ac.firebaseapp.com",
@@ -406,59 +269,48 @@
       appId: "1:176646041982:web:b8ab6615a2bb8fb72b432f"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Global State
-    let currentUser = null;
-    let householdId = null;
-    let householdData = null;
-    let earnings = [];
-    let expenses = [];
-    let customSources = [];
-    let customPersonalCats = [];
-    let customWorkCats = [];
-    let totalPaymentsRecorded = 0;
-    let currentDay = new Date().toISOString().split('T')[0];
-    let dayOpen = true;
-    let editingEarningsId = null;
-    let editingExpenseId = null;
-    let summaryMode = 'day';
-    let expenseType = 'personal';
-    let selectedMonth = new Date().toISOString().slice(0, 7);
-    let isYTD = false;
-    let workBreakdownVisible = false;
-    let monthDropdownOpen = false;
-    let isLoginMode = true;
+    let currentUser = null, householdId = null, earnings = [], expenses = [];
+    let customSources = [], customPersonalCats = [], customWorkCats = [];
+    let totalPaymentsRecorded = 0, currentDay = new Date().toISOString().split('T')[0];
+    let dayOpen = true, editingEarningsId = null, editingExpenseId = null;
+    let summaryMode = 'day', expenseType = 'personal', selectedMonth = new Date().toISOString().slice(0, 7);
+    let isYTD = false, workBreakdownVisible = false, monthDropdownOpen = false, isLoginMode = true;
+    let currentLang = localStorage.getItem('appLang') || 'en';
 
-    // Make Firebase functions available globally
-    window.firebaseAuth = { auth, db };
-    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-    window.signOut = signOut;
-    window.setDoc = setDoc;
-    window.getDoc = getDoc;
-    window.updateDoc = updateDoc;
-    window.arrayUnion = arrayUnion;
-    window.onSnapshot = onSnapshot;
-    window.addDoc = addDoc;
-    window.deleteDoc = deleteDoc;
-    window.query = query;
-    window.orderBy = orderBy;
-    window.collection = collection;
-    window.doc = doc;
+    const translations = {
+      en: { tab_earnings: "Earnings", tab_expenses: "Expenses", summary_day: "Day Total", summary_week: "Week Total", summary_month: "Month Total", btn_add: "Add", btn_update: "Update", btn_cancel: "Cancel", btn_save: "Save", balance_label_owes: "Gian owes Abhi", balance_label_owes_rev: "Abhi owes Gian", balance_label_settled: "All Settled", list_no_earnings: "No earnings yet.", list_no_personal: "No personal expenses.", list_no_work: "No work expenses." },
+      es: { tab_earnings: "Ganancias", tab_expenses: "Gastos", summary_day: "Total del Día", summary_week: "Total de la Semana", summary_month: "Total del Mes", btn_add: "Agregar", btn_update: "Actualizar", btn_cancel: "Cancelar", btn_save: "Guardar", balance_label_owes: "Gian le debe a Abhi", balance_label_owes_rev: "Abhi le debe a Gian", balance_label_settled: "Todo Pagado", list_no_earnings: "Sin ganancias aún.", list_no_personal: "Sin gastos personales.", list_no_work: "Sin gastos de trabajo." }
+    };
 
-    // Auth State Observer
+    window.t = (key) => translations[currentLang][key] || key;
+
+    window.toggleLanguage = () => {
+      currentLang = currentLang === 'en' ? 'es' : 'en';
+      localStorage.setItem('appLang', currentLang);
+      document.getElementById('langToggle').textContent = currentLang.toUpperCase();
+      updateLanguageUI();
+    };
+
+    function updateLanguageUI() {
+      document.getElementById('earningsTabBtn').textContent = t('tab_earnings');
+      document.getElementById('expensesTabBtn').textContent = t('tab_expenses');
+      document.getElementById('earningsAddBtn').textContent = editingEarningsId ? t('btn_update') : t('btn_add');
+      document.getElementById('expenseAddBtn').textContent = editingExpenseId ? t('btn_update') : t('btn_add');
+      updateEarningsSummary();
+      updateOweBalance();
+    }
+
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        await loadHousehold();
         document.getElementById('loginContainer').classList.remove('show');
         document.getElementById('appContainer').classList.add('show');
         document.getElementById('userInfo').textContent = user.email;
-        initApp();
+        await loadHousehold();
       } else {
         currentUser = null;
         householdId = null;
@@ -467,98 +319,70 @@
       }
     });
 
-    // Load Household Data
     async function loadHousehold() {
       if (!currentUser) return;
-      
-      try {
-        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-        if (userDoc.exists()) {
-          householdId = userDoc.data().householdId;
-          await loadHouseholdData();
-        } else {
-          // New user - show household input
-          document.getElementById('householdInputGroup').classList.add('show');
-          document.getElementById('createHouseholdBtn').classList.remove('hidden');
-          document.getElementById('loginSubmitBtn').textContent = 'Join Household';
-        }
-      } catch (error) {
-        console.error('Error loading household:', error);
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userDoc.exists()) {
+        householdId = userDoc.data().householdId;
+        document.getElementById('householdIdDisplay').textContent = `Household ID: ${householdId}`;
+        loadHouseholdData();
+      } else {
+        document.getElementById('householdInputGroup').classList.add('show');
+        document.getElementById('createHouseholdBtn').classList.remove('hidden');
+        document.getElementById('loginSubmitBtn').textContent = 'Join Household';
       }
     }
 
-    // Load Household Data (Real-time)
-    async function loadHouseholdData() {
+    function loadHouseholdData() {
       if (!householdId) return;
-      
-      onSnapshot(doc(db, 'households', householdId), (doc) => {
-        if (doc.exists()) {
-          householdData = doc.data();
-          document.getElementById('householdIdDisplay').textContent = `Household ID: ${householdId}`;
-          
-          // Load sub-collections
-          loadEarnings();
-          loadExpenses();
+      onSnapshot(doc(db, 'households', householdId), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
+          currentDay = data.currentDay || new Date().toISOString().split('T')[0];
+          dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
+          customSources = data.customSources || [];
+          customPersonalCats = data.customPersonalCats || [];
+          customWorkCats = data.customWorkCats || [];
+          updateDayStatus();
+          updateEarningsSourceSelect();
+          updateExpenseCategorySelect();
         }
       });
-    }
-
-    // Load Earnings (Real-time)
-    function loadEarnings() {
-      if (!householdId) return;
-      
-      const q = query(collection(db, 'households', householdId, 'earnings'), orderBy('timestamp', 'desc'));
-      onSnapshot(q, (snapshot) => {
+      const qEarnings = query(collection(db, 'households', householdId, 'earnings'), orderBy('timestamp', 'desc'));
+      onSnapshot(qEarnings, (snapshot) => {
         earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderEarningsList();
         updateEarningsSummary();
       });
-    }
-
-    // Load Expenses (Real-time)
-    function loadExpenses() {
-      if (!householdId) return;
-      
-      const q = query(collection(db, 'households', householdId, 'expenses'), orderBy('timestamp', 'desc'));
-      onSnapshot(q, (snapshot) => {
+      const qExpenses = query(collection(db, 'households', householdId, 'expenses'), orderBy('timestamp', 'desc'));
+      onSnapshot(qExpenses, (snapshot) => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
         updateOweBalance();
       });
     }
 
-    // Login/Signup Functions
-    window.handleLoginSubmit = async function() {
+    window.handleLoginSubmit = async () => {
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
-      
-      if (!email || !password) {
-        errorEl.textContent = 'Please enter email and password';
-        errorEl.style.display = 'block';
-        return;
-      }
-      
+      if (!email || !password) { errorEl.textContent = 'Enter email and password'; errorEl.style.display = 'block'; return; }
       try {
         if (isLoginMode) {
           await signInWithEmailAndPassword(auth, email, password);
         } else {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          // Show household input for new users
+          await createUserWithEmailAndPassword(auth, email, password);
           document.getElementById('householdInputGroup').classList.add('show');
           document.getElementById('createHouseholdBtn').classList.remove('hidden');
           document.getElementById('loginSubmitBtn').textContent = 'Join Household';
           errorEl.textContent = 'Account created! Now create or join a household.';
           errorEl.style.display = 'block';
-          return;
         }
-      } catch (error) {
-        errorEl.textContent = error.message;
-        errorEl.style.display = 'block';
-      }
+      } catch (error) { errorEl.textContent = error.message; errorEl.style.display = 'block'; }
     };
 
-    window.toggleLoginMode = function() {
+    window.toggleLoginMode = () => {
       isLoginMode = !isLoginMode;
       document.getElementById('loginTitle').textContent = isLoginMode ? 'Sign In' : 'Sign Up';
       document.getElementById('loginSubmitBtn').textContent = isLoginMode ? 'Sign In' : 'Sign Up';
@@ -567,336 +391,474 @@
       document.getElementById('createHouseholdBtn').classList.add('hidden');
     };
 
-    window.createHousehold = async function() {
+    window.createHousehold = async () => {
       if (!currentUser) return;
-      
       const newHouseholdId = 'hh_' + Math.random().toString(36).substr(2, 9);
-      
       try {
-        await setDoc(doc(db, 'households', newHouseholdId), {
-          members: [currentUser.email],
-          createdAt: new Date().toISOString()
-        });
-        
-        await setDoc(doc(db, 'users', currentUser.uid), {
-          email: currentUser.email,
-          householdId: newHouseholdId,
-          joinedAt: new Date().toISOString()
-        });
-        
+        await setDoc(doc(db, 'households', newHouseholdId), { members: [currentUser.email], createdAt: new Date().toISOString(), totalPaymentsRecorded: 0, currentDay: new Date().toISOString().split('T')[0], dayOpen: true, customSources: [], customPersonalCats: [], customWorkCats: [] });
+        await setDoc(doc(db, 'users', currentUser.uid), { email: currentUser.email, householdId: newHouseholdId, joinedAt: new Date().toISOString() });
         householdId = newHouseholdId;
-        await loadHouseholdData();
+        document.getElementById('householdIdDisplay').textContent = `Household ID: ${householdId}`;
+        loadHouseholdData();
         showToast('Household created! Share ID: ' + newHouseholdId);
-      } catch (error) {
-        console.error('Error creating household:', error);
-        showToast('Error creating household', true);
-      }
+      } catch (error) { console.error(error); showToast('Error creating household', true); }
     };
 
-    window.joinHousehold = async function() {
-      const householdIdInput = document.getElementById('householdIdInput').value.trim();
-      if (!householdIdInput || !currentUser) return;
-      
+    window.joinHousehold = async () => {
+      const hid = document.getElementById('householdIdInput').value.trim();
+      if (!hid || !currentUser) return;
       try {
-        const householdDoc = await getDoc(doc(db, 'households', householdIdInput));
-        if (!householdDoc.exists()) {
-          showToast('Household not found', true);
-          return;
-        }
-        
-        await updateDoc(doc(db, 'households', householdIdInput), {
-          members: arrayUnion(currentUser.email)
-        });
-        
-        await setDoc(doc(db, 'users', currentUser.uid), {
-          email: currentUser.email,
-          householdId: householdIdInput,
-          joinedAt: new Date().toISOString()
-        });
-        
-        householdId = householdIdInput;
-        await loadHouseholdData();
-        showToast('Joined household successfully!');
-      } catch (error) {
-        console.error('Error joining household:', error);
-        showToast('Error joining household', true);
+        const hDoc = await getDoc(doc(db, 'households', hid));
+        if (!hDoc.exists()) { showToast('Household not found', true); return; }
+        await updateDoc(doc(db, 'households', hid), { members: arrayUnion(currentUser.email) });
+        await setDoc(doc(db, 'users', currentUser.uid), { email: currentUser.email, householdId: hid, joinedAt: new Date().toISOString() });
+        householdId = hid;
+        document.getElementById('householdIdDisplay').textContent = `Household ID: ${householdId}`;
+        loadHouseholdData();
+        showToast('Joined household!');
+      } catch (error) { console.error(error); showToast('Error joining household', true); }
+    };
+
+    window.logout = async () => { try { await signOut(auth); } catch (e) { console.error(e); } };
+
+    window.showMainTab = (tab) => {
+      const eS = document.getElementById('earningsSection');
+      const xS = document.getElementById('expensesSection');
+      const eB = document.getElementById('earningsTabBtn');
+      const xB = document.getElementById('expensesTabBtn');
+      if (tab === 'earnings') {
+        eS.classList.remove('hidden'); xS.classList.add('hidden');
+        eB.classList.add('active'); xB.classList.remove('active');
+      } else {
+        eS.classList.add('hidden'); xS.classList.remove('hidden');
+        xB.classList.add('active'); eB.classList.remove('active');
+        updateMonthDisplay();
+        renderExpenseLists();
       }
     };
 
-    window.logout = async function() {
-      try {
-        await signOut(auth);
-        showToast('Logged out successfully');
-      } catch (error) {
-        console.error('Error logging out:', error);
-      }
-    };
-
-    // Translation System
-    let currentLang = localStorage.getItem('appLang') || 'en';
-    const translations = {
-      en: {
-        tab_earnings: "Earnings",
-        tab_expenses: "Expenses",
-        summary_day: "Day Total",
-        summary_week: "Week Total",
-        summary_month: "Month Total",
-        summary_hint: "tap to switch: day → week → month",
-        day_status_open: "Active day: Today",
-        day_status_closed: "Day closed",
-        day_status_stale: "⚠️ Still on",
-        slide_end_day: "Slide to End Day",
-        slide_release_end: "Release to end day",
-        slide_closed: "Day already closed",
-        month_ytd: "YTD",
-        balance_label_owes: "Gian owes Abhi",
-        balance_label_owes_rev: "Abhi owes Gian",
-        balance_label_settled: "All Settled",
-        payment_slide_text: "Slide to Record Payment",
-        payment_slide_release: "Release to record",
-        work_card_title: "Work Expenses",
-        work_card_suffix: "This Month",
-        type_personal: "Personal",
-        type_work: "Work",
-        placeholder_amount: "Amount",
-        placeholder_amount_cad: "Amount (CAD)",
-        placeholder_new_source: "New source name",
-        placeholder_new_category: "New category",
-        placeholder_percent: "%",
-        btn_add: "Add",
-        btn_cancel: "Cancel",
-        btn_update: "Update",
-        btn_save: "Save",
-        btn_set: "Set",
-        btn_export: "📤 Export Data",
-        btn_import: "📥 Import Data",
-        btn_clear: "⚠️ Clear All Data",
-        btn_logout: "🚪 Logout",
-        btn_add_custom: "+ Add custom…",
-        share_100: "100% (full owed)",
-        share_50: "50% (split)",
-        share_custom: "Custom %",
-        settings_title: "⚙️ Settings & Backup",
-        alert_valid_amount: "Valid amount required.",
-        alert_save_custom_source: "Save custom source first.",
-        alert_save_custom_category: "Save custom category first.",
-        alert_select_date: "Select a date.",
-        alert_delete_confirm: "Delete?",
-        alert_import_confirm: "This will replace ALL current data with the backup. Continue?",
-        alert_clear_warning_1: "⚠️ WARNING: This will DELETE ALL your data permanently. This cannot be undone.\n\nMake sure you have exported a backup first.\n\nContinue?",
-        alert_clear_warning_2: "Are you ABSOLUTELY SURE? All earnings, expenses, and balances will be lost.",
-        toast_expense_saved: "Expense saved",
-        toast_payment_recorded: "Payment recorded - balance reset",
-        toast_day_closed: "Day closed",
-        toast_new_day: "New day started",
-        toast_data_exported: "Data exported successfully!",
-        toast_data_imported: "Data imported successfully!",
-        toast_invalid_file: "Invalid backup file",
-        toast_data_cleared: "All data cleared",
-        list_none: "None",
-        list_no_earnings: "No earnings yet.",
-        list_no_personal: "No personal expenses.",
-        list_no_work: "No work expenses.",
-        meta_owed: "% owed",
-        cat_gas: "Gas",
-        cat_insurance: "Insurance",
-        cat_maintenance: "Maintenance",
-        cat_food: "Food",
-        cat_rent: "Rent",
-        cat_utilities: "Utilities",
-        cat_internet: "Internet",
-        cat_groceries: "Groceries"
-      },
-      es: {
-        tab_earnings: "Ganancias",
-        tab_expenses: "Gastos",
-        summary_day: "Total del Día",
-        summary_week: "Total de la Semana",
-        summary_month: "Total del Mes",
-        summary_hint: "toca para cambiar: día → semana → mes",
-        day_status_open: "Día activo: Hoy",
-        day_status_closed: "Día terminado",
-        day_status_stale: "⚠️ Aún en",
-        slide_end_day: "Desliza para terminar el día",
-        slide_release_end: "Suelta para terminar",
-        slide_closed: "Día ya terminado",
-        month_ytd: "Año a la Fecha",
-        balance_label_owes: "Gian le debe a Abhi",
-        balance_label_owes_rev: "Abhi le debe a Gian",
-        balance_label_settled: "Todo Pagado",
-        payment_slide_text: "Desliza para Registrar Pago",
-        payment_slide_release: "Suelta para registrar",
-        work_card_title: "Gastos de Trabajo",
-        work_card_suffix: "Este Mes",
-        type_personal: "Personal",
-        type_work: "Trabajo",
-        placeholder_amount: "Monto",
-        placeholder_amount_cad: "Monto (CAD)",
-        placeholder_new_source: "Nombre nueva fuente",
-        placeholder_new_category: "Nueva categoría",
-        placeholder_percent: "%",
-        btn_add: "Agregar",
-        btn_cancel: "Cancelar",
-        btn_update: "Actualizar",
-        btn_save: "Guardar",
-        btn_set: "Establecer",
-        btn_export: "📤 Exportar Datos",
-        btn_import: "📥 Importar Datos",
-        btn_clear: "⚠️ Borrar Todo",
-        btn_logout: "🚪 Cerrar Sesión",
-        btn_add_custom: "+ Agregar personalizado…",
-        share_100: "100% (total debida)",
-        share_50: "50% (dividido)",
-        share_custom: "% Personalizado",
-        settings_title: "⚙️ Configuración y Respaldo",
-        alert_valid_amount: "Monto válido requerido.",
-        alert_save_custom_source: "Guarda la fuente personalizada primero.",
-        alert_save_custom_category: "Guarda la categoría personalizada primero.",
-        alert_select_date: "Selecciona una fecha.",
-        alert_delete_confirm: "¿Eliminar?",
-        alert_import_confirm: "Esto reemplazará TODOS los datos actuales con el respaldo. ¿Continuar?",
-        alert_clear_warning_1: "⚠️ ADVERTENCIA: Esto BORRARÁ TODOS tus datos permanentemente. No se puede deshacer.\n\nAsegúrate de haber exportado un respaldo primero.\n\n¿Continuar?",
-        alert_clear_warning_2: "¿Estás ABSOLUTAMENTE SEGURO? Se perderán todas las ganancias, gastos y saldos.",
-        toast_expense_saved: "Gasto guardado",
-        toast_payment_recorded: "Pago registrado - saldo reiniciado",
-        toast_day_closed: "Día terminado",
-        toast_new_day: "Nuevo día iniciado",
-        toast_data_exported: "¡Datos exportados exitosamente!",
-        toast_data_imported: "¡Datos importados exitosamente!",
-        toast_invalid_file: "Archivo de respaldo inválido",
-        toast_data_cleared: "Todos los datos borrados",
-        list_none: "Ninguno",
-        list_no_earnings: "Sin ganancias aún.",
-        list_no_personal: "Sin gastos personales.",
-        list_no_work: "Sin gastos de trabajo.",
-        meta_owed: "% debida",
-        cat_gas: "Gasolina",
-        cat_insurance: "Seguro",
-        cat_maintenance: "Mantenimiento",
-        cat_food: "Comida",
-        cat_rent: "Renta",
-        cat_utilities: "Servicios",
-        cat_internet: "Internet",
-        cat_groceries: "Despensa"
-      }
-    };
-
-    window.t = function(key) {
-      return translations[currentLang][key] || key;
-    };
-
-    window.toggleLanguage = function() {
-      currentLang = currentLang === 'en' ? 'es' : 'en';
-      localStorage.setItem('appLang', currentLang);
-      document.getElementById('langToggle').textContent = currentLang.toUpperCase();
-      updateLanguageUI();
-    };
-
-    function updateLanguageUI() {
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        el.textContent = t(el.getAttribute('data-i18n'));
-      });
-      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-        el.placeholder = t(el.getAttribute('data-i18n-ph'));
-      });
-      updateEarningsSummary();
-      updateDayStatus();
-      updateMonthDisplay();
-      renderEarningsList();
-      renderExpenseLists();
-      updateExpenseCategorySelect();
-      updatePersonalShareSelect();
-    }
-
-    function updatePersonalShareSelect() {
-      const select = document.getElementById('personalShareSelect');
-      if(!select) return;
-      const opts = select.options;
-      if(opts[0]) opts[0].textContent = t('share_100');
-      if(opts[1]) opts[1].textContent = t('share_50');
-      if(opts[2]) opts[2].textContent = t('share_custom');
-    }
-
-    // Helper Functions
-    function getTodayString() {
-      const n = new Date();
-      return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
-    }
-
-    function formatCurrency(n) { return Number(n).toFixed(2); }
-
-    function toDate(dateStr) {
-      const p = dateStr.split('-');
-      return new Date(p[0], p[1] - 1, p[2]);
-    }
-
-    function getReadableDate(dateStr) {
-      return toDate(dateStr).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'es-ES', { weekday:'short', month:'short', day:'numeric' });
-    }
-
-    function getMonthLabel(dateStr) {
-      return toDate(dateStr).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'es-ES', { month:'long', year:'numeric' });
-    }
-
-    function showToast(msg, isError = false) {
-      const tEl = document.getElementById('toast');
-      tEl.textContent = msg;
-      tEl.className = 'show' + (isError ? ' error' : '');
-      clearTimeout(tEl._timer);
-      tEl._timer = setTimeout(() => tEl.classList.remove('show'), 2600);
-    }
-
-    // Initialize App
-    function initApp() {
-      updateLanguageUI();
-      updateEarningsSourceSelect();
-      updateDayStatus();
-      updateEarningsSummary();
-      renderEarningsList();
-      resetSlide();
-      document.getElementById('expenseDateInput').value = getTodayString();
-    }
-
-    // ... [Rest of the app logic for earnings, expenses, slides, etc. - same as before but using Firebase for save/load]
-    // Note: Due to character limits, I've shown the critical Firebase integration parts above.
-    // The rest of the app functions (addOrUpdateEarnings, renderEarningsList, etc.) should be updated to use Firebase instead of localStorage.
-
-    // Example: Save Earnings to Firebase
-    window.addOrUpdateEarnings = async function() {
+    window.addOrUpdateEarnings = async () => {
       const amountInput = document.getElementById('earningsAmountInput');
       const sourceSelect = document.getElementById('earningsSourceSelect');
       const amount = parseFloat(amountInput.value);
       const source = sourceSelect.value;
-      if (!amount || amount <= 0) { alert(t('alert_valid_amount')); return; }
-      if (source === '__custom__') { alert(t('alert_save_custom_source')); return; }
-
-      const entry = {
-        amount,
-        source,
-        date: currentDay,
-        addedBy: currentUser.email,
-        timestamp: new Date().toISOString()
-      };
-
+      if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
+      if (source === '__custom__') { alert('Save custom source first.'); return; }
+      const entry = { amount, source, date: currentDay, addedBy: currentUser.email, timestamp: new Date().toISOString() };
       if (editingEarningsId) {
-        // Update existing
         await updateDoc(doc(db, 'households', householdId, 'earnings', editingEarningsId), entry);
         editingEarningsId = null;
         document.getElementById('earningsAddBtn').textContent = t('btn_add');
         document.getElementById('earningsCancelBtn').style.display = 'none';
       } else {
-        // Add new
         await addDoc(collection(db, 'households', householdId, 'earnings'), entry);
       }
-
       amountInput.value = '';
       sourceSelect.value = 'UberEats';
       updateEarningsSourceSelect();
-      showToast(t('toast_expense_saved'));
     };
 
-    // Make other functions available globally (similar pattern for all CRUD operations)
-    // ... (continue with expenses, slides, etc.)
+    window.addOrUpdateExpense = async () => {
+      const dateInput = document.getElementById('expenseDateInput');
+      const amountInput = document.getElementById('expenseAmountInput');
+      const catSelect = document.getElementById('expenseCategorySelect');
+      const date = dateInput.value;
+      const amount = parseFloat(amountInput.value);
+      const category = catSelect.value;
+      if (!date) { alert('Select a date.'); return; }
+      if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
+      if (category === '__custom__') { alert('Save custom category first.'); return; }
+      const entry = { type: expenseType, date, amount, category, addedBy: currentUser.email, timestamp: new Date().toISOString() };
+      if (expenseType === 'personal') {
+        const paidBy = document.getElementById('personalPaidBySelect').value;
+        let share = document.getElementById('personalShareSelect').value;
+        if (share === '__custom__') share = document.getElementById('personalCustomShareInput').value;
+        entry.paidBy = paidBy;
+        entry.share = share;
+      }
+      if (editingExpenseId) {
+        await updateDoc(doc(db, 'households', householdId, 'expenses', editingExpenseId), entry);
+        editingExpenseId = null;
+        document.getElementById('expenseAddBtn').textContent = t('btn_add');
+        document.getElementById('expenseCancelBtn').style.display = 'none';
+      } else {
+        await addDoc(collection(db, 'households', householdId, 'expenses'), entry);
+      }
+      amountInput.value = '';
+      dateInput.value = new Date().toISOString().split('T')[0];
+      if (expenseType === 'personal') {
+        document.getElementById('personalPaidBySelect').value = 'Abhi';
+        document.getElementById('personalShareSelect').value = '100';
+        document.getElementById('personalCustomShareRow').classList.add('hidden');
+      }
+      catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
+      handleCategoryChange();
+    };
+
+    window.deleteEarnings = async (id) => {
+      if (!confirm('Delete?')) return;
+      await deleteDoc(doc(db, 'households', householdId, 'earnings', id));
+    };
+
+    window.deleteExpense = async (id) => {
+      if (!confirm('Delete?')) return;
+      await deleteDoc(doc(db, 'households', householdId, 'expenses', id));
+    };
+
+    window.startEditEarnings = (id) => {
+      const entry = earnings.find(e => e.id === id);
+      if (!entry) return;
+      editingEarningsId = id;
+      document.getElementById('earningsAmountInput').value = entry.amount;
+      document.getElementById('earningsSourceSelect').value = entry.source;
+      document.getElementById('earningsAddBtn').textContent = t('btn_update');
+      document.getElementById('earningsCancelBtn').style.display = 'inline-block';
+    };
+
+    window.cancelEditEarnings = () => {
+      editingEarningsId = null;
+      document.getElementById('earningsAmountInput').value = '';
+      document.getElementById('earningsSourceSelect').value = 'UberEats';
+      document.getElementById('earningsAddBtn').textContent = t('btn_add');
+      document.getElementById('earningsCancelBtn').style.display = 'none';
+      updateEarningsSourceSelect();
+    };
+
+    window.startEditExpense = (id) => {
+      const entry = expenses.find(e => e.id === id);
+      if (!entry) return;
+      editingExpenseId = id;
+      document.getElementById('expenseDateInput').value = entry.date;
+      document.getElementById('expenseAmountInput').value = entry.amount;
+      setExpenseType(entry.type);
+      document.getElementById('expenseCategorySelect').value = entry.category;
+      handleCategoryChange();
+      if (entry.type === 'personal') {
+        document.getElementById('personalPaidBySelect').value = entry.paidBy;
+        const shareSelect = document.getElementById('personalShareSelect');
+        const shareInput = document.getElementById('personalCustomShareInput');
+        if (entry.share == 100) shareSelect.value = '100';
+        else if (entry.share == 50) shareSelect.value = '50';
+        else { shareSelect.value = '__custom__'; shareInput.value = entry.share; }
+        handleShareChange();
+      }
+      document.getElementById('expenseAddBtn').textContent = t('btn_update');
+      document.getElementById('expenseCancelBtn').style.display = 'inline-block';
+    };
+
+    window.cancelEditExpense = () => {
+      editingExpenseId = null;
+      document.getElementById('expenseAmountInput').value = '';
+      document.getElementById('expenseDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('expenseAddBtn').textContent = t('btn_add');
+      document.getElementById('expenseCancelBtn').style.display = 'none';
+      setExpenseType('personal');
+    };
+
+    window.addCustomSource = async () => {
+      const input = document.getElementById('earningsCustomInput');
+      const name = input.value.trim();
+      if (!name) return;
+      if (!customSources.includes(name)) {
+        customSources.push(name);
+        await updateDoc(doc(db, 'households', householdId), { customSources });
+      }
+      updateEarningsSourceSelect();
+      document.getElementById('earningsSourceSelect').value = name;
+      input.value = '';
+    };
+
+    window.addCustomPersonalCat = async () => {
+      const input = document.getElementById('personalCustomCatInput');
+      const name = input.value.trim();
+      if (!name) return;
+      if (!customPersonalCats.includes(name)) {
+        customPersonalCats.push(name);
+        await updateDoc(doc(db, 'households', householdId), { customPersonalCats });
+      }
+      updateExpenseCategorySelect();
+      document.getElementById('expenseCategorySelect').value = name;
+      input.value = '';
+      handleCategoryChange();
+    };
+
+    window.addCustomWorkCat = async () => {
+      const input = document.getElementById('workCustomCatInput');
+      const name = input.value.trim();
+      if (!name) return;
+      if (!customWorkCats.includes(name)) {
+        customWorkCats.push(name);
+        await updateDoc(doc(db, 'households', householdId), { customWorkCats });
+      }
+      updateExpenseCategorySelect();
+      document.getElementById('expenseCategorySelect').value = name;
+      input.value = '';
+      handleCategoryChange();
+    };
+
+    window.setExpenseType = (type) => {
+      expenseType = type;
+      document.getElementById('typePersonalBtn').classList.toggle('active', type === 'personal');
+      document.getElementById('typeWorkBtn').classList.toggle('active', type === 'work');
+      document.getElementById('personalFields').classList.toggle('hidden', type !== 'personal');
+      document.getElementById('workFields').classList.toggle('hidden', type !== 'work');
+      updateExpenseCategorySelect();
+    };
+
+    window.handleCategoryChange = () => {
+      const select = document.getElementById('expenseCategorySelect');
+      const isCustom = select.value === '__custom__';
+      const catRow = expenseType === 'personal' ? document.getElementById('personalCustomCatRow') : document.getElementById('workCustomCatRow');
+      catRow.classList.toggle('hidden', !isCustom);
+    };
+
+    window.handleShareChange = () => {
+      const select = document.getElementById('personalShareSelect');
+      document.getElementById('personalCustomShareRow').classList.toggle('hidden', select.value !== '__custom__');
+    };
+
+    window.setCustomShare = () => {
+      const val = document.getElementById('personalCustomShareInput').value;
+      if (val) {
+        document.getElementById('personalShareSelect').value = '__custom__';
+        handleShareChange();
+      }
+    };
+
+    function updateEarningsSourceSelect() {
+      const select = document.getElementById('earningsSourceSelect');
+      const current = select.value;
+      while (select.options.length > 3) select.remove(3);
+      customSources.forEach(src => { const opt = document.createElement('option'); opt.value = src; opt.textContent = src; select.add(opt); });
+      if (current && [...select.options].some(o => o.value === current)) select.value = current;
+      else select.value = 'UberEats';
+      document.getElementById('earningsCustomRow').classList.toggle('hidden', select.value !== '__custom__');
+    }
+
+    function updateExpenseCategorySelect() {
+      const select = document.getElementById('expenseCategorySelect');
+      const current = select.value;
+      select.innerHTML = '';
+      const defaults = expenseType === 'personal' ? ['Food', 'Rent', 'Utilities', 'Internet', 'Insurance', 'Groceries'] : ['Gas', 'Insurance', 'Maintenance'];
+      const customs = expenseType === 'personal' ? customPersonalCats : customWorkCats;
+      defaults.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
+      customs.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
+      const optCustom = document.createElement('option'); optCustom.value = '__custom__'; optCustom.textContent = '+ Add custom…'; select.add(optCustom);
+      if (current && current !== '__custom__' && [...select.options].some(o => o.value === current)) select.value = current;
+      else select.value = expenseType === 'personal' ? 'Food' : 'Gas';
+      handleCategoryChange();
+    }
+
+    function renderEarningsList() {
+      const list = document.getElementById('earningsList');
+      list.innerHTML = '';
+      earnings.forEach(e => {
+        const li = document.createElement('li');
+        li.innerHTML = `<div class="amount">$${e.amount.toFixed(2)}</div><div class="meta">${e.source} · ${e.date}</div><div class="actions"><button class="edit" onclick="startEditEarnings('${e.id}')">✏️</button><button class="delete" onclick="deleteEarnings('${e.id}')">🗑️</button></div>`;
+        list.appendChild(li);
+      });
+      if (earnings.length === 0) list.innerHTML = `<li style="opacity:0.6;">${t('list_no_earnings')}</li>`;
+    }
+
+    function renderExpenseLists() {
+      const filter = (e) => e.type === 'personal' && (isYTD || e.date.substring(0,7) === selectedMonth);
+      const filterWork = (e) => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth);
+      const pList = document.getElementById('personalList');
+      pList.innerHTML = '';
+      expenses.filter(filter).forEach(e => {
+        const li = document.createElement('li');
+        li.innerHTML = `<div class="amount">$${e.amount.toFixed(2)}</div><div class="meta">${e.category} · ${e.paidBy} (${e.share}%) · ${e.date}</div><div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
+        pList.appendChild(li);
+      });
+      if (expenses.filter(filter).length === 0) pList.innerHTML = `<li style="opacity:0.6;">${t('list_no_personal')}</li>`;
+      const wList = document.getElementById('workList');
+      wList.innerHTML = '';
+      expenses.filter(filterWork).forEach(e => {
+        const li = document.createElement('li');
+        li.innerHTML = `<div class="amount">$${e.amount.toFixed(2)}</div><div class="meta">${e.category} · ${e.date}</div><div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
+        wList.appendChild(li);
+      });
+      if (expenses.filter(filterWork).length === 0) wList.innerHTML = `<li style="opacity:0.6;">${t('list_no_work')}</li>`;
+      let workTotal = 0;
+      expenses.filter(filterWork).forEach(e => workTotal += parseFloat(e.amount)||0);
+      document.getElementById('workTotalDisplay').textContent = '$' + workTotal.toFixed(2);
+      if (workBreakdownVisible) toggleWorkBreakdown();
+      updateOweBalance();
+    }
+
+    function updateEarningsSummary() {
+      const labelEl = document.getElementById('summaryPeriodLabel');
+      const amountEl = document.getElementById('summaryAmount');
+      let total = 0, label = t('summary_day');
+      if (summaryMode === 'week') { label = t('summary_week'); }
+      else if (summaryMode === 'month') { label = t('summary_month'); }
+      earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount)||0);
+      labelEl.textContent = label;
+      amountEl.textContent = total.toFixed(2);
+    }
+
+    function updateOweBalance() {
+      let gianOwesAbhi = 0;
+      expenses.filter(e => e.type === 'personal').forEach(e => {
+        const amount = parseFloat(e.amount) || 0;
+        const share = parseFloat(e.share) || 100;
+        const paidBy = e.paidBy;
+        const otherShare = (100 - share) / 100 * amount;
+        if (paidBy === 'Abhi') gianOwesAbhi += otherShare;
+        else if (paidBy === 'Gian') gianOwesAbhi -= otherShare;
+      });
+      const net = gianOwesAbhi - totalPaymentsRecorded;
+      const amountEl = document.getElementById('balanceAmount');
+      const labelEl = document.getElementById('balanceLabel');
+      const whoEl = document.getElementById('balanceWho');
+      amountEl.textContent = '$' + Math.abs(net).toFixed(2);
+      if (net > 0.01) { labelEl.textContent = t('balance_label_owes'); whoEl.textContent = ''; whoEl.className = 'balance-who positive'; }
+      else if (net < -0.01) { labelEl.textContent = t('balance_label_owes_rev'); whoEl.textContent = ''; whoEl.className = 'balance-who negative'; }
+      else { labelEl.textContent = t('balance_label_settled'); whoEl.textContent = '✓'; whoEl.className = 'balance-who'; }
+    }
+
+    function updateDayStatus() {
+      const el = document.getElementById('dayStatus');
+      if (!dayOpen) { el.classList.add('closed'); el.classList.remove('open'); el.textContent = 'Day closed'; }
+      else { el.classList.add('open'); el.classList.remove('closed'); el.textContent = 'Active day: Today'; }
+      updateSlideState();
+    }
+
+    function updateSlideState() {
+      const container = document.getElementById('slideContainer');
+      const text = document.getElementById('slideText');
+      if (dayOpen) { container.classList.remove('disabled'); text.textContent = 'Slide to End Day'; }
+      else { container.classList.add('disabled'); text.textContent = 'Day already closed'; }
+    }
+
+    function updateMonthDisplay() {
+      const display = document.getElementById('monthDisplay');
+      const d = new Date(selectedMonth + '-01');
+      display.textContent = d.toLocaleDateString('en-US', { month:'long', year:'numeric' }) + ' ▼';
+      document.getElementById('workMonthLabel').textContent = isYTD ? 'YTD' : 'This Month';
+    }
+
+    window.toggleMonthDropdown = () => {
+      monthDropdownOpen = !monthDropdownOpen;
+      const dropdown = document.getElementById('monthDropdown');
+      if (monthDropdownOpen) {
+        dropdown.innerHTML = '';
+        const months = new Set();
+        expenses.forEach(e => months.add(e.date.substring(0, 7)));
+        months.add(new Date().toISOString().slice(0, 7));
+        Array.from(months).sort().reverse().forEach(m => {
+          const div = document.createElement('div');
+          div.className = 'month-option' + (m === selectedMonth && !isYTD ? ' selected' : '');
+          const d = new Date(m + '-01');
+          div.textContent = d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+          div.onclick = () => { selectedMonth = m; isYTD = false; monthDropdownOpen = false; dropdown.classList.remove('show'); document.getElementById('ytdBtn').classList.remove('active'); updateMonthDisplay(); renderExpenseLists(); };
+          dropdown.appendChild(div);
+        });
+        dropdown.classList.add('show');
+      } else { dropdown.classList.remove('show'); }
+    };
+
+    window.toggleYTD = () => { isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); };
+
+    window.toggleWorkBreakdown = () => {
+      workBreakdownVisible = !workBreakdownVisible;
+      const el = document.getElementById('workBreakdown');
+      if (workBreakdownVisible) {
+        const breakdown = {};
+        expenses.filter(e => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth)).forEach(e => { breakdown[e.category] = (breakdown[e.category] || 0) + (parseFloat(e.amount)||0); });
+        el.innerHTML = '';
+        for (const [cat, amt] of Object.entries(breakdown)) { el.innerHTML += `<div class="breakdown-row"><span>${cat}</span><span>$${amt.toFixed(2)}</span></div>`; }
+        el.classList.add('show');
+      } else { el.classList.remove('show'); }
+    };
+
+    // Slide to End Day
+    let isDragging = false, handleLeft = 4;
+    const slideTrack = document.getElementById('slideTrack');
+    const slideHandle = document.getElementById('slideHandle');
+    const slideText = document.getElementById('slideText');
+    function maxLeft() { return slideTrack.getBoundingClientRect().width - 4 - slideHandle.offsetWidth; }
+    function resetSlide() { isDragging = false; handleLeft = 4; slideHandle.style.left = '4px'; slideTrack.classList.remove('completed','dragging'); updateSlideState(); }
+    slideTrack.addEventListener('pointerdown', e => { if (!dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
+    slideTrack.addEventListener('pointermove', e => { if (!isDragging) return; const rect = slideTrack.getBoundingClientRect(); let left = e.clientX - rect.left - slideHandle.offsetWidth / 2; left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px'; if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; } else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; } });
+    slideTrack.addEventListener('pointerup', async () => { if (!isDragging) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; await updateDoc(doc(db, 'households', householdId), { dayOpen: false, currentDay }); updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
+    slideTrack.addEventListener('pointercancel', resetSlide);
+
+    // Payment Slider
+    let paymentDragging = false, paymentHandleLeft = 4;
+    const paymentTrack = document.getElementById('paymentSliderTrack');
+    const paymentHandle = document.getElementById('paymentSliderHandle');
+    const paymentText = document.getElementById('paymentSliderText');
+    function paymentMaxLeft() { return paymentTrack.getBoundingClientRect().width - 4 - paymentHandle.offsetWidth; }
+    function resetPaymentSlide() { paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px'; paymentTrack.classList.remove('completed','dragging'); paymentText.textContent = 'Slide to Record Payment'; }
+    paymentTrack.addEventListener('pointerdown', e => { paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
+    paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
+    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (100 - share) / 100 * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await updateDoc(doc(db, 'households', householdId), { totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
+    paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
+
+    window.exportData = () => {
+      const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
+      const dataStr = JSON.stringify(backup, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `budget-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Data exported!');
+    };
+
+    window.importData = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const backup = JSON.parse(e.target.result);
+          if (!backup.earnings || !backup.expenses) throw new Error('Invalid file');
+          if (!confirm('This will replace ALL data. Continue?')) { event.target.value = ''; return; }
+          await updateDoc(doc(db, 'households', householdId), { customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || new Date().toISOString().split('T')[0], dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
+          showToast('Data imported!');
+        } catch (err) { showToast('Invalid file', true); }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    };
+
+    window.clearAllData = async () => {
+      if (!confirm('⚠️ DELETE ALL DATA? This cannot be undone.')) return;
+      if (!confirm('Are you ABSOLUTELY SURE?')) return;
+      await updateDoc(doc(db, 'households', householdId), { customSources: [], customPersonalCats: [], customWorkCats: [], totalPaymentsRecorded: 0, currentDay: new Date().toISOString().split('T')[0], dayOpen: true });
+      earnings.forEach(e => deleteDoc(doc(db, 'households', householdId, 'earnings', e.id)));
+      expenses.forEach(e => deleteDoc(doc(db, 'households', householdId, 'expenses', e.id)));
+      showToast('All data cleared');
+    };
+
+    window.showToast = (msg, isError = false) => {
+      const tEl = document.getElementById('toast');
+      tEl.textContent = msg;
+      tEl.className = 'show' + (isError ? ' error' : '');
+      clearTimeout(tEl._timer);
+      tEl._timer = setTimeout(() => tEl.classList.remove('show'), 2600);
+    };
+
+    document.getElementById('earningsAddBtn').addEventListener('click', addOrUpdateEarnings);
+    document.getElementById('earningsCancelBtn').addEventListener('click', cancelEditEarnings);
+    document.getElementById('earningsSourceSelect').addEventListener('change', updateEarningsSourceSelect);
+    document.getElementById('earningsAmountInput').addEventListener('keydown', e => { if (e.key === 'Enter') addOrUpdateEarnings(); });
+    document.getElementById('earningsCustomInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomSource(); });
+    document.getElementById('summaryBtn').addEventListener('click', () => { const modes = ['day','week','month']; summaryMode = modes[(modes.indexOf(summaryMode) + 1) % modes.length]; updateEarningsSummary(); });
+    document.getElementById('expenseAddBtn').addEventListener('click', addOrUpdateExpense);
+    document.getElementById('expenseCancelBtn').addEventListener('click', cancelEditExpense);
+    document.getElementById('expenseAmountInput').addEventListener('keydown', e => { if (e.key === 'Enter') addOrUpdateExpense(); });
+    document.getElementById('personalCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomPersonalCat(); });
+    document.getElementById('workCustomCatInput').addEventListener('keydown', e => { if (e.key === 'Enter') addCustomWorkCat(); });
+    document.addEventListener('click', e => { if (!e.target.closest('.month-display') && !e.target.closest('.month-dropdown')) { monthDropdownOpen = false; document.getElementById('monthDropdown').classList.remove('show'); } });
+
+    document.getElementById('loginSubmitBtn').addEventListener('click', () => { if (document.getElementById('householdInputGroup').classList.contains('show')) joinHousehold(); else handleLoginSubmit(); });
   </script>
 </body>
 </html>
