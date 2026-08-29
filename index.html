@@ -19,7 +19,15 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
     body { background: #0d1117; color: #fff; padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
 
-    h1 { margin-bottom: 8px; font-size: 28px; }
+    /* Header & Lang Toggle */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    h1 { font-size: 28px; }
+    .lang-toggle {
+      background: #161b22; border: 1px solid #30363d; color: #fff;
+      padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: bold;
+      cursor: pointer;
+    }
+
     .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
     .tab { flex: 1; padding: 10px; font-size: 16px; background: #161b22; color: #fff;
            border: none; border-radius: 10px; cursor: pointer; }
@@ -149,7 +157,6 @@
     li .actions button.edit { color: #58a6ff; }
     li .actions button.delete { color: #f85149; }
 
-    /* Settings Section */
     .settings-section {
       background: #161b22; border-radius: 10px; padding: 16px; margin-top: 20px;
     }
@@ -179,43 +186,46 @@
   </style>
 </head>
 <body>
-  <h1>💰 Budget</h1>
+  <div class="header">
+    <h1>💰 Budget</h1>
+    <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
+  </div>
 
   <div class="tabs">
-    <button class="tab active" id="earningsTabBtn" onclick="showMainTab('earnings')">Earnings</button>
-    <button class="tab" id="expensesTabBtn" onclick="showMainTab('expenses')">Expenses</button>
+    <button class="tab active" id="earningsTabBtn" onclick="showMainTab('earnings')" data-i18n="tab_earnings">Earnings</button>
+    <button class="tab" id="expensesTabBtn" onclick="showMainTab('expenses')" data-i18n="tab_expenses">Expenses</button>
   </div>
 
   <div id="earningsSection">
     <button class="summary-btn" id="summaryBtn">
-      <span class="period-label" id="summaryPeriodLabel">Day Total</span>
+      <span class="period-label" id="summaryPeriodLabel" data-i18n="summary_day">Day Total</span>
       <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
-      <span class="hint">tap to switch: day → week → month</span>
+      <span class="hint" data-i18n="summary_hint">tap to switch: day → week → month</span>
     </button>
 
-    <div class="day-status open" id="dayStatus">Active day: Today</div>
+    <div class="day-status open" id="dayStatus" data-i18n="day_status_open">Active day: Today</div>
 
     <div class="slide-container" id="slideContainer">
       <div class="slide-track" id="slideTrack">
-        <span class="slide-text" id="slideText">Slide to End Day</span>
+        <span class="slide-text" id="slideText" data-i18n="slide_end_day">Slide to End Day</span>
         <div class="slide-handle" id="slideHandle">🛑</div>
       </div>
     </div>
 
     <div class="entry-form">
-      <input type="number" id="earningsAmountInput" placeholder="Amount" step="0.01" min="0" inputmode="decimal">
+      <input type="number" id="earningsAmountInput" data-i18n-ph="placeholder_amount" placeholder="Amount" step="0.01" min="0" inputmode="decimal">
       <select id="earningsSourceSelect">
         <option value="UberEats">UberEats</option>
         <option value="DoorDash">DoorDash</option>
-        <option value="__custom__">+ Add custom…</option>
+        <option value="__custom__" data-i18n="btn_add_custom">+ Add custom…</option>
       </select>
-      <button id="earningsAddBtn">Add</button>
-      <button id="earningsCancelBtn">Cancel</button>
+      <button id="earningsAddBtn" data-i18n="btn_add">Add</button>
+      <button id="earningsCancelBtn" data-i18n="btn_cancel">Cancel</button>
     </div>
 
     <div id="earningsCustomRow" class="custom-row hidden">
-      <input type="text" id="earningsCustomInput" placeholder="New source name">
-      <button onclick="addCustomSource()">Save</button>
+      <input type="text" id="earningsCustomInput" data-i18n-ph="placeholder_new_source" placeholder="New source name">
+      <button onclick="addCustomSource()" data-i18n="btn_save">Save</button>
     </div>
 
     <ul id="earningsList"></ul>
@@ -225,40 +235,40 @@
     
     <div class="month-header">
       <div class="month-display" id="monthDisplay" onclick="toggleMonthDropdown()">January 2026 ▼</div>
-      <button class="ytd-btn" id="ytdBtn" onclick="toggleYTD()">YTD</button>
+      <button class="ytd-btn" id="ytdBtn" onclick="toggleYTD()" data-i18n="month_ytd">YTD</button>
     </div>
     <div class="month-dropdown" id="monthDropdown"></div>
 
     <div class="balance-card">
-      <div class="balance-label" id="balanceLabel">Gian owes Abhi</div>
+      <div class="balance-label" id="balanceLabel" data-i18n="balance_label_owes">Gian owes Abhi</div>
       <div class="balance-amount" id="balanceAmount">$0.00</div>
       <div class="balance-who" id="balanceWho"></div>
     </div>
 
     <div class="payment-slider-container" id="paymentSliderContainer">
       <div class="payment-slider-track" id="paymentSliderTrack">
-        <span class="payment-slider-text" id="paymentSliderText">Slide to Record Payment</span>
+        <span class="payment-slider-text" id="paymentSliderText" data-i18n="payment_slide_text">Slide to Record Payment</span>
         <div class="payment-slider-handle" id="paymentSliderHandle">💰</div>
       </div>
     </div>
 
     <div class="work-card" onclick="toggleWorkBreakdown()">
-      <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
+      <div class="work-card-title"><span data-i18n="work_card_title">Work Expenses</span> (<span id="workMonthLabel" data-i18n="work_card_suffix">This Month</span>)</div>
       <div class="work-card-value" id="workTotalDisplay">$0.00</div>
       <div id="workBreakdown" class="breakdown"></div>
     </div>
 
     <div class="type-toggle">
-      <button class="type-btn active" id="typePersonalBtn" onclick="setExpenseType('personal')">Personal</button>
-      <button class="type-btn" id="typeWorkBtn" onclick="setExpenseType('work')">Work</button>
+      <button class="type-btn active" id="typePersonalBtn" onclick="setExpenseType('personal')" data-i18n="type_personal">Personal</button>
+      <button class="type-btn" id="typeWorkBtn" onclick="setExpenseType('work')" data-i18n="type_work">Work</button>
     </div>
 
     <div class="entry-form">
       <input type="date" id="expenseDateInput">
-      <input type="number" id="expenseAmountInput" placeholder="Amount (CAD)" step="0.01" min="0" inputmode="decimal">
+      <input type="number" id="expenseAmountInput" data-i18n-ph="placeholder_amount_cad" placeholder="Amount (CAD)" step="0.01" min="0" inputmode="decimal">
       <select id="expenseCategorySelect" onchange="handleCategoryChange()"></select>
-      <button id="expenseAddBtn">Add</button>
-      <button id="expenseCancelBtn">Cancel</button>
+      <button id="expenseAddBtn" data-i18n="btn_add">Add</button>
+      <button id="expenseCancelBtn" data-i18n="btn_cancel">Cancel</button>
     </div>
 
     <div id="personalFields" class="section">
@@ -268,46 +278,46 @@
           <option value="Gian">Gian</option>
         </select>
         <select id="personalShareSelect" onchange="handleShareChange()">
-          <option value="100">100% (full owed)</option>
-          <option value="50">50% (split)</option>
-          <option value="__custom__">Custom %</option>
+          <option value="100" data-i18n="share_100">100% (full owed)</option>
+          <option value="50" data-i18n="share_50">50% (split)</option>
+          <option value="__custom__" data-i18n="share_custom">Custom %</option>
         </select>
       </div>
       <div id="personalCustomShareRow" class="custom-row hidden">
-        <input type="number" id="personalCustomShareInput" placeholder="%" step="1" min="0" max="100">
-        <button onclick="setCustomShare()">Set</button>
+        <input type="number" id="personalCustomShareInput" data-i18n-ph="placeholder_percent" placeholder="%" step="1" min="0" max="100">
+        <button onclick="setCustomShare()" data-i18n="btn_set">Set</button>
       </div>
       <div id="personalCustomCatRow" class="custom-row hidden">
-        <input type="text" id="personalCustomCatInput" placeholder="New category">
-        <button onclick="addCustomPersonalCat()">Save</button>
+        <input type="text" id="personalCustomCatInput" data-i18n-ph="placeholder_new_category" placeholder="New category">
+        <button onclick="addCustomPersonalCat()" data-i18n="btn_save">Save</button>
       </div>
     </div>
 
     <div id="workFields" class="section hidden">
       <div id="workCustomCatRow" class="custom-row hidden">
-        <input type="text" id="workCustomCatInput" placeholder="New category">
-        <button onclick="addCustomWorkCat()">Save</button>
+        <input type="text" id="workCustomCatInput" data-i18n-ph="placeholder_new_category" placeholder="New category">
+        <button onclick="addCustomWorkCat()" data-i18n="btn_save">Save</button>
       </div>
     </div>
 
     <div class="lists-container">
       <div class="list-column">
-        <div class="list-header">PERSONAL</div>
+        <div class="list-header" data-i18n="type_personal">PERSONAL</div>
         <ul id="personalList"></ul>
       </div>
       <div class="list-column">
-        <div class="list-header">WORK</div>
+        <div class="list-header" data-i18n="type_work">WORK</div>
         <ul id="workList"></ul>
       </div>
     </div>
 
     <!-- Settings Section -->
     <div class="settings-section">
-      <div class="settings-title">⚙️ Settings & Backup</div>
+      <div class="settings-title" data-i18n="settings_title">⚙️ Settings & Backup</div>
       <div class="settings-grid">
-        <button class="settings-btn export" onclick="exportData()">📤 Export Data</button>
-        <button class="settings-btn import" onclick="document.getElementById('fileInput').click()">📥 Import Data</button>
-        <button class="settings-btn danger" onclick="clearAllData()">⚠️ Clear All Data</button>
+        <button class="settings-btn export" onclick="exportData()" data-i18n="btn_export">📤 Export Data</button>
+        <button class="settings-btn import" onclick="document.getElementById('fileInput').click()" data-i18n="btn_import">📥 Import Data</button>
+        <button class="settings-btn danger" onclick="clearAllData()" data-i18n="btn_clear">⚠️ Clear All Data</button>
       </div>
       <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
     </div>
@@ -316,6 +326,195 @@
   <div id="toast"></div>
 
   <script>
+    // ------------------------ Translations ------------------------
+    let currentLang = localStorage.getItem('appLang') || 'en';
+
+    const translations = {
+      en: {
+        tab_earnings: "Earnings",
+        tab_expenses: "Expenses",
+        summary_day: "Day Total",
+        summary_week: "Week Total",
+        summary_month: "Month Total",
+        summary_hint: "tap to switch: day → week → month",
+        day_status_open: "Active day: Today",
+        day_status_closed: "Day closed",
+        day_status_stale: "⚠️ Still on",
+        slide_end_day: "Slide to End Day",
+        slide_release_end: "Release to end day",
+        slide_closed: "Day already closed",
+        month_ytd: "YTD",
+        balance_label_owes: "Gian owes Abhi",
+        balance_label_owes_rev: "Abhi owes Gian",
+        balance_label_settled: "All Settled",
+        payment_slide_text: "Slide to Record Payment",
+        payment_slide_release: "Release to record",
+        work_card_title: "Work Expenses",
+        work_card_suffix: "This Month",
+        type_personal: "Personal",
+        type_work: "Work",
+        placeholder_amount: "Amount",
+        placeholder_amount_cad: "Amount (CAD)",
+        placeholder_new_source: "New source name",
+        placeholder_new_category: "New category",
+        placeholder_percent: "%",
+        btn_add: "Add",
+        btn_cancel: "Cancel",
+        btn_update: "Update",
+        btn_save: "Save",
+        btn_set: "Set",
+        btn_export: "📤 Export Data",
+        btn_import: "📥 Import Data",
+        btn_clear: "⚠️ Clear All Data",
+        btn_add_custom: "+ Add custom…",
+        share_100: "100% (full owed)",
+        share_50: "50% (split)",
+        share_custom: "Custom %",
+        settings_title: "⚙️ Settings & Backup",
+        alert_valid_amount: "Valid amount required.",
+        alert_save_custom_source: "Save custom source first.",
+        alert_save_custom_category: "Save custom category first.",
+        alert_select_date: "Select a date.",
+        alert_delete_confirm: "Delete?",
+        alert_import_confirm: "This will replace ALL current data with the backup. Continue?",
+        alert_clear_warning_1: "⚠️ WARNING: This will DELETE ALL your data permanently. This cannot be undone.\n\nMake sure you have exported a backup first.\n\nContinue?",
+        alert_clear_warning_2: "Are you ABSOLUTELY SURE? All earnings, expenses, and balances will be lost.",
+        toast_expense_saved: "Expense saved",
+        toast_payment_recorded: "Payment recorded - balance reset",
+        toast_day_closed: "Day closed",
+        toast_new_day: "New day started",
+        toast_data_exported: "Data exported successfully!",
+        toast_data_imported: "Data imported successfully!",
+        toast_invalid_file: "Invalid backup file",
+        toast_data_cleared: "All data cleared",
+        list_none: "None",
+        list_no_earnings: "No earnings yet.",
+        list_no_personal: "No personal expenses.",
+        list_no_work: "No work expenses.",
+        meta_owed: "% owed",
+        cat_gas: "Gas",
+        cat_insurance: "Insurance",
+        cat_maintenance: "Maintenance",
+        cat_food: "Food",
+        cat_rent: "Rent",
+        cat_utilities: "Utilities",
+        cat_internet: "Internet",
+        cat_groceries: "Groceries"
+      },
+      es: {
+        tab_earnings: "Ganancias",
+        tab_expenses: "Gastos",
+        summary_day: "Total del Día",
+        summary_week: "Total de la Semana",
+        summary_month: "Total del Mes",
+        summary_hint: "toca para cambiar: día → semana → mes",
+        day_status_open: "Día activo: Hoy",
+        day_status_closed: "Día terminado",
+        day_status_stale: "⚠️ Aún en",
+        slide_end_day: "Desliza para terminar el día",
+        slide_release_end: "Suelta para terminar",
+        slide_closed: "Día ya terminado",
+        month_ytd: "Año a la Fecha",
+        balance_label_owes: "Gian le debe a Abhi",
+        balance_label_owes_rev: "Abhi le debe a Gian",
+        balance_label_settled: "Todo Pagado",
+        payment_slide_text: "Desliza para Registrar Pago",
+        payment_slide_release: "Suelta para registrar",
+        work_card_title: "Gastos de Trabajo",
+        work_card_suffix: "Este Mes",
+        type_personal: "Personal",
+        type_work: "Trabajo",
+        placeholder_amount: "Monto",
+        placeholder_amount_cad: "Monto (CAD)",
+        placeholder_new_source: "Nombre nueva fuente",
+        placeholder_new_category: "Nueva categoría",
+        placeholder_percent: "%",
+        btn_add: "Agregar",
+        btn_cancel: "Cancelar",
+        btn_update: "Actualizar",
+        btn_save: "Guardar",
+        btn_set: "Establecer",
+        btn_export: "📤 Exportar Datos",
+        btn_import: "📥 Importar Datos",
+        btn_clear: "⚠️ Borrar Todo",
+        btn_add_custom: "+ Agregar personalizado…",
+        share_100: "100% (total debida)",
+        share_50: "50% (dividido)",
+        share_custom: "% Personalizado",
+        settings_title: "⚙️ Configuración y Respaldo",
+        alert_valid_amount: "Monto válido requerido.",
+        alert_save_custom_source: "Guarda la fuente personalizada primero.",
+        alert_save_custom_category: "Guarda la categoría personalizada primero.",
+        alert_select_date: "Selecciona una fecha.",
+        alert_delete_confirm: "¿Eliminar?",
+        alert_import_confirm: "Esto reemplazará TODOS los datos actuales con el respaldo. ¿Continuar?",
+        alert_clear_warning_1: "⚠️ ADVERTENCIA: Esto BORRARÁ TODOS tus datos permanentemente. No se puede deshacer.\n\nAsegúrate de haber exportado un respaldo primero.\n\n¿Continuar?",
+        alert_clear_warning_2: "¿Estás ABSOLUTAMENTE SEGURO? Se perderán todas las ganancias, gastos y saldos.",
+        toast_expense_saved: "Gasto guardado",
+        toast_payment_recorded: "Pago registrado - saldo reiniciado",
+        toast_day_closed: "Día terminado",
+        toast_new_day: "Nuevo día iniciado",
+        toast_data_exported: "¡Datos exportados exitosamente!",
+        toast_data_imported: "¡Datos importados exitosamente!",
+        toast_invalid_file: "Archivo de respaldo inválido",
+        toast_data_cleared: "Todos los datos borrados",
+        list_none: "Ninguno",
+        list_no_earnings: "Sin ganancias aún.",
+        list_no_personal: "Sin gastos personales.",
+        list_no_work: "Sin gastos de trabajo.",
+        meta_owed: "% debida",
+        cat_gas: "Gasolina",
+        cat_insurance: "Seguro",
+        cat_maintenance: "Mantenimiento",
+        cat_food: "Comida",
+        cat_rent: "Renta",
+        cat_utilities: "Servicios",
+        cat_internet: "Internet",
+        cat_groceries: "Despensa"
+      }
+    };
+
+    function t(key) {
+      return translations[currentLang][key] || key;
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === 'en' ? 'es' : 'en';
+      localStorage.setItem('appLang', currentLang);
+      document.getElementById('langToggle').textContent = currentLang.toUpperCase();
+      updateLanguageUI();
+    }
+
+    function updateLanguageUI() {
+      // Update static elements with data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.getAttribute('data-i18n'));
+      });
+      // Update placeholders
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        el.placeholder = t(el.getAttribute('data-i18n-ph'));
+      });
+      // Update dynamic parts
+      updateEarningsSummary();
+      updateDayStatus();
+      updateMonthDisplay();
+      renderEarningsList();
+      renderExpenseLists();
+      updateExpenseCategorySelect();
+      updatePersonalShareSelect();
+      document.getElementById('slideText').textContent = dayOpen ? t('slide_end_day') : t('slide_closed');
+      document.getElementById('paymentSliderText').textContent = t('payment_slide_text');
+    }
+
+    function updatePersonalShareSelect() {
+      const select = document.getElementById('personalShareSelect');
+      if(!select) return;
+      const opts = select.options;
+      if(opts[0]) opts[0].textContent = t('share_100');
+      if(opts[1]) opts[1].textContent = t('share_50');
+      if(opts[2]) opts[2].textContent = t('share_custom');
+    }
+
     // ------------------------ Data ------------------------
     let earnings = JSON.parse(localStorage.getItem('earnings') || '[]');
     let customSources = JSON.parse(localStorage.getItem('customSources') || '[]');
@@ -364,19 +563,19 @@
     }
 
     function getReadableDate(dateStr) {
-      return toDate(dateStr).toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+      return toDate(dateStr).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'es-ES', { weekday:'short', month:'short', day:'numeric' });
     }
 
     function getMonthLabel(dateStr) {
-      return toDate(dateStr).toLocaleDateString(undefined, { month:'long', year:'numeric' });
+      return toDate(dateStr).toLocaleDateString(currentLang === 'en' ? 'en-US' : 'es-ES', { month:'long', year:'numeric' });
     }
 
     function showToast(msg, isError = false) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'show' + (isError ? ' error' : '');
-      clearTimeout(t._timer);
-      t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+      const tEl = document.getElementById('toast');
+      tEl.textContent = msg;
+      tEl.className = 'show' + (isError ? ' error' : '');
+      clearTimeout(tEl._timer);
+      tEl._timer = setTimeout(() => tEl.classList.remove('show'), 2600);
     }
 
     // ------------------- Export/Import Functions -------------------
@@ -406,7 +605,7 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      showToast('Data exported successfully!');
+      showToast(t('toast_data_exported'));
     }
 
     function importData(event) {
@@ -417,19 +616,9 @@
       reader.onload = function(e) {
         try {
           const backup = JSON.parse(e.target.result);
+          if (!backup.earnings || !backup.expenses) throw new Error('Invalid backup file');
+          if (!confirm(t('alert_import_confirm'))) { event.target.value = ''; return; }
           
-          // Validate backup structure
-          if (!backup.earnings || !backup.expenses) {
-            throw new Error('Invalid backup file');
-          }
-          
-          // Confirm before importing
-          if (!confirm('This will replace ALL current data with the backup. Continue?')) {
-            event.target.value = '';
-            return;
-          }
-          
-          // Restore all data
           earnings = backup.earnings || [];
           expenses = backup.expenses || [];
           customSources = backup.customSources || [];
@@ -440,17 +629,14 @@
           dayOpen = backup.dayOpen !== undefined ? backup.dayOpen : true;
           
           saveData();
-          
-          // Refresh UI
           updateEarningsSummary();
           renderEarningsList();
           renderExpenseLists();
           updateOweBalance();
           updateDayStatus();
-          
-          showToast('Data imported successfully!');
+          showToast(t('toast_data_imported'));
         } catch (err) {
-          showToast('Invalid backup file', true);
+          showToast(t('toast_invalid_file'), true);
           console.error(err);
         }
         event.target.value = '';
@@ -459,35 +645,18 @@
     }
 
     function clearAllData() {
-      if (!confirm('⚠️ WARNING: This will DELETE ALL your data permanently. This cannot be undone.\n\nMake sure you have exported a backup first.\n\nContinue?')) {
-        return;
-      }
+      if (!confirm(t('alert_clear_warning_1'))) return;
+      if (!confirm(t('alert_clear_warning_2'))) return;
       
-      // Double confirmation
-      if (!confirm('Are you ABSOLUTELY SURE? All earnings, expenses, and balances will be lost.')) {
-        return;
-      }
-      
-      // Clear everything
-      earnings = [];
-      expenses = [];
-      customSources = [];
-      customPersonalCats = [];
-      customWorkCats = [];
+      earnings = []; expenses = []; customSources = [];
+      customPersonalCats = []; customWorkCats = [];
       totalPaymentsRecorded = 0;
-      currentDay = getTodayString();
-      dayOpen = true;
+      currentDay = getTodayString(); dayOpen = true;
       
       saveData();
-      
-      // Refresh UI
-      updateEarningsSummary();
-      renderEarningsList();
-      renderExpenseLists();
-      updateOweBalance();
-      updateDayStatus();
-      
-      showToast('All data cleared');
+      updateEarningsSummary(); renderEarningsList();
+      renderExpenseLists(); updateOweBalance(); updateDayStatus();
+      showToast(t('toast_data_cleared'));
     }
 
     // ------------------- Earnings Logic -------------------
@@ -509,7 +678,7 @@
     function updateEarningsSummary() {
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
-      let total = 0, label = '';
+      let total = 0, labelKey = 'summary_day';
       const getStartOfWeek = (dStr) => {
         const d = toDate(dStr);
         const day = d.getDay();
@@ -521,15 +690,15 @@
 
       if (summaryMode === 'day') {
         total = earnings.filter(e => e.date === currentDay).reduce((s,e) => s + (parseFloat(e.amount)||0), 0);
-        label = dayOpen ? 'Day Total' : 'Last Day Total';
+        labelKey = dayOpen ? 'summary_day' : 'summary_day'; // Reuse key, logic handles text
       } else if (summaryMode === 'week') {
         total = earnings.filter(e => isSameWeek(e.date, currentDay)).reduce((s,e) => s + (parseFloat(e.amount)||0), 0);
-        label = 'Week Total';
+        labelKey = 'summary_week';
       } else {
         total = earnings.filter(e => isSameMonth(e.date, currentDay)).reduce((s,e) => s + (parseFloat(e.amount)||0), 0);
-        label = 'Month Total';
+        labelKey = 'summary_month';
       }
-      labelEl.textContent = label;
+      labelEl.textContent = t(labelKey);
       amountEl.textContent = formatCurrency(total);
     }
 
@@ -538,13 +707,13 @@
       el.classList.remove('open','stale','closed');
       if (!dayOpen) {
         el.classList.add('closed');
-        el.textContent = `Day closed (${getReadableDate(currentDay)})`;
+        el.textContent = `${t('day_status_closed')} (${getReadableDate(currentDay)})`;
       } else if (currentDay === getTodayString()) {
         el.classList.add('open');
-        el.textContent = 'Active day: Today';
+        el.textContent = t('day_status_open');
       } else {
         el.classList.add('stale');
-        el.textContent = `⚠️ Still on ${getReadableDate(currentDay)}`;
+        el.textContent = `${t('day_status_stale')} ${getReadableDate(currentDay)}`;
       }
       updateSlideState();
     }
@@ -554,10 +723,10 @@
       const text = document.getElementById('slideText');
       if (dayOpen) {
         container.classList.remove('disabled');
-        text.textContent = 'Slide to End Day';
+        text.textContent = t('slide_end_day');
       } else {
         container.classList.add('disabled');
-        text.textContent = 'Day already closed';
+        text.textContent = t('slide_closed');
       }
     }
 
@@ -571,7 +740,7 @@
           <div class="actions"><button class="edit" onclick="startEditEarnings('${e.id}')">✏️</button><button class="delete" onclick="deleteEarnings('${e.id}')">🗑️</button></div>`;
         list.appendChild(li);
       });
-      if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">No earnings yet.</li>';
+      if (earnings.length === 0) list.innerHTML = `<li style="opacity:0.6;">${t('list_no_earnings')}</li>`;
     }
 
     function updateEarningsSourceSelect() {
@@ -588,17 +757,17 @@
       const sourceSelect = document.getElementById('earningsSourceSelect');
       const amount = parseFloat(amountInput.value);
       const source = sourceSelect.value;
-      if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
-      if (source === '__custom__') { alert('Save custom source first.'); return; }
+      if (!amount || amount <= 0) { alert(t('alert_valid_amount')); return; }
+      if (source === '__custom__') { alert(t('alert_save_custom_source')); return; }
 
       if (editingEarningsId) {
         const i = earnings.findIndex(e => e.id === editingEarningsId);
         if (i !== -1) { earnings[i].amount = amount; earnings[i].source = source; }
         editingEarningsId = null;
-        document.getElementById('earningsAddBtn').textContent = 'Update';
+        document.getElementById('earningsAddBtn').textContent = t('btn_update');
         document.getElementById('earningsCancelBtn').style.display = 'none';
       } else {
-        if (!dayOpen) { currentDay = getTodayString(); dayOpen = true; showToast('New day started'); }
+        if (!dayOpen) { currentDay = getTodayString(); dayOpen = true; showToast(t('toast_new_day')); }
         earnings.push({ id: Date.now().toString() + Math.random().toString(36).substr(2,5), amount, source, date: currentDay });
       }
       amountInput.value = ''; sourceSelect.value = 'UberEats'; updateEarningsSourceSelect();
@@ -610,7 +779,7 @@
       editingEarningsId = id;
       document.getElementById('earningsAmountInput').value = entry.amount;
       document.getElementById('earningsSourceSelect').value = entry.source; updateEarningsSourceSelect();
-      document.getElementById('earningsAddBtn').textContent = 'Update';
+      document.getElementById('earningsAddBtn').textContent = t('btn_update');
       document.getElementById('earningsCancelBtn').style.display = 'inline-block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -619,13 +788,13 @@
       editingEarningsId = null;
       document.getElementById('earningsAmountInput').value = '';
       document.getElementById('earningsSourceSelect').value = 'UberEats';
-      document.getElementById('earningsAddBtn').textContent = 'Add';
+      document.getElementById('earningsAddBtn').textContent = t('btn_add');
       document.getElementById('earningsCancelBtn').style.display = 'none';
       updateEarningsSourceSelect();
     }
 
     function deleteEarnings(id) {
-      if (!confirm('Delete?')) return;
+      if (!confirm(t('alert_delete_confirm'))) return;
       earnings = earnings.filter(e => e.id !== id);
       if (editingEarningsId === id) cancelEditEarnings();
       saveData(); updateEarningsSummary(); renderEarningsList();
@@ -654,13 +823,13 @@
       const rect = slideTrack.getBoundingClientRect();
       let left = e.clientX - rect.left - slideHandle.offsetWidth / 2;
       left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px';
-      if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; }
-      else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; }
+      if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = t('slide_release_end'); }
+      else { slideTrack.classList.remove('completed'); slideText.textContent = t('slide_end_day'); }
     });
     function finishSlide() {
       if (!isDragging) return;
       const done = handleLeft >= maxLeft() * 0.92; resetSlide();
-      if (done) { dayOpen = false; saveData(); updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); }
+      if (done) { dayOpen = false; saveData(); updateDayStatus(); updateEarningsSummary(); showToast(t('toast_day_closed')); }
     }
     slideTrack.addEventListener('pointerup', finishSlide);
     slideTrack.addEventListener('pointercancel', finishSlide);
@@ -677,18 +846,15 @@
     function populateMonthDropdown() {
       const dropdown = document.getElementById('monthDropdown');
       dropdown.innerHTML = '';
-      
       const months = new Set();
       expenses.forEach(e => months.add(e.date.substring(0, 7)));
       months.add(currentMonth);
-      
       const sorted = Array.from(months).sort().reverse();
-      
       sorted.forEach(m => {
         const div = document.createElement('div');
         div.className = 'month-option';
         const d = new Date(m + '-01');
-        div.textContent = d.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+        div.textContent = d.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'es-ES', { month:'long', year:'numeric' });
         div.onclick = () => selectMonth(m);
         if (m === selectedMonth && !isYTD) div.classList.add('selected');
         dropdown.appendChild(div);
@@ -722,11 +888,11 @@
     function updateMonthDisplay() {
       const display = document.getElementById('monthDisplay');
       if (isYTD) {
-        display.textContent = 'Year to Date ▼';
+        display.textContent = `${t('month_ytd')} ▼`;
       } else {
-        display.textContent = getMonthLabel(selectedMonth + '-01') + ' ▼';
+        display.textContent = `${getMonthLabel(selectedMonth + '-01')} ▼`;
       }
-      document.getElementById('workMonthLabel').textContent = isYTD ? 'YTD' : getMonthLabel(selectedMonth + '-01');
+      document.getElementById('workMonthLabel').textContent = isYTD ? t('month_ytd') : t('work_card_suffix');
     }
 
     function setExpenseType(type) {
@@ -742,46 +908,27 @@
       const select = document.getElementById('expenseCategorySelect');
       const current = select.value;
       select.innerHTML = '';
-      
       const defaults = expenseType === 'personal' 
-        ? ['Food', 'Rent', 'Utilities', 'Internet', 'Insurance', 'Groceries']
-        : ['Gas', 'Insurance', 'Maintenance'];
+        ? [t('cat_food'), t('cat_rent'), t('cat_utilities'), t('cat_internet'), t('cat_insurance'), t('cat_groceries')]
+        : [t('cat_gas'), t('cat_insurance'), t('cat_maintenance')];
       const customs = expenseType === 'personal' ? customPersonalCats : customWorkCats;
 
-      defaults.forEach(c => { 
-        const opt = document.createElement('option'); 
-        opt.value = c; 
-        opt.textContent = c; 
-        select.add(opt); 
-      });
-      
-      customs.forEach(c => { 
-        const opt = document.createElement('option'); 
-        opt.value = c; 
-        opt.textContent = c; 
-        select.add(opt); 
-      });
-      
-      const optCustom = document.createElement('option'); 
-      optCustom.value = '__custom__'; 
-      optCustom.textContent = '+ Add custom…'; 
-      select.add(optCustom);
+      defaults.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
+      customs.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
+      const optCustom = document.createElement('option'); optCustom.value = '__custom__'; optCustom.textContent = t('btn_add_custom'); select.add(optCustom);
       
       if (current && current !== '__custom__' && [...select.options].some(o => o.value === current)) {
         select.value = current;
       } else {
-        select.value = expenseType === 'personal' ? 'Food' : 'Gas';
+        select.value = expenseType === 'personal' ? t('cat_food') : t('cat_gas');
       }
-      
       handleCategoryChange();
     }
 
     function handleCategoryChange() {
       const select = document.getElementById('expenseCategorySelect');
       const isCustom = select.value === '__custom__';
-      const catRow = expenseType === 'personal' 
-        ? document.getElementById('personalCustomCatRow') 
-        : document.getElementById('workCustomCatRow');
+      const catRow = expenseType === 'personal' ? document.getElementById('personalCustomCatRow') : document.getElementById('workCustomCatRow');
       catRow.classList.toggle('hidden', !isCustom);
     }
 
@@ -803,9 +950,7 @@
       const name = input.value.trim(); if (!name) return;
       if (!customPersonalCats.includes(name)) { customPersonalCats.push(name); saveData(); }
       updateExpenseCategorySelect();
-      document.getElementById('expenseCategorySelect').value = name; 
-      input.value = '';
-      handleCategoryChange();
+      document.getElementById('expenseCategorySelect').value = name; input.value = ''; handleCategoryChange();
     }
 
     function addCustomWorkCat() {
@@ -813,9 +958,7 @@
       const name = input.value.trim(); if (!name) return;
       if (!customWorkCats.includes(name)) { customWorkCats.push(name); saveData(); }
       updateExpenseCategorySelect();
-      document.getElementById('expenseCategorySelect').value = name; 
-      input.value = '';
-      handleCategoryChange();
+      document.getElementById('expenseCategorySelect').value = name; input.value = ''; handleCategoryChange();
     }
 
     function updateOweBalance() {
@@ -837,17 +980,14 @@
       amountEl.textContent = '$' + formatCurrency(Math.abs(net));
       
       if (net > 0.01) {
-        labelEl.textContent = 'Gian owes Abhi';
-        whoEl.textContent = '';
-        whoEl.className = 'balance-who positive';
+        labelEl.textContent = t('balance_label_owes');
+        whoEl.textContent = ''; whoEl.className = 'balance-who positive';
       } else if (net < -0.01) {
-        labelEl.textContent = 'Abhi owes Gian';
-        whoEl.textContent = '';
-        whoEl.className = 'balance-who negative';
+        labelEl.textContent = t('balance_label_owes_rev');
+        whoEl.textContent = ''; whoEl.className = 'balance-who negative';
       } else {
-        labelEl.textContent = 'All Settled';
-        whoEl.textContent = '✓';
-        whoEl.className = 'balance-who';
+        labelEl.textContent = t('balance_label_settled');
+        whoEl.textContent = '✓'; whoEl.className = 'balance-who';
       }
     }
 
@@ -857,39 +997,23 @@
     const paymentText = document.getElementById('paymentSliderText');
 
     function paymentMaxLeft() { return paymentTrack.getBoundingClientRect().width - 4 - paymentHandle.offsetWidth; }
-
     function resetPaymentSlide() {
-      paymentDragging = false; 
-      paymentHandleLeft = 4; 
-      paymentHandle.style.left = '4px';
+      paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px';
       paymentTrack.classList.remove('completed','dragging');
-      paymentText.textContent = 'Slide to Record Payment';
+      paymentText.textContent = t('payment_slide_text');
     }
-
-    paymentTrack.addEventListener('pointerdown', e => {
-      paymentDragging = true; 
-      paymentTrack.classList.add('dragging'); 
-      paymentTrack.setPointerCapture(e.pointerId);
-    });
+    paymentTrack.addEventListener('pointerdown', e => { paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
     paymentTrack.addEventListener('pointermove', e => {
       if (!paymentDragging) return;
       const rect = paymentTrack.getBoundingClientRect();
       let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2;
-      left = Math.max(4, Math.min(paymentMaxLeft(), left)); 
-      paymentHandleLeft = left; 
-      paymentHandle.style.left = left + 'px';
-      if (left >= paymentMaxLeft() * 0.92) { 
-        paymentTrack.classList.add('completed'); 
-        paymentText.textContent = 'Release to record'; 
-      } else { 
-        paymentTrack.classList.remove('completed'); 
-        paymentText.textContent = 'Slide to Record Payment'; 
-      }
+      left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px';
+      if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = t('payment_slide_release'); }
+      else { paymentTrack.classList.remove('completed'); paymentText.textContent = t('payment_slide_text'); }
     });
     function finishPaymentSlide() {
       if (!paymentDragging) return;
-      const done = paymentHandleLeft >= paymentMaxLeft() * 0.92;
-      resetPaymentSlide();
+      const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide();
       if (done) recordPayment();
     }
     paymentTrack.addEventListener('pointerup', finishPaymentSlide);
@@ -909,7 +1033,7 @@
       totalPaymentsRecorded += net;
       saveData();
       updateOweBalance();
-      showToast('Payment recorded - balance reset');
+      showToast(t('toast_payment_recorded'));
     }
 
     function toggleWorkBreakdown() {
@@ -917,14 +1041,11 @@
       const el = document.getElementById('workBreakdown');
       if (workBreakdownVisible) {
         const breakdown = {};
-        let total = 0;
         expenses.filter(e => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth)).forEach(e => {
           const cat = e.category;
           const amt = parseFloat(e.amount) || 0;
           breakdown[cat] = (breakdown[cat] || 0) + amt;
-          total += amt;
         });
-        
         let html = '';
         for (const [cat, amt] of Object.entries(breakdown)) {
           html += `<div class="breakdown-row"><span>${cat}</span><span>$${formatCurrency(amt)}</span></div>`;
@@ -945,11 +1066,11 @@
       expenses.filter(filter).sort((a,b) => b.date.localeCompare(a.date)).forEach(e => {
         const li = document.createElement('li');
         li.innerHTML = `<div class="amount">$${formatCurrency(e.amount)}</div>
-          <div class="meta">${e.category} · ${e.paidBy} (${e.share}% owed) · ${getReadableDate(e.date)}</div>
+          <div class="meta">${e.category} · ${e.paidBy} (${e.share}${t('meta_owed')}) · ${getReadableDate(e.date)}</div>
           <div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
         pList.appendChild(li);
       });
-      if (expenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">None</li>';
+      if (expenses.filter(filter).length === 0) pList.innerHTML = `<li style="opacity:0.6;">${t('list_no_personal')}</li>`;
 
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
@@ -960,12 +1081,11 @@
           <div class="actions"><button class="edit" onclick="startEditExpense('${e.id}')">✏️</button><button class="delete" onclick="deleteExpense('${e.id}')">🗑️</button></div>`;
         wList.appendChild(li);
       });
-      if (expenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">None</li>';
+      if (expenses.filter(filterWork).length === 0) wList.innerHTML = `<li style="opacity:0.6;">${t('list_no_work')}</li>`;
 
       let workTotal = 0;
       expenses.filter(filterWork).forEach(e => workTotal += parseFloat(e.amount)||0);
       document.getElementById('workTotalDisplay').textContent = '$' + formatCurrency(workTotal);
-      
       if (workBreakdownVisible) toggleWorkBreakdown();
       updateOweBalance();
     }
@@ -978,47 +1098,38 @@
       const amount = parseFloat(amountInput.value);
       let category = catSelect.value;
 
-      if (!date) { alert('Select a date.'); return; }
-      if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
-      if (category === '__custom__') { alert('Save custom category first.'); return; }
+      if (!date) { alert(t('alert_select_date')); return; }
+      if (!amount || amount <= 0) { alert(t('alert_valid_amount')); return; }
+      if (category === '__custom__') { alert(t('alert_save_custom_category')); return; }
 
-      let entry = {
-        id: editingExpenseId || (Date.now().toString() + Math.random().toString(36).substr(2,5)),
-        type: expenseType,
-        date, amount, category
-      };
-
+      let entry = { id: editingExpenseId || (Date.now().toString() + Math.random().toString(36).substr(2,5)), type: expenseType, date, amount, category };
       if (expenseType === 'personal') {
         const paidBy = document.getElementById('personalPaidBySelect').value;
         let share = document.getElementById('personalShareSelect').value;
         if (share === '__custom__') share = document.getElementById('personalCustomShareInput').value;
-        entry.paidBy = paidBy;
-        entry.share = share;
+        entry.paidBy = paidBy; entry.share = share;
       }
 
       if (editingExpenseId) {
         const i = expenses.findIndex(e => e.id === editingExpenseId);
         if (i !== -1) expenses[i] = entry;
         editingExpenseId = null;
-        document.getElementById('expenseAddBtn').textContent = 'Update';
+        document.getElementById('expenseAddBtn').textContent = t('btn_update');
         document.getElementById('expenseCancelBtn').style.display = 'none';
       } else {
         expenses.push(entry);
       }
 
-      amountInput.value = '';
-      dateInput.value = getTodayString();
+      amountInput.value = ''; dateInput.value = getTodayString();
       if (expenseType === 'personal') {
         document.getElementById('personalPaidBySelect').value = 'Abhi';
         document.getElementById('personalShareSelect').value = '100';
         document.getElementById('personalCustomShareRow').classList.add('hidden');
       }
-      catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
+      catSelect.value = expenseType === 'personal' ? t('cat_food') : t('cat_gas');
       handleCategoryChange();
-      
-      saveData();
-      renderExpenseLists();
-      showToast('Expense saved');
+      saveData(); renderExpenseLists();
+      showToast(t('toast_expense_saved'));
     }
 
     function startEditExpense(id) {
@@ -1027,11 +1138,8 @@
       document.getElementById('expenseDateInput').value = entry.date;
       document.getElementById('expenseAmountInput').value = entry.amount;
       setExpenseType(entry.type);
-      
       const catSelect = document.getElementById('expenseCategorySelect');
-      catSelect.value = entry.category;
-      handleCategoryChange();
-      
+      catSelect.value = entry.category; handleCategoryChange();
       if (entry.type === 'personal') {
         document.getElementById('personalPaidBySelect').value = entry.paidBy;
         const shareSelect = document.getElementById('personalShareSelect');
@@ -1041,8 +1149,7 @@
         else { shareSelect.value = '__custom__'; shareInput.value = entry.share; }
         handleShareChange();
       }
-
-      document.getElementById('expenseAddBtn').textContent = 'Update';
+      document.getElementById('expenseAddBtn').textContent = t('btn_update');
       document.getElementById('expenseCancelBtn').style.display = 'inline-block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -1051,13 +1158,13 @@
       editingExpenseId = null;
       document.getElementById('expenseAmountInput').value = '';
       document.getElementById('expenseDateInput').value = getTodayString();
-      document.getElementById('expenseAddBtn').textContent = 'Add';
+      document.getElementById('expenseAddBtn').textContent = t('btn_add');
       document.getElementById('expenseCancelBtn').style.display = 'none';
       setExpenseType('personal');
     }
 
     function deleteExpense(id) {
-      if (!confirm('Delete?')) return;
+      if (!confirm(t('alert_delete_confirm'))) return;
       expenses = expenses.filter(e => e.id !== id);
       if (editingExpenseId === id) cancelEditExpense();
       saveData(); renderExpenseLists();
@@ -1087,6 +1194,9 @@
       }
     });
 
+    // Init
+    document.getElementById('langToggle').textContent = currentLang.toUpperCase();
+    updateLanguageUI();
     updateEarningsSourceSelect();
     updateDayStatus();
     updateEarningsSummary();
