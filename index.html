@@ -280,6 +280,18 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    
+    function getTodayLocal() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentMonthLocal() {
+  return getTodayLocal().slice(0, 7);
+}
 
     let currentUser = null;
     let householdId = null;
@@ -289,7 +301,7 @@
     let customPersonalCats = [];
     let customWorkCats = [];
     let totalPaymentsRecorded = 0;
-    let currentDay = new Date().toISOString().split('T')[0];
+    let currentDay = getTodayLocal();
     let dayOpen = true;
     let editingEarningsId = null;
     let editingExpenseId = null;
@@ -376,7 +388,7 @@
         if (doc.exists) {
           const data = doc.data();
           totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
-          currentDay = data.currentDay || new Date().toISOString().split('T')[0];
+          currentDay = data.currentDay || getTodayLocal();
           dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
           customSources = data.customSources || [];
           customPersonalCats = data.customPersonalCats || [];
@@ -439,7 +451,7 @@
           members: [currentUser.email],
           createdAt: new Date().toISOString(),
           totalPaymentsRecorded: 0,
-          currentDay: new Date().toISOString().split('T')[0],
+          currentDay: getTodayLocal(),
           dayOpen: true,
           customSources: [],
           customPersonalCats: [],
@@ -581,7 +593,7 @@
           await db.collection('households').doc(householdId).collection('expenses').add(entry);
         }
         amountInput.value = '';
-        dateInput.value = new Date().toISOString().split('T')[0];
+        dateInput.value = getTodayLocal();
         if (expenseType === 'personal') {
           document.getElementById('personalPaidBySelect').value = 'Abhi';
           document.getElementById('personalShareSelect').value = '100';
@@ -599,7 +611,7 @@
     document.getElementById('expenseCancelBtn').addEventListener('click', () => {
       editingExpenseId = null;
       document.getElementById('expenseAmountInput').value = '';
-      document.getElementById('expenseDateInput').value = new Date().toISOString().split('T')[0];
+      document.getElementById('expenseDateInput').value = getTodayLocal();
       document.getElementById('expenseAddBtn').textContent = t('add');
       document.getElementById('expenseCancelBtn').style.display = 'none';
       setExpenseType('personal');
@@ -918,7 +930,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'budget-backup-' + new Date().toISOString().split('T')[0] + '.json';
+      a.download = 'budget-backup-' + getTodayLocal() + '.json';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -936,7 +948,7 @@
           const backup = JSON.parse(e.target.result);
           if (!backup.earnings || !backup.expenses) throw new Error('Invalid file');
           if (!confirm('This will replace ALL data. Continue?')) { event.target.value = ''; return; }
-          await db.collection('households').doc(householdId).update({ customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || new Date().toISOString().split('T')[0], dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
+          await db.collection('households').doc(householdId).update({ customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || getTodayLocal(), dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
           showToast('Data imported!');
         } catch (err) { showToast('Invalid file: ' + err.message, true); }
         event.target.value = '';
@@ -948,7 +960,7 @@
       if (!householdId) return;
       if (!confirm('⚠️ DELETE ALL DATA? This cannot be undone.')) return;
       if (!confirm('Are you ABSOLUTELY SURE?')) return;
-      await db.collection('households').doc(householdId).update({ customSources: [], customPersonalCats: [], customWorkCats: [], totalPaymentsRecorded: 0, currentDay: new Date().toISOString().split('T')[0], dayOpen: true });
+      await db.collection('households').doc(householdId).update({ customSources: [], customPersonalCats: [], customWorkCats: [], totalPaymentsRecorded: 0, currentDay: getTodayLocal(), dayOpen: true });
       earnings.forEach(e => db.collection('households').doc(householdId).collection('earnings').doc(e.id).delete());
       expenses.forEach(e => db.collection('households').doc(householdId).collection('expenses').doc(e.id).delete());
       showToast('All data cleared');
@@ -966,7 +978,7 @@
       updateOweBalance();
     });
 
-    document.getElementById('expenseDateInput').value = new Date().toISOString().split('T')[0];
+    document.getElementById('expenseDateInput').value = getTodayLocal();
   </script>
 </body>
 </html>
