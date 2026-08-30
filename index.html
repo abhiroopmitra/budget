@@ -382,32 +382,40 @@
 
     function loadHouseholdData() {
       if (!householdId) return;
-      db.collection('households').doc(householdId).onSnapshot(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
-          currentDay = data.currentDay || getTodayLocal();
-          dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
-          customSources = data.customSources || [];
-          customPersonalCats = data.customPersonalCats || [];
-          customWorkCats = data.customWorkCats || [];
-          updateDayStatus();
-          updateEarningsSourceSelect();
-          updateExpenseCategorySelect();
-          updateContentAccess();
-        }
-      }, error => { console.error('Error listening to household:', error); });
-      db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-        earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderEarningsList();
-        updateEarningsSummary();
-      }, error => console.error('Error loading earnings:', error));
-      db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-        expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderExpenseLists();
-        updateOweBalance();
-      }, error => console.error('Error loading expenses:', error));
+      db.collection('households').doc(householdId).onSnapshot(async doc => {
+  if (doc.exists) {
+    const data = doc.data();
+    totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
+    customSources = data.customSources || [];
+    customPersonalCats = data.customPersonalCats || [];
+    customWorkCats = data.customWorkCats || [];
+
+    // Auto-detect date change
+    const today = getTodayLocal();
+    const savedDay = data.currentDay || today;
+    
+    if (savedDay !== today) {
+      // Date has changed, auto-start a new day
+      currentDay = today;
+      dayOpen = true;
+      // Save to Firebase
+      await db.collection('households').doc(householdId).update({
+        currentDay: today,
+        dayOpen: true
+      });
+      showToast('New day started: ' + today);
+    } else {
+      // Same day, use saved values
+      currentDay = savedDay;
+      dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
     }
+    
+    updateDayStatus();
+    updateEarningsSourceSelect();
+    updateExpenseCategorySelect();
+    updateContentAccess();
+  }
+});
 
     document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
       const email = document.getElementById('loginEmail').value;
