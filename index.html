@@ -86,6 +86,30 @@
     .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px; border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
     .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px; background: #2ea043; color: #fff; }
     .entry-form #cancelEditBtn { background: #f85149; display: none; }
+    .past-date-toggle {
+      padding: 12px 14px; font-size: 14px; border: none; border-radius: 10px;
+      background: #30363d; color: #fff; cursor: pointer; white-space: nowrap;
+    }
+    .past-date-toggle:hover { background: #484f58; }
+    .past-date-row {
+      display: none; gap: 8px; margin-bottom: 12px; align-items: center;
+      background: #161b22; padding: 10px; border-radius: 10px;
+    }
+    .past-date-row.show { display: flex; }
+    .past-date-row label { font-size: 12px; opacity: 0.7; }
+    .past-date-row input[type="date"] {
+      flex: 1; padding: 10px; font-size: 14px; border-radius: 8px;
+      border: 1px solid #30363d; background: #0d1117; color: #fff;
+    }
+    .past-date-row .clear-date-btn {
+      padding: 10px 14px; font-size: 14px; border: none; border-radius: 8px;
+      background: #f85149; color: #fff; cursor: pointer;
+    }
+    .past-date-active-badge {
+      font-size: 11px; opacity: 0.7; margin-top: 2px;
+      padding: 4px 8px; background: #1f6feb; color: #fff;
+      border-radius: 6px; display: inline-block;
+    }
     .note-input { width: 100%; padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #fff; margin-bottom: 8px; }
     .note-input::placeholder { color: #8b949e; }
     .custom-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
@@ -174,6 +198,12 @@
         </select>
         <button id="earningsAddBtn">Add</button>
         <button id="earningsCancelBtn" style="display:none;">Cancel</button>
+        <button id="pastDateToggleBtn" class="past-date-toggle" onclick="togglePastDate()">📅 Past Date</button>
+      </div>
+      <div id="pastDateRow" class="past-date-row">
+        <label>Date:</label>
+        <input type="date" id="pastDateInput">
+        <button class="clear-date-btn" onclick="clearPastDate()">✕ Clear</button>
       </div>
       <div id="earningsCustomRow" class="custom-row hidden">
         <input type="text" id="earningsCustomInput" placeholder="New source name">
@@ -291,6 +321,15 @@
       return `${year}-${month}-${day}`;
     }
 
+    function getYesterdayLocal() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     function getCurrentMonthLocal() {
       return getTodayLocal().slice(0, 7);
     }
@@ -302,10 +341,9 @@
       return `${y}-${m}-${d}`;
     }
 
-    // Returns the Monday (YYYY-MM-DD) of the Mon-Sun week that contains the given date
     function getMondayOfWeek(dateStr) {
       const d = new Date(dateStr + 'T00:00:00');
-      const dayOfWeek = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+      const dayOfWeek = d.getDay();
       const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
       d.setDate(d.getDate() + diff);
       return formatDateForCompare(d);
@@ -331,6 +369,7 @@
     let monthDropdownOpen = false;
     let isLoginMode = true;
     let currentLang = localStorage.getItem('appLang') || 'en';
+    let pastDateActive = false;
 
     const translations = {
       en: { earnings: "Earnings", expenses: "Expenses", add: "Add", update: "Update", cancel: "Cancel", save: "Save", dayTotal: "Day Total", weekTotal: "Week Total", monthTotal: "Month Total", owes1: "Gian owes Abhi", owes2: "Abhi owes Gian", settled: "All Settled", noEarnings: "No earnings yet.", noPersonal: "No personal expenses.", noWork: "No work expenses." },
@@ -352,6 +391,34 @@
       document.getElementById('earningsSection').classList.toggle('content-disabled', !hasHousehold);
       document.getElementById('expensesSection').classList.toggle('content-disabled', !hasHousehold);
       document.getElementById('noHouseholdBanner').classList.toggle('show', !hasHousehold);
+    }
+
+    // Past date functions
+    function togglePastDate() {
+      const row = document.getElementById('pastDateRow');
+      const input = document.getElementById('pastDateInput');
+      if (row.classList.contains('show')) {
+        // Hide
+        row.classList.remove('show');
+        pastDateActive = false;
+        input.value = '';
+      } else {
+        // Show with default = yesterday, max = today
+        row.classList.add('show');
+        pastDateActive = true;
+        input.max = getTodayLocal();
+        if (!input.value) {
+          input.value = getYesterdayLocal();
+        }
+      }
+    }
+
+    function clearPastDate() {
+      const row = document.getElementById('pastDateRow');
+      const input = document.getElementById('pastDateInput');
+      input.value = '';
+      row.classList.remove('show');
+      pastDateActive = false;
     }
 
     auth.onAuthStateChanged(async (user) => {
@@ -406,7 +473,6 @@
           customSources = data.customSources || [];
           customPersonalCats = data.customPersonalCats || [];
           customWorkCats = data.customWorkCats || [];
-          // Use saved values, no auto-reset
           currentDay = data.currentDay || getTodayLocal();
           dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
           updateDayStatus();
@@ -537,6 +603,7 @@
       renderExpenseLists();
     });
 
+    // Earnings Add with past date support
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (!householdId) { showToast('Create or join a household first!', true); return; }
       const amountInput = document.getElementById('earningsAmountInput');
@@ -545,7 +612,21 @@
       const source = sourceSelect.value;
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
       if (source === '__custom__') { alert('Save custom source first.'); return; }
-      const entry = { amount, source, date: currentDay, addedBy: currentUser.email, timestamp: new Date().toISOString() };
+
+      // Determine the date: past date if active, else currentDay
+      let entryDate = currentDay;
+      if (pastDateActive) {
+        const pastDateInput = document.getElementById('pastDateInput').value;
+        if (pastDateInput) {
+          if (pastDateInput > getTodayLocal()) {
+            alert('Past date cannot be in the future.');
+            return;
+          }
+          entryDate = pastDateInput;
+        }
+      }
+
+      const entry = { amount, source, date: entryDate, addedBy: currentUser.email, timestamp: new Date().toISOString() };
       try {
         if (editingEarningsId) {
           await db.collection('households').doc(householdId).collection('earnings').doc(editingEarningsId).update(entry);
@@ -558,7 +639,9 @@
         amountInput.value = '';
         sourceSelect.value = 'UberEats';
         updateEarningsSourceSelect();
-        showToast('Earning added!');
+        // Clear past date selection after adding
+        if (pastDateActive) clearPastDate();
+        showToast('Earning added' + (entryDate !== currentDay ? ' (date: ' + entryDate + ')' : '') + '!');
       } catch (e) { console.error(e); showToast('Error adding earning: ' + e.message, true); }
     });
 
@@ -568,6 +651,7 @@
       document.getElementById('earningsSourceSelect').value = 'UberEats';
       document.getElementById('earningsAddBtn').textContent = t('add');
       document.getElementById('earningsCancelBtn').style.display = 'none';
+      if (pastDateActive) clearPastDate();
       updateEarningsSourceSelect();
     });
 
@@ -645,6 +729,13 @@
       editingEarningsId = id;
       document.getElementById('earningsAmountInput').value = entry.amount;
       document.getElementById('earningsSourceSelect').value = entry.source;
+      // Show the entry's date in past date picker if it's not currentDay
+      if (entry.date !== currentDay) {
+        if (!pastDateActive) togglePastDate();
+        document.getElementById('pastDateInput').value = entry.date;
+      } else {
+        if (pastDateActive) clearPastDate();
+      }
       document.getElementById('earningsAddBtn').textContent = t('update');
       document.getElementById('earningsCancelBtn').style.display = 'inline-block';
     };
@@ -780,7 +871,13 @@
       list.innerHTML = '';
       earnings.forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = '<div class="amount">$' + e.amount.toFixed(2) + '</div><div class="meta">' + e.source + ' · ' + e.date + '</div><div class="actions"><button class="edit" onclick="startEditEarnings(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteEarnings(\'' + e.id + '\')">🗑️</button></div>';
+        const isPast = e.date !== currentDay;
+        let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
+        html += '<div class="meta">' + e.source + ' · ' + e.date;
+        if (isPast) html += ' <span class="past-date-active-badge">📅 Past</span>';
+        html += '</div>';
+        html += '<div class="actions"><button class="edit" onclick="startEditEarnings(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteEarnings(\'' + e.id + '\')">🗑️</button></div>';
+        li.innerHTML = html;
         list.appendChild(li);
       });
       if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">' + t('noEarnings') + '</li>';
@@ -824,7 +921,6 @@
       updateOweBalance();
     }
 
-    // New correct logic: Mon-Sun week, based on entry's own date
     function updateEarningsSummary() {
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
@@ -832,13 +928,11 @@
       let label = '';
 
       if (summaryMode === 'day') {
-        // Day: only entries on currentDay
         earnings.filter(e => e.date === currentDay).forEach(e => {
           total += parseFloat(e.amount) || 0;
         });
         label = t('dayTotal');
       } else if (summaryMode === 'week') {
-        // Week: Mon-Sun, the week that contains currentDay
         const mondayStr = getMondayOfWeek(currentDay);
         const mondayDate = new Date(mondayStr + 'T00:00:00');
         const sundayDate = new Date(mondayDate);
@@ -852,7 +946,6 @@
         });
         label = t('weekTotal');
       } else if (summaryMode === 'month') {
-        // Month: same YYYY-MM as currentDay
         const monthPrefix = currentDay.substring(0, 7);
         earnings.filter(e => e.date.startsWith(monthPrefix)).forEach(e => {
           total += parseFloat(e.amount) || 0;
