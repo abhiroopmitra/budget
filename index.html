@@ -382,41 +382,58 @@
 
     function loadHouseholdData() {
       if (!householdId) return;
-      db.collection('households').doc(householdId).onSnapshot(async doc => {
-  if (doc.exists) {
-    const data = doc.data();
-    totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
-    customSources = data.customSources || [];
-    customPersonalCats = data.customPersonalCats || [];
-    customWorkCats = data.customWorkCats || [];
+      
+      // Household settings
+      db.collection('households').doc(householdId).onSnapshot(async (doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
+          customSources = data.customSources || [];
+          customPersonalCats = data.customPersonalCats || [];
+          customWorkCats = data.customWorkCats || [];
 
-    // Auto-detect date change
-    const today = getTodayLocal();
-    const savedDay = data.currentDay || today;
-    
-    if (savedDay !== today) {
-      // Date has changed, auto-start a new day
-      currentDay = today;
-      dayOpen = true;
-      // Save to Firebase
-      await db.collection('households').doc(householdId).update({
-        currentDay: today,
-        dayOpen: true
-      });
-      showToast('New day started: ' + today);
-    } else {
-      // Same day, use saved values
-      currentDay = savedDay;
-      dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
+          // Auto-detect date change and reopen day
+          const today = getTodayLocal();
+          const savedDay = data.currentDay || today;
+          
+          if (savedDay !== today) {
+            currentDay = today;
+            dayOpen = true;
+            try {
+              await db.collection('households').doc(householdId).update({
+                currentDay: today,
+                dayOpen: true
+              });
+            } catch (e) { console.error('Error resetting day:', e); }
+            showToast('New day started: ' + today);
+          } else {
+            currentDay = savedDay;
+            dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
+          }
+          
+          updateDayStatus();
+          updateEarningsSourceSelect();
+          updateExpenseCategorySelect();
+          updateContentAccess();
+        }
+      }, error => { console.error('Error listening to household:', error); });
+      
+      // Earnings
+      db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderEarningsList();
+        updateEarningsSummary();
+      }, error => console.error('Error loading earnings:', error));
+      
+      // Expenses
+      db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderExpenseLists();
+        updateOweBalance();
+      }, error => console.error('Error loading expenses:', error));
     }
-    
-    updateDayStatus();
-    updateEarningsSourceSelect();
-    updateExpenseCategorySelect();
-    updateContentAccess();
-  }
-});
 
+    // Login handlers
     document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
@@ -507,6 +524,7 @@
 
     document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
+    // Tab switching
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
       if (!householdId) { showToast('Create or join a household first!', true); return; }
       document.getElementById('earningsSection').classList.remove('hidden');
@@ -525,6 +543,7 @@
       renderExpenseLists();
     });
 
+    // Earnings
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (!householdId) { showToast('Create or join a household first!', true); return; }
       const amountInput = document.getElementById('earningsAmountInput');
@@ -559,6 +578,7 @@
       updateEarningsSourceSelect();
     });
 
+    // Expenses
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) { showToast('Create or join a household first!', true); return; }
       const dateInput = document.getElementById('expenseDateInput');
@@ -906,6 +926,7 @@
       } else { el.classList.remove('show'); }
     });
 
+    // End day slider
     let isDragging = false, handleLeft = 4;
     const slideTrack = document.getElementById('slideTrack');
     const slideHandle = document.getElementById('slideHandle');
@@ -914,9 +935,10 @@
     function resetSlide() { isDragging = false; handleLeft = 4; slideHandle.style.left = '4px'; slideTrack.classList.remove('completed','dragging'); updateSlideState(); }
     slideTrack.addEventListener('pointerdown', e => { if (!householdId || !dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
     slideTrack.addEventListener('pointermove', e => { if (!isDragging) return; const rect = slideTrack.getBoundingClientRect(); let left = e.clientX - rect.left - slideHandle.offsetWidth / 2; left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px'; if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; } else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; } });
-    slideTrack.addEventListener('pointerup', async () => { if (!isDragging || !householdId) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
+    slideTrack.addEventListener('pointerup', async () => { if (!isDragging || !householdId) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; try { await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); } catch(e){console.error(e);} updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
     slideTrack.addEventListener('pointercancel', resetSlide);
 
+    // Payment slider
     let paymentDragging = false, paymentHandleLeft = 4;
     const paymentTrack = document.getElementById('paymentSliderTrack');
     const paymentHandle = document.getElementById('paymentSliderHandle');
@@ -925,9 +947,10 @@
     function resetPaymentSlide() { paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px'; paymentTrack.classList.remove('completed','dragging'); paymentText.textContent = 'Slide to Record Payment'; }
     paymentTrack.addEventListener('pointerdown', e => { if (!householdId) return; paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
     paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
-    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
+    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; try { await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); } catch(e){console.error(e);} updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
+    // Settings
     document.getElementById('exportBtn').addEventListener('click', () => {
       const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
       const dataStr = JSON.stringify(backup, null, 2);
