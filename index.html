@@ -818,7 +818,7 @@
         const amount = parseFloat(e.amount) || 0;
         const share = parseFloat(e.share) || 100;
         const paidBy = e.paidBy;
-        const otherShare = (100 - share) / 100 * amount;
+        const otherShare = (share / 100) * amount;
         if (paidBy === 'Abhi') gianOwesAbhi += otherShare;
         else if (paidBy === 'Gian') gianOwesAbhi -= otherShare;
       });
@@ -908,7 +908,7 @@
     function resetPaymentSlide() { paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px'; paymentTrack.classList.remove('completed','dragging'); paymentText.textContent = 'Slide to Record Payment'; }
     paymentTrack.addEventListener('pointerdown', e => { if (!householdId) return; paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
     paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
-    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (100 - share) / 100 * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
+    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
     document.getElementById('exportBtn').addEventListener('click', () => {
