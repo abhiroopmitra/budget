@@ -295,6 +295,22 @@
       return getTodayLocal().slice(0, 7);
     }
 
+    function formatDateForCompare(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    // Returns the Monday (YYYY-MM-DD) of the Mon-Sun week that contains the given date
+    function getMondayOfWeek(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      const dayOfWeek = d.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+      const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      d.setDate(d.getDate() + diff);
+      return formatDateForCompare(d);
+    }
+
     let currentUser = null;
     let householdId = null;
     let earnings = [];
@@ -383,34 +399,16 @@
     function loadHouseholdData() {
       if (!householdId) return;
       
-      // Household settings
-      db.collection('households').doc(householdId).onSnapshot(async (doc) => {
+      db.collection('households').doc(householdId).onSnapshot((doc) => {
         if (doc.exists) {
           const data = doc.data();
           totalPaymentsRecorded = data.totalPaymentsRecorded || 0;
           customSources = data.customSources || [];
           customPersonalCats = data.customPersonalCats || [];
           customWorkCats = data.customWorkCats || [];
-
-          // Auto-detect date change and reopen day
-          const today = getTodayLocal();
-          const savedDay = data.currentDay || today;
-          
-          if (savedDay !== today) {
-            currentDay = today;
-            dayOpen = true;
-            try {
-              await db.collection('households').doc(householdId).update({
-                currentDay: today,
-                dayOpen: true
-              });
-            } catch (e) { console.error('Error resetting day:', e); }
-            showToast('New day started: ' + today);
-          } else {
-            currentDay = savedDay;
-            dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
-          }
-          
+          // Use saved values, no auto-reset
+          currentDay = data.currentDay || getTodayLocal();
+          dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
           updateDayStatus();
           updateEarningsSourceSelect();
           updateExpenseCategorySelect();
@@ -418,22 +416,19 @@
         }
       }, error => { console.error('Error listening to household:', error); });
       
-      // Earnings
-      db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+      db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
         earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderEarningsList();
         updateEarningsSummary();
       }, error => console.error('Error loading earnings:', error));
       
-      // Expenses
-      db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+      db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
         updateOweBalance();
       }, error => console.error('Error loading expenses:', error));
     }
 
-    // Login handlers
     document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPassword').value;
@@ -524,7 +519,6 @@
 
     document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
-    // Tab switching
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
       if (!householdId) { showToast('Create or join a household first!', true); return; }
       document.getElementById('earningsSection').classList.remove('hidden');
@@ -543,7 +537,6 @@
       renderExpenseLists();
     });
 
-    // Earnings
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (!householdId) { showToast('Create or join a household first!', true); return; }
       const amountInput = document.getElementById('earningsAmountInput');
@@ -578,7 +571,6 @@
       updateEarningsSourceSelect();
     });
 
-    // Expenses
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) { showToast('Create or join a household first!', true); return; }
       const dateInput = document.getElementById('expenseDateInput');
@@ -832,13 +824,42 @@
       updateOweBalance();
     }
 
+    // New correct logic: Mon-Sun week, based on entry's own date
     function updateEarningsSummary() {
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
-      let total = 0, label = t('dayTotal');
-      if (summaryMode === 'week') label = t('weekTotal');
-      else if (summaryMode === 'month') label = t('monthTotal');
-      earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount)||0);
+      let total = 0;
+      let label = '';
+
+      if (summaryMode === 'day') {
+        // Day: only entries on currentDay
+        earnings.filter(e => e.date === currentDay).forEach(e => {
+          total += parseFloat(e.amount) || 0;
+        });
+        label = t('dayTotal');
+      } else if (summaryMode === 'week') {
+        // Week: Mon-Sun, the week that contains currentDay
+        const mondayStr = getMondayOfWeek(currentDay);
+        const mondayDate = new Date(mondayStr + 'T00:00:00');
+        const sundayDate = new Date(mondayDate);
+        sundayDate.setDate(mondayDate.getDate() + 6);
+        const sundayStr = formatDateForCompare(sundayDate);
+
+        earnings.filter(e => {
+          return e.date >= mondayStr && e.date <= sundayStr;
+        }).forEach(e => {
+          total += parseFloat(e.amount) || 0;
+        });
+        label = t('weekTotal');
+      } else if (summaryMode === 'month') {
+        // Month: same YYYY-MM as currentDay
+        const monthPrefix = currentDay.substring(0, 7);
+        earnings.filter(e => e.date.startsWith(monthPrefix)).forEach(e => {
+          total += parseFloat(e.amount) || 0;
+        });
+        label = t('monthTotal');
+      }
+
       labelEl.textContent = label;
       amountEl.textContent = total.toFixed(2);
     }
@@ -950,7 +971,6 @@
     paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; try { await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); } catch(e){console.error(e);} updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
-    // Settings
     document.getElementById('exportBtn').addEventListener('click', () => {
       const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
       const dataStr = JSON.stringify(backup, null, 2);
