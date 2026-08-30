@@ -86,6 +86,8 @@
     .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px; border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
     .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px; background: #2ea043; color: #fff; }
     .entry-form #cancelEditBtn { background: #f85149; display: none; }
+    .note-input { width: 100%; padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #fff; margin-bottom: 8px; }
+    .note-input::placeholder { color: #8b949e; }
     .custom-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
     .custom-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #2ea043; color: #fff; }
@@ -96,6 +98,7 @@
     li { background: #0d1117; padding: 10px; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
     li .amount { font-size: 16px; font-weight: bold; color: #7ee787; }
     li .meta { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+    li .note { font-size: 11px; opacity: 0.6; margin-top: 4px; font-style: italic; color: #8b949e; }
     li .actions { display: flex; gap: 4px; margin-top: 6px; }
     li .actions button { background: none; border: none; font-size: 14px; padding: 2px; }
     li .actions button.edit { color: #58a6ff; }
@@ -140,9 +143,7 @@
   </div>
 
   <div class="app-container" id="appContainer">
-    <div class="no-household-banner" id="noHouseholdBanner">
-      ⚠️ <strong>No Household!</strong> Please create or join a household in Settings to start adding data.
-    </div>
+    <div class="no-household-banner" id="noHouseholdBanner">⚠️ <strong>No Household!</strong> Please create or join a household in Settings to start adding data.</div>
     <div class="header">
       <h1>💰 Budget</h1>
       <button class="lang-toggle" id="langToggle">EN</button>
@@ -213,6 +214,7 @@
         <button id="expenseAddBtn">Add</button>
         <button id="expenseCancelBtn" style="display:none;">Cancel</button>
       </div>
+      <input type="text" id="expenseNoteInput" class="note-input" placeholder="Note (optional) — e.g. Birthday dinner, Cash tip, etc.">
       <div id="personalFields" class="section">
         <div class="entry-form">
           <select id="personalPaidBySelect">
@@ -280,18 +282,18 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    
-    function getTodayLocal() {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
 
-function getCurrentMonthLocal() {
-  return getTodayLocal().slice(0, 7);
-}
+    function getTodayLocal() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getCurrentMonthLocal() {
+      return getTodayLocal().slice(0, 7);
+    }
 
     let currentUser = null;
     let householdId = null;
@@ -307,7 +309,7 @@ function getCurrentMonthLocal() {
     let editingExpenseId = null;
     let summaryMode = 'day';
     let expenseType = 'personal';
-    let selectedMonth = new Date().toISOString().slice(0, 7);
+    let selectedMonth = getCurrentMonthLocal();
     let isYTD = false;
     let workBreakdownVisible = false;
     let monthDropdownOpen = false;
@@ -366,11 +368,7 @@ function getCurrentMonthLocal() {
           showHouseholdSetup();
         }
         updateContentAccess();
-      } catch (e) { 
-        console.error('Error loading household:', e);
-        showHouseholdSetup();
-        updateContentAccess();
-      }
+      } catch (e) { console.error('Error loading household:', e); showHouseholdSetup(); updateContentAccess(); }
     }
 
     function showHouseholdSetup() {
@@ -398,10 +396,7 @@ function getCurrentMonthLocal() {
           updateExpenseCategorySelect();
           updateContentAccess();
         }
-      }, error => {
-        console.error('Error listening to household:', error);
-        showToast('Error loading data', true);
-      });
+      }, error => { console.error('Error listening to household:', error); });
       db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderEarningsList();
@@ -470,13 +465,8 @@ function getCurrentMonthLocal() {
         loadHouseholdData();
         updateContentAccess();
         showToast('Household created! Share ID: ' + newHouseholdId);
-      } catch (e) { 
-        console.error(e); 
-        showToast('Error creating household: ' + e.message, true); 
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Create New Household';
-      }
+      } catch (e) { console.error(e); showToast('Error creating household: ' + e.message, true); }
+      finally { btn.disabled = false; btn.textContent = 'Create New Household'; }
     });
 
     async function joinHousehold(hid) {
@@ -549,10 +539,7 @@ function getCurrentMonthLocal() {
         sourceSelect.value = 'UberEats';
         updateEarningsSourceSelect();
         showToast('Earning added!');
-      } catch (e) {
-        console.error(e);
-        showToast('Error adding earning: ' + e.message, true);
-      }
+      } catch (e) { console.error(e); showToast('Error adding earning: ' + e.message, true); }
     });
 
     document.getElementById('earningsCancelBtn').addEventListener('click', () => {
@@ -569,13 +556,15 @@ function getCurrentMonthLocal() {
       const dateInput = document.getElementById('expenseDateInput');
       const amountInput = document.getElementById('expenseAmountInput');
       const catSelect = document.getElementById('expenseCategorySelect');
+      const noteInput = document.getElementById('expenseNoteInput');
       const date = dateInput.value;
       const amount = parseFloat(amountInput.value);
       const category = catSelect.value;
+      const note = noteInput.value.trim();
       if (!date) { alert('Select a date.'); return; }
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
       if (category === '__custom__') { alert('Save custom category first.'); return; }
-      const entry = { type: expenseType, date, amount, category, addedBy: currentUser.email, timestamp: new Date().toISOString() };
+      const entry = { type: expenseType, date, amount, category, note: note, addedBy: currentUser.email, timestamp: new Date().toISOString() };
       if (expenseType === 'personal') {
         const paidBy = document.getElementById('personalPaidBySelect').value;
         let share = document.getElementById('personalShareSelect').value;
@@ -594,6 +583,7 @@ function getCurrentMonthLocal() {
         }
         amountInput.value = '';
         dateInput.value = getTodayLocal();
+        noteInput.value = '';
         if (expenseType === 'personal') {
           document.getElementById('personalPaidBySelect').value = 'Abhi';
           document.getElementById('personalShareSelect').value = '100';
@@ -602,16 +592,14 @@ function getCurrentMonthLocal() {
         catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
         handleCategoryChange();
         showToast('Expense added!');
-      } catch (e) {
-        console.error(e);
-        showToast('Error adding expense: ' + e.message, true);
-      }
+      } catch (e) { console.error(e); showToast('Error adding expense: ' + e.message, true); }
     });
 
     document.getElementById('expenseCancelBtn').addEventListener('click', () => {
       editingExpenseId = null;
       document.getElementById('expenseAmountInput').value = '';
       document.getElementById('expenseDateInput').value = getTodayLocal();
+      document.getElementById('expenseNoteInput').value = '';
       document.getElementById('expenseAddBtn').textContent = t('add');
       document.getElementById('expenseCancelBtn').style.display = 'none';
       setExpenseType('personal');
@@ -620,19 +608,15 @@ function getCurrentMonthLocal() {
     window.deleteEarnings = async (id) => {
       if (!householdId) return;
       if (!confirm('Delete?')) return;
-      try {
-        await db.collection('households').doc(householdId).collection('earnings').doc(id).delete();
-        showToast('Deleted');
-      } catch (e) { showToast('Error deleting', true); }
+      try { await db.collection('households').doc(householdId).collection('earnings').doc(id).delete(); showToast('Deleted'); }
+      catch (e) { showToast('Error deleting', true); }
     };
 
     window.deleteExpense = async (id) => {
       if (!householdId) return;
       if (!confirm('Delete?')) return;
-      try {
-        await db.collection('households').doc(householdId).collection('expenses').doc(id).delete();
-        showToast('Deleted');
-      } catch (e) { showToast('Error deleting', true); }
+      try { await db.collection('households').doc(householdId).collection('expenses').doc(id).delete(); showToast('Deleted'); }
+      catch (e) { showToast('Error deleting', true); }
     };
 
     window.startEditEarnings = (id) => {
@@ -651,6 +635,7 @@ function getCurrentMonthLocal() {
       editingExpenseId = id;
       document.getElementById('expenseDateInput').value = entry.date;
       document.getElementById('expenseAmountInput').value = entry.amount;
+      document.getElementById('expenseNoteInput').value = entry.note || '';
       setExpenseType(entry.type);
       document.getElementById('expenseCategorySelect').value = entry.category;
       handleCategoryChange();
@@ -788,7 +773,13 @@ function getCurrentMonthLocal() {
       pList.innerHTML = '';
       expenses.filter(filter).forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = '<div class="amount">$' + e.amount.toFixed(2) + '</div><div class="meta">' + e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date + '</div><div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
+        let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
+        html += '<div class="meta">' + e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date + '</div>';
+        if (e.note && e.note.trim() !== '') {
+          html += '<div class="note">📝 ' + e.note + '</div>';
+        }
+        html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
+        li.innerHTML = html;
         pList.appendChild(li);
       });
       if (expenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">' + t('noPersonal') + '</li>';
@@ -796,7 +787,13 @@ function getCurrentMonthLocal() {
       wList.innerHTML = '';
       expenses.filter(filterWork).forEach(e => {
         const li = document.createElement('li');
-        li.innerHTML = '<div class="amount">$' + e.amount.toFixed(2) + '</div><div class="meta">' + e.category + ' · ' + e.date + '</div><div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
+        let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
+        html += '<div class="meta">' + e.category + ' · ' + e.date + '</div>';
+        if (e.note && e.note.trim() !== '') {
+          html += '<div class="note">📝 ' + e.note + '</div>';
+        }
+        html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
+        li.innerHTML = html;
         wList.appendChild(li);
       });
       if (expenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">' + t('noWork') + '</li>';
@@ -873,7 +870,7 @@ function getCurrentMonthLocal() {
         dropdown.innerHTML = '';
         const months = new Set();
         expenses.forEach(e => months.add(e.date.substring(0, 7)));
-        months.add(new Date().toISOString().slice(0, 7));
+        months.add(getCurrentMonthLocal());
         Array.from(months).sort().reverse().forEach(m => {
           const div = document.createElement('div');
           div.className = 'month-option' + (m === selectedMonth && !isYTD ? ' selected' : '');
