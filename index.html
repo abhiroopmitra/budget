@@ -382,8 +382,8 @@
     let pastDateActive = false;
 
     const translations = {
-      en: { earnings: "Earnings", expenses: "Expenses", add: "Add", update: "Update", cancel: "Cancel", save: "Save", dayTotal: "Day Total", weekTotal: "Week Total", monthTotal: "Month Total", owes1: "Gian owes Abhi", owes2: "Abhi owes Gian", settled: "All Settled", noEarnings: "No earnings yet.", noPersonal: "No personal expenses.", noWork: "No work expenses." },
-      es: { earnings: "Ganancias", expenses: "Gastos", add: "Agregar", update: "Actualizar", cancel: "Cancelar", save: "Guardar", dayTotal: "Total del Día", weekTotal: "Total de la Semana", monthTotal: "Total del Mes", owes1: "Gian le debe a Abhi", owes2: "Abhi le debe a Gian", settled: "Todo Pagado", noEarnings: "Sin ganancias aún.", noPersonal: "Sin gastos personales.", noWork: "Sin gastos de trabajo." }
+      en: { add: "Add", update: "Update" },
+      es: { add: "Agregar", update: "Actualizar" }
     };
 
     function t(key) { return translations[currentLang][key] || key; }
@@ -658,7 +658,6 @@
     document.getElementById('logoutBtn').addEventListener('click', doLogout);
     document.getElementById('limitedLogoutBtn').addEventListener('click', doLogout);
 
-    // TAB SWITCHING - Using style.display directly
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
       document.getElementById('earningsSection').style.display = 'block';
       document.getElementById('expensesSection').style.display = 'none';
@@ -708,7 +707,6 @@
       }
     }
 
-    // EARNINGS ADD - With auto-reopen day
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (userRole !== 'owner') return;
       if (!householdId) return;
@@ -747,7 +745,7 @@
         if (editingEarningsId) {
           await db.collection('households').doc(householdId).collection('earnings').doc(editingEarningsId).update(entry);
           editingEarningsId = null;
-          document.getElementById('earningsAddBtn').textContent = 'Add';
+          document.getElementById('earningsAddBtn').textContent = t('add');
           document.getElementById('earningsCancelBtn').style.display = 'none';
         } else {
           await db.collection('households').doc(householdId).collection('earnings').add(entry);
@@ -764,13 +762,12 @@
       editingEarningsId = null;
       document.getElementById('earningsAmountInput').value = '';
       document.getElementById('earningsSourceSelect').value = 'UberEats';
-      document.getElementById('earningsAddBtn').textContent = 'Add';
+      document.getElementById('earningsAddBtn').textContent = t('add');
       document.getElementById('earningsCancelBtn').style.display = 'none';
       if (pastDateActive) clearPastDate();
       updateEarningsSourceSelect();
     });
 
-    // EXPENSE ADD - With auto-reopen day
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) return;
       
@@ -812,7 +809,7 @@
         if (editingExpenseId) {
           await db.collection('households').doc(householdId).collection('expenses').doc(editingExpenseId).update(entry);
           editingExpenseId = null;
-          document.getElementById('expenseAddBtn').textContent = 'Add';
+          document.getElementById('expenseAddBtn').textContent = t('add');
           document.getElementById('expenseCancelBtn').style.display = 'none';
         } else {
           await db.collection('households').doc(householdId).collection('expenses').add(entry);
@@ -840,7 +837,7 @@
       document.getElementById('expenseAmountInput').value = '';
       document.getElementById('expenseDateInput').value = getTodayLocal();
       document.getElementById('expenseNoteInput').value = '';
-      document.getElementById('expenseAddBtn').textContent = 'Add';
+      document.getElementById('expenseAddBtn').textContent = t('add');
       document.getElementById('expenseCancelBtn').style.display = 'none';
       if (userRole === 'owner') {
         document.getElementById('involvesGian').checked = false;
@@ -880,7 +877,7 @@
       } else {
         if (pastDateActive) clearPastDate();
       }
-      document.getElementById('earningsAddBtn').textContent = 'Update';
+      document.getElementById('earningsAddBtn').textContent = t('update');
       document.getElementById('earningsCancelBtn').style.display = 'inline-block';
     };
 
@@ -908,7 +905,7 @@
           document.getElementById('involvesGian').checked = isShared;
         }
       }
-      document.getElementById('expenseAddBtn').textContent = 'Update';
+      document.getElementById('expenseAddBtn').textContent = t('update');
       document.getElementById('expenseCancelBtn').style.display = 'inline-block';
     };
 
@@ -1041,15 +1038,20 @@
       if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">No earnings yet.</li>';
     }
 
+    // FIXED: renderExpenseLists now shows all personal expenses for owner
     function renderExpenseLists() {
-      let visibleExpenses = expenses;
+      // For the owner: show ALL personal expenses (no filter by involves)
+      // For the limited user (Gian): show personal expenses that involve him
+      let visibleExpenses;
       if (userRole === 'limited') {
         visibleExpenses = expenses.filter(e => {
           if (e.type !== 'personal') return false;
+          // Old entries without involves field: show them
           if (!e.involves || e.involves.length === 0) return true;
           return e.involves.includes('Gian');
         });
       } else {
+        // Owner: show all personal expenses, ignore involves filter
         visibleExpenses = expenses.filter(e => e.type === 'personal');
       }
 
@@ -1066,8 +1068,7 @@
         const li = document.createElement('li');
         let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
         let metaLine = e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date;
-        if (e.involves && e.involves.length === 1) metaLine += ' (only Abhi)';
-        else if (e.share == 0) metaLine += ' (personal)';
+        if (e.share == 0) metaLine += ' (personal)';
         else metaLine += ' (shared)';
         html += '<div class="meta">' + metaLine + '</div>';
         if (e.note && e.note.trim() !== '') html += '<div class="note">📝 ' + e.note + '</div>';
