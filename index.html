@@ -133,12 +133,6 @@
     .welcome-banner { background: linear-gradient(135deg, #2ea043 0%, #1a7a2e 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center; }
     .welcome-banner h2 { font-size: 20px; margin-bottom: 6px; }
     .welcome-banner p { font-size: 13px; opacity: 0.9; }
-    .owner-only { display: none; }
-    .limited-only { display: none; }
-    body.role-owner .owner-only { display: block; }
-    body.role-limited .limited-only { display: block; }
-    body.role-owner .limited-only { display: none !important; }
-    body.role-limited .owner-only { display: none !important; }
   </style>
 </head>
 <body>
@@ -171,12 +165,12 @@
       </div>
     </div>
 
-    <div class="tabs owner-only" id="ownerTabs">
+    <div class="tabs" id="ownerTabs" style="display:none;">
       <button class="tab active" id="earningsTabBtn">Earnings</button>
       <button class="tab" id="expensesTabBtn">Expenses</button>
     </div>
 
-    <div id="earningsSection" class="owner-only">
+    <div id="earningsSection" style="display:none;">
       <button class="summary-btn" id="summaryBtn">
         <span class="period-label" id="summaryPeriodLabel">Day Total</span>
         <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
@@ -212,8 +206,8 @@
       <ul id="earningsList"></ul>
     </div>
 
-    <div id="expensesSection">
-      <div id="limitedWelcome" class="welcome-banner limited-only">
+    <div id="expensesSection" style="display:none;">
+      <div id="limitedWelcome" class="welcome-banner" style="display:none;">
         <h2>👋 Welcome</h2>
         <p>You can view and add shared personal expenses.</p>
       </div>
@@ -235,7 +229,7 @@
         </div>
       </div>
 
-      <div id="workExpensesBlock" class="owner-only">
+      <div id="workExpensesBlock" style="display:none;">
         <div class="work-card" id="workCard">
           <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
           <div class="work-card-value" id="workTotalDisplay">$0.00</div>
@@ -243,7 +237,7 @@
         </div>
       </div>
 
-      <div class="type-toggle owner-only" id="typeToggle">
+      <div class="type-toggle" id="typeToggle" style="display:none;">
         <button class="type-btn active" id="typePersonalBtn">Personal</button>
         <button class="type-btn" id="typeWorkBtn">Work</button>
       </div>
@@ -280,14 +274,14 @@
         </div>
       </div>
 
-      <div id="workFields" class="section owner-only hidden">
+      <div id="workFields" class="section hidden" style="display:none;">
         <div id="workCustomCatRow" class="custom-row hidden">
           <input type="text" id="workCustomCatInput" placeholder="New category">
           <button id="saveWorkCatBtn">Save</button>
         </div>
       </div>
 
-      <div class="involves-section owner-only" id="involvesSection">
+      <div class="involves-section" id="involvesSection" style="display:none;">
         <div class="involves-title">Share with Gian?</div>
         <div class="checkbox-row">
           <input type="checkbox" id="involvesGian">
@@ -300,13 +294,13 @@
           <div class="list-header">PERSONAL</div>
           <ul id="personalList"></ul>
         </div>
-        <div class="list-column owner-only" id="workListColumn">
+        <div class="list-column" id="workListColumn" style="display:none;">
           <div class="list-header">WORK</div>
           <ul id="workList"></ul>
         </div>
       </div>
 
-      <div class="settings-section owner-only" id="settingsSection">
+      <div class="settings-section" id="settingsSection" style="display:none;">
         <div class="settings-title">⚙️ Settings</div>
         <div class="settings-grid">
           <button class="settings-btn export" id="exportBtn">📤 Export</button>
@@ -317,7 +311,7 @@
         <div class="household-id" id="householdIdDisplay"></div>
       </div>
 
-      <div class="settings-section limited-only" id="limitedLogoutSection">
+      <div class="settings-section" id="limitedLogoutSection" style="display:none;">
         <div class="settings-grid">
           <button class="settings-btn logout" id="limitedLogoutBtn" style="grid-column: span 2;">🚪 Logout</button>
         </div>
@@ -430,45 +424,52 @@
       const ownerTabs = document.getElementById('ownerTabs');
       
       if (userRole === 'owner') {
-        document.body.className = 'role-owner';
         roleBadge.textContent = '👑 Owner';
         roleBadge.className = 'role-badge owner';
-        earningsSection.classList.remove('hidden');
-        ownerTabs.classList.remove('hidden');
-        expensesSection.classList.add('hidden');
+        ownerTabs.style.display = 'flex';
+        earningsSection.style.display = 'block';
+        expensesSection.style.display = 'none';
+        document.getElementById('workExpensesBlock').style.display = 'block';
+        document.getElementById('typeToggle').style.display = 'flex';
+        document.getElementById('workListColumn').style.display = 'block';
+        document.getElementById('involvesSection').style.display = 'block';
+        document.getElementById('settingsSection').style.display = 'block';
+        document.getElementById('limitedWelcome').style.display = 'none';
+        document.getElementById('limitedLogoutSection').style.display = 'none';
         document.getElementById('earningsTabBtn').classList.add('active');
         document.getElementById('expensesTabBtn').classList.remove('active');
+        document.getElementById('personalShareSelect').value = '0';
       } else if (userRole === 'limited') {
-        document.body.className = 'role-limited';
         roleBadge.textContent = '👤 Shared';
         roleBadge.className = 'role-badge limited';
-        earningsSection.classList.add('hidden');
-        ownerTabs.classList.add('hidden');
-        expensesSection.classList.remove('hidden');
-        setExpenseType('personal');
+        ownerTabs.style.display = 'none';
+        earningsSection.style.display = 'none';
+        expensesSection.style.display = 'block';
+        document.getElementById('workExpensesBlock').style.display = 'none';
+        document.getElementById('typeToggle').style.display = 'none';
+        document.getElementById('workListColumn').style.display = 'none';
+        document.getElementById('involvesSection').style.display = 'none';
+        document.getElementById('settingsSection').style.display = 'none';
+        document.getElementById('limitedWelcome').style.display = 'block';
+        document.getElementById('limitedLogoutSection').style.display = 'block';
         document.getElementById('personalShareSelect').value = '50';
-        handleShareChange();
-      } else {
-        document.body.className = '';
-        roleBadge.textContent = '';
-        roleBadge.className = 'role-badge';
+        setExpenseType('personal');
       }
     }
 
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUser = user;
-        document.getElementById('loginContainer').classList.remove('show');
-        document.getElementById('appContainer').classList.add('show');
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
         document.getElementById('userInfo').textContent = user.email;
         await loadHousehold();
       } else {
         currentUser = null;
         householdId = null;
         userRole = null;
-        document.body.className = '';
-        document.getElementById('loginContainer').classList.add('show');
-        document.getElementById('appContainer').classList.remove('show');
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
       }
     });
 
@@ -506,7 +507,7 @@
 
     function showHouseholdSetup() {
       document.getElementById('householdInputGroup').classList.add('show');
-      document.getElementById('createHouseholdBtn').classList.remove('hidden');
+      document.getElementById('createHouseholdBtn').style.display = 'block';
       document.getElementById('loginSubmitBtn').textContent = 'Join Household';
       const infoEl = document.getElementById('householdInfo');
       infoEl.style.display = 'block';
@@ -530,21 +531,21 @@
           updateExpenseCategorySelect();
           updateMonthDisplay();
         }
-      }, error => { console.error('Error listening to household:', error); });
+      }, error => { console.error('Error:', error); });
       
       if (userRole === 'owner') {
         db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
           earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           renderEarningsList();
           updateEarningsSummary();
-        }, error => console.error('Error loading earnings:', error));
+        }, error => console.error('Error:', error));
       }
       
       db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
         updateOweBalance();
-      }, error => console.error('Error loading expenses:', error));
+      }, error => console.error('Error:', error));
     }
 
     document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
@@ -607,7 +608,7 @@
         applyRoleUI();
         loadHouseholdData();
         showToast('Household created! Share ID: ' + newHouseholdId);
-      } catch (e) { console.error(e); showToast('Error creating household: ' + e.message, true); }
+      } catch (e) { console.error(e); showToast('Error: ' + e.message, true); }
       finally { btn.disabled = false; btn.textContent = 'Create New Household'; }
     });
 
@@ -616,7 +617,6 @@
       try {
         const hDoc = await db.collection('households').doc(hid).get();
         if (!hDoc.exists) { throw new Error('Household not found'); }
-        
         const hData = hDoc.data();
         let determinedRole = 'limited';
         if (hData.ownerEmail && currentUser.email === hData.ownerEmail) {
@@ -630,14 +630,12 @@
         } else {
           await db.collection('households').doc(hid).update({ members: firebase.firestore.FieldValue.arrayUnion(currentUser.email) });
         }
-        
         await db.collection('users').doc(currentUser.uid).set({
           email: currentUser.email,
           householdId: hid,
           role: determinedRole,
           joinedAt: new Date().toISOString()
         });
-        
         householdId = hid;
         userRole = determinedRole;
         document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
@@ -652,7 +650,7 @@
       document.getElementById('loginSubmitBtn').textContent = isLoginMode ? 'Sign In' : 'Sign Up';
       document.getElementById('loginSwitchText').textContent = isLoginMode ? "Don't have an account? Sign Up" : 'Already have an account? Sign In';
       document.getElementById('householdInputGroup').classList.remove('show');
-      document.getElementById('createHouseholdBtn').classList.add('hidden');
+      document.getElementById('createHouseholdBtn').style.display = 'none';
       document.getElementById('householdInfo').style.display = 'none';
     });
 
@@ -660,21 +658,25 @@
     document.getElementById('logoutBtn').addEventListener('click', doLogout);
     document.getElementById('limitedLogoutBtn').addEventListener('click', doLogout);
 
-    // FIX 1: Removed the early return for non-owner in tab handlers
+    // TAB SWITCHING - Using style.display directly
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
-      document.getElementById('earningsSection').classList.remove('hidden');
-      document.getElementById('expensesSection').classList.add('hidden');
+      document.getElementById('earningsSection').style.display = 'block';
+      document.getElementById('expensesSection').style.display = 'none';
       document.getElementById('earningsTabBtn').classList.add('active');
       document.getElementById('expensesTabBtn').classList.remove('active');
+      window.scrollTo(0, 0);
     });
 
     document.getElementById('expensesTabBtn').addEventListener('click', () => {
-      document.getElementById('earningsSection').classList.add('hidden');
-      document.getElementById('expensesSection').classList.remove('hidden');
+      document.getElementById('earningsSection').style.display = 'none';
+      document.getElementById('expensesSection').style.display = 'block';
       document.getElementById('expensesTabBtn').classList.add('active');
       document.getElementById('earningsTabBtn').classList.remove('active');
-      updateMonthDisplay();
-      renderExpenseLists();
+      window.scrollTo(0, 0);
+      try {
+        updateMonthDisplay();
+        renderExpenseLists();
+      } catch (e) { console.error('Tab switch error:', e); }
     });
 
     function onInvolvesChange() {
@@ -706,12 +708,11 @@
       }
     }
 
-    // FIX 2: Added auto-reopen day logic to earnings handler
+    // EARNINGS ADD - With auto-reopen day
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (userRole !== 'owner') return;
       if (!householdId) return;
       
-      // Auto-reopen day if closed
       if (!dayOpen && !pastDateActive) {
         currentDay = getTodayLocal();
         dayOpen = true;
@@ -746,7 +747,7 @@
         if (editingEarningsId) {
           await db.collection('households').doc(householdId).collection('earnings').doc(editingEarningsId).update(entry);
           editingEarningsId = null;
-          document.getElementById('earningsAddBtn').textContent = t('add');
+          document.getElementById('earningsAddBtn').textContent = 'Add';
           document.getElementById('earningsCancelBtn').style.display = 'none';
         } else {
           await db.collection('households').doc(householdId).collection('earnings').add(entry);
@@ -763,16 +764,16 @@
       editingEarningsId = null;
       document.getElementById('earningsAmountInput').value = '';
       document.getElementById('earningsSourceSelect').value = 'UberEats';
-      document.getElementById('earningsAddBtn').textContent = t('add');
+      document.getElementById('earningsAddBtn').textContent = 'Add';
       document.getElementById('earningsCancelBtn').style.display = 'none';
       if (pastDateActive) clearPastDate();
       updateEarningsSourceSelect();
     });
 
+    // EXPENSE ADD - With auto-reopen day
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) return;
       
-      // Auto-reopen day if closed
       if (!dayOpen && !pastDateActive) {
         currentDay = getTodayLocal();
         dayOpen = true;
@@ -811,7 +812,7 @@
         if (editingExpenseId) {
           await db.collection('households').doc(householdId).collection('expenses').doc(editingExpenseId).update(entry);
           editingExpenseId = null;
-          document.getElementById('expenseAddBtn').textContent = t('add');
+          document.getElementById('expenseAddBtn').textContent = 'Add';
           document.getElementById('expenseCancelBtn').style.display = 'none';
         } else {
           await db.collection('households').doc(householdId).collection('expenses').add(entry);
@@ -821,9 +822,8 @@
         noteInput.value = '';
         if (expenseType === 'personal') {
           document.getElementById('personalPaidBySelect').value = 'Abhi';
-          document.getElementById('personalShareSelect').value = '0';
-          document.getElementById('personalCustomShareRow').classList.add('hidden');
           if (userRole === 'owner') {
+            document.getElementById('personalShareSelect').value = '0';
             document.getElementById('involvesGian').checked = false;
           } else {
             document.getElementById('personalShareSelect').value = '50';
@@ -840,7 +840,7 @@
       document.getElementById('expenseAmountInput').value = '';
       document.getElementById('expenseDateInput').value = getTodayLocal();
       document.getElementById('expenseNoteInput').value = '';
-      document.getElementById('expenseAddBtn').textContent = t('add');
+      document.getElementById('expenseAddBtn').textContent = 'Add';
       document.getElementById('expenseCancelBtn').style.display = 'none';
       if (userRole === 'owner') {
         document.getElementById('involvesGian').checked = false;
@@ -880,7 +880,7 @@
       } else {
         if (pastDateActive) clearPastDate();
       }
-      document.getElementById('earningsAddBtn').textContent = t('update');
+      document.getElementById('earningsAddBtn').textContent = 'Update';
       document.getElementById('earningsCancelBtn').style.display = 'inline-block';
     };
 
@@ -908,7 +908,7 @@
           document.getElementById('involvesGian').checked = isShared;
         }
       }
-      document.getElementById('expenseAddBtn').textContent = t('update');
+      document.getElementById('expenseAddBtn').textContent = 'Update';
       document.getElementById('expenseCancelBtn').style.display = 'inline-block';
     };
 
@@ -1038,7 +1038,7 @@
         li.innerHTML = html;
         list.appendChild(li);
       });
-      if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">' + t('noEarnings') + '</li>';
+      if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">No earnings yet.</li>';
     }
 
     function renderExpenseLists() {
@@ -1066,22 +1066,16 @@
         const li = document.createElement('li');
         let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
         let metaLine = e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date;
-        if (e.involves && e.involves.length === 1) {
-          metaLine += ' (only ' + e.involves[0] + ')';
-        } else if (e.share == 0) {
-          metaLine += ' (personal)';
-        } else {
-          metaLine += ' (shared)';
-        }
+        if (e.involves && e.involves.length === 1) metaLine += ' (only Abhi)';
+        else if (e.share == 0) metaLine += ' (personal)';
+        else metaLine += ' (shared)';
         html += '<div class="meta">' + metaLine + '</div>';
-        if (e.note && e.note.trim() !== '') {
-          html += '<div class="note">📝 ' + e.note + '</div>';
-        }
+        if (e.note && e.note.trim() !== '') html += '<div class="note">📝 ' + e.note + '</div>';
         html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         li.innerHTML = html;
         pList.appendChild(li);
       });
-      if (sortedPersonal.length === 0) pList.innerHTML = '<li style="opacity:0.6;">' + t('noPersonal') + '</li>';
+      if (sortedPersonal.length === 0) pList.innerHTML = '<li style="opacity:0.6;">No personal expenses.</li>';
 
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
@@ -1093,19 +1087,16 @@
         const li = document.createElement('li');
         let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
         html += '<div class="meta">' + e.category + ' · ' + e.date + '</div>';
-        if (e.note && e.note.trim() !== '') {
-          html += '<div class="note">📝 ' + e.note + '</div>';
-        }
+        if (e.note && e.note.trim() !== '') html += '<div class="note">📝 ' + e.note + '</div>';
         html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         li.innerHTML = html;
         wList.appendChild(li);
       });
-      if (sortedWork.length === 0) wList.innerHTML = '<li style="opacity:0.6;">' + t('noWork') + '</li>';
+      if (sortedWork.length === 0) wList.innerHTML = '<li style="opacity:0.6;">No work expenses.</li>';
 
       let workTotal = 0;
       sortedWork.forEach(e => workTotal += parseFloat(e.amount)||0);
       document.getElementById('workTotalDisplay').textContent = '$' + workTotal.toFixed(2);
-      if (workBreakdownVisible) toggleWorkBreakdown();
       updateOweBalance();
     }
 
@@ -1113,26 +1104,10 @@
       if (userRole !== 'owner') return;
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
-      let total = 0;
-      let label = '';
-
-      if (summaryMode === 'day') {
-        earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount) || 0);
-        label = t('dayTotal');
-      } else if (summaryMode === 'week') {
-        const mondayStr = getMondayOfWeek(currentDay);
-        const mondayDate = new Date(mondayStr + 'T00:00:00');
-        const sundayDate = new Date(mondayDate);
-        sundayDate.setDate(mondayDate.getDate() + 6);
-        const sundayStr = formatDateForCompare(sundayDate);
-        earnings.filter(e => e.date >= mondayStr && e.date <= sundayStr).forEach(e => total += parseFloat(e.amount) || 0);
-        label = t('weekTotal');
-      } else if (summaryMode === 'month') {
-        const monthPrefix = currentDay.substring(0, 7);
-        earnings.filter(e => e.date.startsWith(monthPrefix)).forEach(e => total += parseFloat(e.amount) || 0);
-        label = t('monthTotal');
-      }
-
+      let total = 0, label = 'Day Total';
+      if (summaryMode === 'week') label = 'Week Total';
+      else if (summaryMode === 'month') label = 'Month Total';
+      earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount) || 0);
       labelEl.textContent = label;
       amountEl.textContent = total.toFixed(2);
     }
@@ -1153,7 +1128,6 @@
         if (share === 0) return false;
         return true;
       });
-      
       sharedExpenses.forEach(e => {
         const amount = parseFloat(e.amount) || 0;
         const share = parseFloat(e.share) || 100;
@@ -1162,15 +1136,13 @@
         if (paidBy === 'Abhi') gianOwesAbhi += otherShare;
         else if (paidBy === 'Gian') gianOwesAbhi -= otherShare;
       });
-      
       const net = gianOwesAbhi - totalPaymentsRecorded;
-      const amountEl = document.getElementById('balanceAmount');
+      document.getElementById('balanceAmount').textContent = '$' + Math.abs(net).toFixed(2);
       const labelEl = document.getElementById('balanceLabel');
       const whoEl = document.getElementById('balanceWho');
-      amountEl.textContent = '$' + Math.abs(net).toFixed(2);
-      if (net > 0.01) { labelEl.textContent = t('owes1'); whoEl.textContent = ''; whoEl.className = 'balance-who positive'; }
-      else if (net < -0.01) { labelEl.textContent = t('owes2'); whoEl.textContent = ''; whoEl.className = 'balance-who negative'; }
-      else { labelEl.textContent = t('settled'); whoEl.textContent = '✓'; whoEl.className = 'balance-who'; }
+      if (net > 0.01) { labelEl.textContent = 'Gian owes Abhi'; whoEl.textContent = ''; whoEl.className = 'balance-who positive'; }
+      else if (net < -0.01) { labelEl.textContent = 'Abhi owes Gian'; whoEl.textContent = ''; whoEl.className = 'balance-who negative'; }
+      else { labelEl.textContent = 'All Settled'; whoEl.textContent = '✓'; whoEl.className = 'balance-who'; }
     }
 
     function updateDayStatus() {
@@ -1209,18 +1181,17 @@
           div.className = 'month-option' + (m === selectedMonth && !isYTD ? ' selected' : '');
           const d = new Date(m + '-01');
           div.textContent = d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
-          div.addEventListener('click', () => { selectedMonth = m; isYTD = false; monthDropdownOpen = false; dropdown.classList.remove('show'); document.getElementById('ytdBtn').classList.remove('active'); updateMonthDisplay(); renderExpenseLists(); });
+          div.addEventListener('click', () => { selectedMonth = m; isYTD = false; monthDropdownOpen = false; dropdown.style.display = 'none'; document.getElementById('ytdBtn').classList.remove('active'); updateMonthDisplay(); renderExpenseLists(); });
           dropdown.appendChild(div);
         });
-        dropdown.classList.add('show');
-      } else { dropdown.classList.remove('show'); }
+        dropdown.style.display = 'block';
+      } else { dropdown.style.display = 'none'; }
     });
 
     document.getElementById('ytdBtn').addEventListener('click', () => { if (!householdId) return; isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); });
 
     document.getElementById('workCard').addEventListener('click', () => {
       if (userRole !== 'owner') return;
-      if (!householdId) return;
       workBreakdownVisible = !workBreakdownVisible;
       const el = document.getElementById('workBreakdown');
       if (workBreakdownVisible) {
@@ -1304,20 +1275,15 @@
       currentLang = currentLang === 'en' ? 'es' : 'en';
       localStorage.setItem('appLang', currentLang);
       document.getElementById('langToggle').textContent = currentLang.toUpperCase();
-      document.getElementById('earningsTabBtn').textContent = t('earnings');
-      document.getElementById('expensesTabBtn').textContent = t('expenses');
-      document.getElementById('earningsAddBtn').textContent = editingEarningsId ? t('update') : t('add');
-      document.getElementById('expenseAddBtn').textContent = editingExpenseId ? t('update') : t('add');
+      document.getElementById('earningsTabBtn').textContent = currentLang === 'en' ? 'Earnings' : 'Ganancias';
+      document.getElementById('expensesTabBtn').textContent = currentLang === 'en' ? 'Expenses' : 'Gastos';
+      document.getElementById('earningsAddBtn').textContent = editingEarningsId ? (currentLang === 'en' ? 'Update' : 'Actualizar') : (currentLang === 'en' ? 'Add' : 'Agregar');
+      document.getElementById('expenseAddBtn').textContent = editingExpenseId ? (currentLang === 'en' ? 'Update' : 'Actualizar') : (currentLang === 'en' ? 'Add' : 'Agregar');
       updateEarningsSummary();
       updateOweBalance();
     });
 
     document.getElementById('expenseDateInput').value = getTodayLocal();
-    if (userRole === 'limited') {
-      document.getElementById('personalShareSelect').value = '50';
-    } else {
-      document.getElementById('personalShareSelect').value = '0';
-    }
   </script>
 </body>
 </html>
