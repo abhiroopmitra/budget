@@ -446,7 +446,6 @@
         ownerTabs.classList.add('hidden');
         expensesSection.classList.remove('hidden');
         setExpenseType('personal');
-        // Set Gian's default as shared with 50%
         document.getElementById('personalShareSelect').value = '50';
         handleShareChange();
       } else {
@@ -661,8 +660,8 @@
     document.getElementById('logoutBtn').addEventListener('click', doLogout);
     document.getElementById('limitedLogoutBtn').addEventListener('click', doLogout);
 
+    // FIX 1: Removed the early return for non-owner in tab handlers
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
-      if (userRole !== 'owner') return;
       document.getElementById('earningsSection').classList.remove('hidden');
       document.getElementById('expensesSection').classList.add('hidden');
       document.getElementById('earningsTabBtn').classList.add('active');
@@ -670,7 +669,6 @@
     });
 
     document.getElementById('expensesTabBtn').addEventListener('click', () => {
-      if (userRole !== 'owner') return;
       document.getElementById('earningsSection').classList.add('hidden');
       document.getElementById('expensesSection').classList.remove('hidden');
       document.getElementById('expensesTabBtn').classList.add('active');
@@ -679,7 +677,6 @@
       renderExpenseLists();
     });
 
-    // Owner (Abhi) - handles involves checkbox
     function onInvolvesChange() {
       const checkbox = document.getElementById('involvesGian');
       const shareSelect = document.getElementById('personalShareSelect');
@@ -694,30 +691,40 @@
     document.getElementById('involvesGian').addEventListener('change', onInvolvesChange);
 
     function getInvolves() {
-      // For Abhi (owner): depends on the checkbox
-      // For Gian (limited): always both
       if (userRole === 'limited') return ['Abhi', 'Gian'];
       const involvesGian = document.getElementById('involvesGian').checked;
       return involvesGian ? ['Abhi', 'Gian'] : ['Abhi'];
     }
 
     function setInvolves(involves) {
-      if (userRole === 'limited') {
-        // Limited users always have both
-        return;
-      }
+      if (userRole === 'limited') return;
       if (!involves || involves.length === 0 || (involves.length === 1 && involves[0] === 'Abhi')) {
         document.getElementById('involvesGian').checked = false;
         document.getElementById('personalShareSelect').value = '0';
       } else {
         document.getElementById('involvesGian').checked = true;
-        // Don't override share when editing
       }
     }
 
+    // FIX 2: Added auto-reopen day logic to earnings handler
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (userRole !== 'owner') return;
       if (!householdId) return;
+      
+      // Auto-reopen day if closed
+      if (!dayOpen && !pastDateActive) {
+        currentDay = getTodayLocal();
+        dayOpen = true;
+        try {
+          await db.collection('households').doc(householdId).update({
+            dayOpen: true,
+            currentDay: currentDay
+          });
+          updateDayStatus();
+          showToast('New day started');
+        } catch(e) { console.error(e); }
+      }
+      
       const amountInput = document.getElementById('earningsAmountInput');
       const sourceSelect = document.getElementById('earningsSourceSelect');
       const amount = parseFloat(amountInput.value);
@@ -765,7 +772,7 @@
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) return;
       
-      // Auto-reopen day if it was closed (for new entries)
+      // Auto-reopen day if closed
       if (!dayOpen && !pastDateActive) {
         currentDay = getTodayLocal();
         dayOpen = true;
@@ -819,7 +826,6 @@
           if (userRole === 'owner') {
             document.getElementById('involvesGian').checked = false;
           } else {
-            // For limited users, reset to shared 50%
             document.getElementById('personalShareSelect').value = '50';
           }
         }
@@ -897,7 +903,6 @@
         else if (entry.share == 100) shareSelect.value = '100';
         else { shareSelect.value = '__custom__'; shareInput.value = entry.share; }
         handleShareChange();
-        // Set involves checkbox (owner only)
         if (userRole === 'owner') {
           const isShared = entry.involves && entry.involves.includes('Gian');
           document.getElementById('involvesGian').checked = isShared;
@@ -1018,7 +1023,6 @@
       if (userRole !== 'owner') return;
       const list = document.getElementById('earningsList');
       list.innerHTML = '';
-      // Sort by date descending, then by timestamp descending
       const sorted = [...earnings].sort((a, b) => {
         if (b.date !== a.date) return b.date.localeCompare(a.date);
         return (b.timestamp || '').localeCompare(a.timestamp || '');
@@ -1040,14 +1044,12 @@
     function renderExpenseLists() {
       let visibleExpenses = expenses;
       if (userRole === 'limited') {
-        // Limited users: only see personal expenses that involve them
         visibleExpenses = expenses.filter(e => {
           if (e.type !== 'personal') return false;
           if (!e.involves || e.involves.length === 0) return true;
           return e.involves.includes('Gian');
         });
       } else {
-        // Owner: see all personal expenses
         visibleExpenses = expenses.filter(e => e.type === 'personal');
       }
 
@@ -1056,7 +1058,6 @@
       
       const pList = document.getElementById('personalList');
       pList.innerHTML = '';
-      // Sort by date descending, then by timestamp descending
       const sortedPersonal = [...visibleExpenses].filter(filter).sort((a, b) => {
         if (b.date !== a.date) return b.date.localeCompare(a.date);
         return (b.timestamp || '').localeCompare(a.timestamp || '');
@@ -1146,11 +1147,10 @@
       let gianOwesAbhi = 0;
       const sharedExpenses = expenses.filter(e => {
         if (e.type !== 'personal') return false;
-        // Only count if share > 0 (it's actually shared) and involves both
         const involves = e.involves || ['Abhi', 'Gian'];
         if (!involves.includes('Abhi') || !involves.includes('Gian')) return false;
         const share = parseFloat(e.share) || 0;
-        if (share === 0) return false; // 0% means it's not shared
+        if (share === 0) return false;
         return true;
       });
       
@@ -1313,7 +1313,6 @@
     });
 
     document.getElementById('expenseDateInput').value = getTodayLocal();
-    // Set initial share based on role
     if (userRole === 'limited') {
       document.getElementById('personalShareSelect').value = '50';
     } else {
