@@ -67,7 +67,7 @@
     .balance-who { font-size: 18px; opacity: 0.9; }
     .balance-who.positive { color: #f85149; }
     .balance-who.negative { color: #7ee787; }
-    .payment-slider-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 16px; user-select: none; touch-action: none; }
+    .payment-slider-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 14px; user-select: none; touch-action: none; }
     .payment-slider-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
     .payment-slider-handle { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; background: #1f6feb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; pointer-events: none; transition: left 0.15s ease-out; }
     .payment-slider-track.dragging .payment-slider-handle { transition: none; }
@@ -133,6 +133,12 @@
     .welcome-banner { background: linear-gradient(135deg, #2ea043 0%, #1a7a2e 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center; }
     .welcome-banner h2 { font-size: 20px; margin-bottom: 6px; }
     .welcome-banner p { font-size: 13px; opacity: 0.9; }
+    .owner-only { display: none; }
+    .limited-only { display: none; }
+    body.role-owner .owner-only { display: block; }
+    body.role-limited .limited-only { display: block; }
+    body.role-owner .limited-only { display: none !important; }
+    body.role-limited .owner-only { display: none !important; }
   </style>
 </head>
 <body>
@@ -165,12 +171,12 @@
       </div>
     </div>
 
-    <div class="tabs" id="ownerTabs">
+    <div class="tabs owner-only" id="ownerTabs">
       <button class="tab active" id="earningsTabBtn">Earnings</button>
       <button class="tab" id="expensesTabBtn">Expenses</button>
     </div>
 
-    <div id="earningsSection" class="hidden">
+    <div id="earningsSection" class="owner-only">
       <button class="summary-btn" id="summaryBtn">
         <span class="period-label" id="summaryPeriodLabel">Day Total</span>
         <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
@@ -206,10 +212,10 @@
       <ul id="earningsList"></ul>
     </div>
 
-    <div id="expensesSection" class="hidden">
-      <div id="limitedWelcome" class="welcome-banner hidden">
-        <h2>👋 Welcome, Gian</h2>
-        <p>You can view and add shared personal expenses with Abhi.</p>
+    <div id="expensesSection">
+      <div id="limitedWelcome" class="welcome-banner limited-only">
+        <h2>👋 Welcome</h2>
+        <p>You can view and add shared personal expenses.</p>
       </div>
 
       <div class="month-header">
@@ -314,7 +320,7 @@
         <div class="household-id" id="householdIdDisplay"></div>
       </div>
 
-      <div class="settings-section limited-only hidden" id="limitedLogoutSection">
+      <div class="settings-section limited-only" id="limitedLogoutSection">
         <div class="settings-grid">
           <button class="settings-btn logout" id="limitedLogoutBtn" style="grid-column: span 2;">🚪 Logout</button>
         </div>
@@ -421,26 +427,33 @@
     }
 
     function applyRoleUI() {
-      const ownerEls = document.querySelectorAll('.owner-only');
-      const limitedEls = document.querySelectorAll('.limited-only');
       const roleBadge = document.getElementById('roleBadge');
+      const earningsSection = document.getElementById('earningsSection');
+      const expensesSection = document.getElementById('expensesSection');
+      const ownerTabs = document.getElementById('ownerTabs');
       
       if (userRole === 'owner') {
-        ownerEls.forEach(el => el.classList.remove('hidden'));
-        limitedEls.forEach(el => el.classList.add('hidden'));
+        document.body.className = 'role-owner';
         roleBadge.textContent = '👑 Owner';
         roleBadge.className = 'role-badge owner';
-        document.getElementById('ownerTabs').classList.remove('hidden');
+        earningsSection.classList.remove('hidden');
+        ownerTabs.classList.remove('hidden');
+        expensesSection.classList.add('hidden');
+        // Show earnings tab as active
+        document.getElementById('earningsTabBtn').classList.add('active');
+        document.getElementById('expensesTabBtn').classList.remove('active');
       } else if (userRole === 'limited') {
-        ownerEls.forEach(el => el.classList.add('hidden'));
-        limitedEls.forEach(el => el.classList.remove('hidden'));
+        document.body.className = 'role-limited';
         roleBadge.textContent = '👤 Shared';
         roleBadge.className = 'role-badge limited';
-        document.getElementById('ownerTabs').classList.add('hidden');
-        document.getElementById('expensesSection').classList.remove('hidden');
-        document.getElementById('earningsSection').classList.add('hidden');
-        document.getElementById('limitedWelcome').classList.remove('hidden');
+        earningsSection.classList.add('hidden');
+        ownerTabs.classList.add('hidden');
+        expensesSection.classList.remove('hidden');
         setExpenseType('personal');
+      } else {
+        document.body.className = '';
+        roleBadge.textContent = '';
+        roleBadge.className = 'role-badge';
       }
     }
 
@@ -455,6 +468,7 @@
         currentUser = null;
         householdId = null;
         userRole = null;
+        document.body.className = '';
         document.getElementById('loginContainer').classList.add('show');
         document.getElementById('appContainer').classList.remove('show');
       }
@@ -646,6 +660,7 @@
     document.getElementById('limitedLogoutBtn').addEventListener('click', doLogout);
 
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
+      if (userRole !== 'owner') return;
       document.getElementById('earningsSection').classList.remove('hidden');
       document.getElementById('expensesSection').classList.add('hidden');
       document.getElementById('earningsTabBtn').classList.add('active');
@@ -653,6 +668,7 @@
     });
 
     document.getElementById('expensesTabBtn').addEventListener('click', () => {
+      if (userRole !== 'owner') return;
       document.getElementById('earningsSection').classList.add('hidden');
       document.getElementById('expensesSection').classList.remove('hidden');
       document.getElementById('expensesTabBtn').classList.add('active');
@@ -660,6 +676,23 @@
       updateMonthDisplay();
       renderExpenseLists();
     });
+
+    function getInvolves() {
+      const involves = [];
+      if (document.getElementById('involvesAbhi').checked) involves.push('Abhi');
+      if (document.getElementById('involvesGian').checked) involves.push('Gian');
+      return involves;
+    }
+
+    function setInvolves(involves) {
+      if (!involves || involves.length === 0) {
+        document.getElementById('involvesAbhi').checked = true;
+        document.getElementById('involvesGian').checked = true;
+      } else {
+        document.getElementById('involvesAbhi').checked = involves.includes('Abhi');
+        document.getElementById('involvesGian').checked = involves.includes('Gian');
+      }
+    }
 
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (userRole !== 'owner') return;
@@ -707,23 +740,6 @@
       if (pastDateActive) clearPastDate();
       updateEarningsSourceSelect();
     });
-
-    function getInvolves() {
-      const involves = [];
-      if (document.getElementById('involvesAbhi').checked) involves.push('Abhi');
-      if (document.getElementById('involvesGian').checked) involves.push('Gian');
-      return involves;
-    }
-
-    function setInvolves(involves) {
-      if (!involves || involves.length === 0) {
-        document.getElementById('involvesAbhi').checked = true;
-        document.getElementById('involvesGian').checked = true;
-      } else {
-        document.getElementById('involvesAbhi').checked = involves.includes('Abhi');
-        document.getElementById('involvesGian').checked = involves.includes('Gian');
-      }
-    }
 
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) return;
@@ -900,7 +916,6 @@
       document.getElementById('typeWorkBtn').classList.toggle('active', type === 'work');
       document.getElementById('personalFields').classList.toggle('hidden', type !== 'personal');
       document.getElementById('workFields').classList.toggle('hidden', type !== 'work');
-      document.getElementById('involvesSection').classList.toggle('hidden', type !== 'personal');
       updateExpenseCategorySelect();
     }
 
@@ -947,6 +962,7 @@
     }
 
     function renderEarningsList() {
+      if (userRole !== 'owner') return;
       const list = document.getElementById('earningsList');
       list.innerHTML = '';
       earnings.forEach(e => {
