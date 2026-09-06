@@ -16,6 +16,9 @@
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     h1 { font-size: 28px; }
     .lang-toggle { background: #161b22; border: 1px solid #30363d; color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .role-badge { font-size: 11px; padding: 3px 8px; border-radius: 6px; margin-right: 6px; }
+    .role-badge.owner { background: #2ea043; color: #fff; }
+    .role-badge.limited { background: #6e7681; color: #fff; }
     .login-container { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0d1117; z-index: 1000; padding: 40px 20px; align-items: center; justify-content: center; flex-direction: column; }
     .login-container.show { display: flex; }
     .login-box { background: #161b22; padding: 30px; border-radius: 16px; width: 100%; max-width: 400px; border: 1px solid #30363d; }
@@ -86,35 +89,29 @@
     .entry-form input, .entry-form select { flex: 1 1 auto; padding: 12px; font-size: 16px; border-radius: 10px; border: none; background: #fff; color: #000; min-width: 0; }
     .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px; background: #2ea043; color: #fff; }
     .entry-form #cancelEditBtn { background: #f85149; display: none; }
-    .past-date-toggle {
-      padding: 12px 14px; font-size: 14px; border: none; border-radius: 10px;
-      background: #30363d; color: #fff; cursor: pointer; white-space: nowrap;
-    }
+    .past-date-toggle { padding: 12px 14px; font-size: 14px; border: none; border-radius: 10px; background: #30363d; color: #fff; cursor: pointer; white-space: nowrap; }
     .past-date-toggle:hover { background: #484f58; }
-    .past-date-row {
-      display: none; gap: 8px; margin-bottom: 12px; align-items: center;
-      background: #161b22; padding: 10px; border-radius: 10px;
-    }
+    .past-date-row { display: none; gap: 8px; margin-bottom: 12px; align-items: center; background: #161b22; padding: 10px; border-radius: 10px; }
     .past-date-row.show { display: flex; }
     .past-date-row label { font-size: 12px; opacity: 0.7; }
-    .past-date-row input[type="date"] {
-      flex: 1; padding: 10px; font-size: 14px; border-radius: 8px;
-      border: 1px solid #30363d; background: #0d1117; color: #fff;
-    }
-    .past-date-row .clear-date-btn {
-      padding: 10px 14px; font-size: 14px; border: none; border-radius: 8px;
-      background: #f85149; color: #fff; cursor: pointer;
-    }
-    .past-date-active-badge {
-      font-size: 11px; opacity: 0.7; margin-top: 2px;
-      padding: 4px 8px; background: #1f6feb; color: #fff;
-      border-radius: 6px; display: inline-block;
-    }
+    .past-date-row input[type="date"] { flex: 1; padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #fff; }
+    .past-date-row .clear-date-btn { padding: 10px 14px; font-size: 14px; border: none; border-radius: 8px; background: #f85149; color: #fff; cursor: pointer; }
+    .past-date-active-badge { font-size: 11px; opacity: 0.7; margin-top: 2px; padding: 4px 8px; background: #1f6feb; color: #fff; border-radius: 6px; display: inline-block; }
     .note-input { width: 100%; padding: 10px; font-size: 14px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: #fff; margin-bottom: 8px; }
     .note-input::placeholder { color: #8b949e; }
     .custom-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
     .custom-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #2ea043; color: #fff; }
+    .involves-section {
+      background: #161b22; border-radius: 10px; padding: 12px; margin-bottom: 12px;
+    }
+    .involves-title { font-size: 13px; opacity: 0.7; margin-bottom: 8px; }
+    .checkbox-row {
+      display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 15px;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 20px; height: 20px; cursor: pointer; accent-color: #2ea043;
+    }
     .lists-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .list-column { background: #161b22; border-radius: 10px; padding: 12px; max-height: 400px; overflow-y: auto; }
     .list-header { font-size: 14px; font-weight: bold; opacity: 0.8; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
@@ -143,6 +140,12 @@
     .user-info { font-size: 12px; opacity: 0.6; margin-top: 10px; text-align: center; }
     .household-id { font-size: 11px; opacity: 0.5; margin-top: 5px; text-align: center; font-family: monospace; }
     .content-disabled { opacity: 0.3; pointer-events: none; }
+    .welcome-banner {
+      background: linear-gradient(135deg, #2ea043 0%, #1a7a2e 100%);
+      border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;
+    }
+    .welcome-banner h2 { font-size: 20px; margin-bottom: 6px; }
+    .welcome-banner p { font-size: 13px; opacity: 0.9; }
   </style>
 </head>
 <body>
@@ -170,12 +173,19 @@
     <div class="no-household-banner" id="noHouseholdBanner">⚠️ <strong>No Household!</strong> Please create or join a household in Settings to start adding data.</div>
     <div class="header">
       <h1>💰 Budget</h1>
-      <button class="lang-toggle" id="langToggle">EN</button>
+      <div style="display:flex; align-items:center;">
+        <span id="roleBadge" class="role-badge"></span>
+        <button class="lang-toggle" id="langToggle">EN</button>
+      </div>
     </div>
-    <div class="tabs">
+
+    <!-- OWNER TABS (Abhi only) -->
+    <div class="tabs" id="ownerTabs">
       <button class="tab active" id="earningsTabBtn">Earnings</button>
       <button class="tab" id="expensesTabBtn">Expenses</button>
     </div>
+
+    <!-- EARNINGS SECTION (Abhi only) -->
     <div id="earningsSection" class="content-disabled">
       <button class="summary-btn" id="summaryBtn">
         <span class="period-label" id="summaryPeriodLabel">Day Total</span>
@@ -211,7 +221,15 @@
       </div>
       <ul id="earningsList"></ul>
     </div>
+
+    <!-- EXPENSES SECTION (both can see, but limited view) -->
     <div id="expensesSection" class="hidden content-disabled">
+      <!-- Welcome banner for limited users -->
+      <div id="limitedWelcome" class="welcome-banner hidden">
+        <h2>👋 Welcome, Gian</h2>
+        <p>You can view and add shared personal expenses with Abhi.</p>
+      </div>
+
       <div class="month-header">
         <div class="month-display" id="monthDisplay">January 2026 ▼</div>
         <button class="ytd-btn" id="ytdBtn">YTD</button>
@@ -228,15 +246,22 @@
           <div class="payment-slider-handle" id="paymentSliderHandle">💰</div>
         </div>
       </div>
-      <div class="work-card" id="workCard">
-        <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
-        <div class="work-card-value" id="workTotalDisplay">$0.00</div>
-        <div id="workBreakdown" class="breakdown"></div>
+
+      <!-- Work expenses (OWNER ONLY) -->
+      <div id="workExpensesBlock" class="owner-only">
+        <div class="work-card" id="workCard">
+          <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
+          <div class="work-card-value" id="workTotalDisplay">$0.00</div>
+          <div id="workBreakdown" class="breakdown"></div>
+        </div>
       </div>
-      <div class="type-toggle">
+
+      <!-- Type toggle (OWNER ONLY - can choose Personal/Work) -->
+      <div class="type-toggle owner-only" id="typeToggle">
         <button class="type-btn active" id="typePersonalBtn">Personal</button>
         <button class="type-btn" id="typeWorkBtn">Work</button>
       </div>
+
       <div class="entry-form">
         <input type="date" id="expenseDateInput">
         <input type="number" id="expenseAmountInput" placeholder="Amount (CAD)" step="0.01" min="0">
@@ -245,6 +270,8 @@
         <button id="expenseCancelBtn" style="display:none;">Cancel</button>
       </div>
       <input type="text" id="expenseNoteInput" class="note-input" placeholder="Note (optional) — e.g. Birthday dinner, Cash tip, etc.">
+
+      <!-- Personal-specific fields (always shown for personal expenses) -->
       <div id="personalFields" class="section">
         <div class="entry-form">
           <select id="personalPaidBySelect">
@@ -266,23 +293,41 @@
           <button id="savePersonalCatBtn">Save</button>
         </div>
       </div>
-      <div id="workFields" class="section hidden">
+
+      <!-- Work-specific fields (OWNER ONLY) -->
+      <div id="workFields" class="section owner-only hidden">
         <div id="workCustomCatRow" class="custom-row hidden">
           <input type="text" id="workCustomCatInput" placeholder="New category">
           <button id="saveWorkCatBtn">Save</button>
         </div>
       </div>
+
+      <!-- INVOLVES section (for personal expenses) -->
+      <div class="involves-section owner-only" id="involvesSection">
+        <div class="involves-title">This expense involves:</div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="involvesAbhi" checked>
+          <label for="involvesAbhi">Abhi</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="involvesGian" checked>
+          <label for="involvesGian">Gian</label>
+        </div>
+      </div>
+
       <div class="lists-container">
         <div class="list-column">
-          <div class="list-header">PERSONAL</div>
+          <div class="list-header" data-list-type="personal">PERSONAL</div>
           <ul id="personalList"></ul>
         </div>
-        <div class="list-column">
+        <div class="list-column owner-only" id="workListColumn">
           <div class="list-header">WORK</div>
           <ul id="workList"></ul>
         </div>
       </div>
-      <div class="settings-section">
+
+      <!-- Settings (OWNER ONLY) -->
+      <div class="settings-section owner-only" id="settingsSection">
         <div class="settings-title">⚙️ Settings</div>
         <div class="settings-grid">
           <button class="settings-btn export" id="exportBtn">📤 Export</button>
@@ -292,13 +337,18 @@
         <input type="file" id="fileInput" accept=".json">
         <div class="household-id" id="householdIdDisplay"></div>
       </div>
+
+      <!-- Logout for limited users only -->
+      <div class="settings-section limited-only hidden" id="limitedLogoutSection">
+        <button class="settings-btn logout" id="limitedLogoutBtn" style="grid-column: span 2;">🚪 Logout</button>
+      </div>
     </div>
   </div>
   <div id="toast"></div>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCw-VlPowIAzY0ylq2-WK39Jo-L0ELn414",
@@ -315,32 +365,17 @@
 
     function getTodayLocal() {
       const d = new Date();
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
-
     function getYesterdayLocal() {
       const d = new Date();
       d.setDate(d.getDate() - 1);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
-
-    function getCurrentMonthLocal() {
-      return getTodayLocal().slice(0, 7);
-    }
-
+    function getCurrentMonthLocal() { return getTodayLocal().slice(0, 7); }
     function formatDateForCompare(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
-
     function getMondayOfWeek(dateStr) {
       const d = new Date(dateStr + 'T00:00:00');
       const dayOfWeek = d.getDay();
@@ -351,6 +386,7 @@
 
     let currentUser = null;
     let householdId = null;
+    let userRole = null; // 'owner' or 'limited'
     let earnings = [];
     let expenses = [];
     let customSources = [];
@@ -377,7 +413,6 @@
     };
 
     function t(key) { return translations[currentLang][key] || key; }
-
     function showToast(msg, isError = false) {
       const el = document.getElementById('toast');
       el.textContent = msg;
@@ -386,39 +421,54 @@
       el._timer = setTimeout(() => el.classList.remove('show'), 2600);
     }
 
-    function updateContentAccess() {
-      const hasHousehold = householdId !== null && householdId !== '';
-      document.getElementById('earningsSection').classList.toggle('content-disabled', !hasHousehold);
-      document.getElementById('expensesSection').classList.toggle('content-disabled', !hasHousehold);
-      document.getElementById('noHouseholdBanner').classList.toggle('show', !hasHousehold);
-    }
-
-    // Past date functions
     function togglePastDate() {
       const row = document.getElementById('pastDateRow');
       const input = document.getElementById('pastDateInput');
       if (row.classList.contains('show')) {
-        // Hide
         row.classList.remove('show');
         pastDateActive = false;
         input.value = '';
       } else {
-        // Show with default = yesterday, max = today
         row.classList.add('show');
         pastDateActive = true;
         input.max = getTodayLocal();
-        if (!input.value) {
-          input.value = getYesterdayLocal();
-        }
+        if (!input.value) input.value = getYesterdayLocal();
       }
     }
-
     function clearPastDate() {
       const row = document.getElementById('pastDateRow');
       const input = document.getElementById('pastDateInput');
       input.value = '';
       row.classList.remove('show');
       pastDateActive = false;
+    }
+
+    function applyRoleUI() {
+      // Hide/show owner-only and limited-only elements
+      const ownerEls = document.querySelectorAll('.owner-only');
+      const limitedEls = document.querySelectorAll('.limited-only');
+      const roleBadge = document.getElementById('roleBadge');
+      
+      if (userRole === 'owner') {
+        ownerEls.forEach(el => el.classList.remove('hidden'));
+        limitedEls.forEach(el => el.classList.add('hidden'));
+        roleBadge.textContent = '👑 Owner';
+        roleBadge.className = 'role-badge owner';
+        document.getElementById('ownerTabs').classList.remove('hidden');
+      } else if (userRole === 'limited') {
+        ownerEls.forEach(el => el.classList.add('hidden'));
+        limitedEls.forEach(el => el.classList.remove('hidden'));
+        roleBadge.textContent = '👤 Shared';
+        roleBadge.className = 'role-badge limited';
+        document.getElementById('ownerTabs').classList.add('hidden');
+        // Force show expenses section for limited users
+        document.getElementById('expensesSection').classList.remove('hidden');
+        document.getElementById('earningsSection').classList.add('hidden');
+        // Show welcome banner
+        document.getElementById('limitedWelcome').classList.remove('hidden');
+        // Force personal type
+        setExpenseType('personal');
+      }
     }
 
     auth.onAuthStateChanged(async (user) => {
@@ -431,10 +481,10 @@
       } else {
         currentUser = null;
         householdId = null;
+        userRole = null;
         document.getElementById('loginContainer').classList.add('show');
         document.getElementById('appContainer').classList.remove('show');
       }
-      updateContentAccess();
     });
 
     async function loadHousehold() {
@@ -442,16 +492,31 @@
       try {
         const userDoc = await db.collection('users').doc(currentUser.uid).get();
         if (userDoc.exists) {
-          householdId = userDoc.data().householdId;
+          const userData = userDoc.data();
+          householdId = userData.householdId;
+          userRole = userData.role;
           if (householdId) {
+            // If role not set, determine from household
+            if (!userRole) {
+              const householdDoc = await db.collection('households').doc(householdId).get();
+              if (householdDoc.exists) {
+                const hData = householdDoc.data();
+                const ownerEmail = hData.ownerEmail;
+                userRole = (ownerEmail && currentUser.email === ownerEmail) ? 'owner' : 'limited';
+                // Save role to user profile
+                await db.collection('users').doc(currentUser.uid).update({ role: userRole });
+              } else {
+                userRole = 'limited';
+              }
+            }
+            applyRoleUI();
             document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
             loadHouseholdData();
           }
         } else {
           showHouseholdSetup();
         }
-        updateContentAccess();
-      } catch (e) { console.error('Error loading household:', e); showHouseholdSetup(); updateContentAccess(); }
+      } catch (e) { console.error('Error loading household:', e); showHouseholdSetup(); }
     }
 
     function showHouseholdSetup() {
@@ -475,19 +540,22 @@
           customWorkCats = data.customWorkCats || [];
           currentDay = data.currentDay || getTodayLocal();
           dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
-          updateDayStatus();
-          updateEarningsSourceSelect();
+          if (userRole === 'owner') updateDayStatus();
+          if (userRole === 'owner') updateEarningsSourceSelect();
           updateExpenseCategorySelect();
-          updateContentAccess();
         }
       }, error => { console.error('Error listening to household:', error); });
       
-      db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
-        earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderEarningsList();
-        updateEarningsSummary();
-      }, error => console.error('Error loading earnings:', error));
+      // Earnings (owner only)
+      if (userRole === 'owner') {
+        db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+          earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          renderEarningsList();
+          updateEarningsSummary();
+        }, error => console.error('Error loading earnings:', error));
+      }
       
+      // Expenses (both)
       db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
@@ -528,8 +596,10 @@
       btn.textContent = 'Creating...';
       try {
         const newHouseholdId = 'hh_' + Math.random().toString(36).substr(2, 9);
+        const ownerEmail = currentUser.email;
         await db.collection('households').doc(newHouseholdId).set({
           members: [currentUser.email],
+          ownerEmail: ownerEmail,
           createdAt: new Date().toISOString(),
           totalPaymentsRecorded: 0,
           currentDay: getTodayLocal(),
@@ -541,15 +611,17 @@
         await db.collection('users').doc(currentUser.uid).set({
           email: currentUser.email,
           householdId: newHouseholdId,
+          role: 'owner',
           joinedAt: new Date().toISOString()
         });
         householdId = newHouseholdId;
+        userRole = 'owner';
         document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
         const infoEl = document.getElementById('householdInfo');
         infoEl.style.display = 'block';
         infoEl.textContent = '✅ Household created! Share this ID with your partner: ' + newHouseholdId;
+        applyRoleUI();
         loadHouseholdData();
-        updateContentAccess();
         showToast('Household created! Share ID: ' + newHouseholdId);
       } catch (e) { console.error(e); showToast('Error creating household: ' + e.message, true); }
       finally { btn.disabled = false; btn.textContent = 'Create New Household'; }
@@ -560,16 +632,35 @@
       try {
         const hDoc = await db.collection('households').doc(hid).get();
         if (!hDoc.exists) { throw new Error('Household not found'); }
-        await db.collection('households').doc(hid).update({ members: firebase.firestore.FieldValue.arrayUnion(currentUser.email) });
+        
+        // Determine role: if no ownerEmail set, first member is owner
+        const hData = hDoc.data();
+        let determinedRole = 'limited';
+        if (hData.ownerEmail && currentUser.email === hData.ownerEmail) {
+          determinedRole = 'owner';
+        } else if (!hData.ownerEmail && hData.members && hData.members.length === 1) {
+          // First member becomes owner if no ownerEmail set
+          determinedRole = 'owner';
+          await db.collection('households').doc(hid).update({ 
+            members: firebase.firestore.FieldValue.arrayUnion(currentUser.email),
+            ownerEmail: currentUser.email 
+          });
+        } else {
+          await db.collection('households').doc(hid).update({ members: firebase.firestore.FieldValue.arrayUnion(currentUser.email) });
+        }
+        
         await db.collection('users').doc(currentUser.uid).set({
           email: currentUser.email,
           householdId: hid,
+          role: determinedRole,
           joinedAt: new Date().toISOString()
         });
+        
         householdId = hid;
+        userRole = determinedRole;
         document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
+        applyRoleUI();
         loadHouseholdData();
-        updateContentAccess();
       } catch (e) { throw e; }
     }
 
@@ -583,10 +674,11 @@
       document.getElementById('householdInfo').style.display = 'none';
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+    function doLogout() { auth.signOut(); }
+    document.getElementById('logoutBtn').addEventListener('click', doLogout);
+    document.getElementById('limitedLogoutBtn').addEventListener('click', doLogout);
 
     document.getElementById('earningsTabBtn').addEventListener('click', () => {
-      if (!householdId) { showToast('Create or join a household first!', true); return; }
       document.getElementById('earningsSection').classList.remove('hidden');
       document.getElementById('expensesSection').classList.add('hidden');
       document.getElementById('earningsTabBtn').classList.add('active');
@@ -594,7 +686,6 @@
     });
 
     document.getElementById('expensesTabBtn').addEventListener('click', () => {
-      if (!householdId) { showToast('Create or join a household first!', true); return; }
       document.getElementById('earningsSection').classList.add('hidden');
       document.getElementById('expensesSection').classList.remove('hidden');
       document.getElementById('expensesTabBtn').classList.add('active');
@@ -603,9 +694,10 @@
       renderExpenseLists();
     });
 
-    // Earnings Add with past date support
+    // EARNINGS (owner only)
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
-      if (!householdId) { showToast('Create or join a household first!', true); return; }
+      if (userRole !== 'owner') return;
+      if (!householdId) return;
       const amountInput = document.getElementById('earningsAmountInput');
       const sourceSelect = document.getElementById('earningsSourceSelect');
       const amount = parseFloat(amountInput.value);
@@ -613,15 +705,11 @@
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
       if (source === '__custom__') { alert('Save custom source first.'); return; }
 
-      // Determine the date: past date if active, else currentDay
       let entryDate = currentDay;
       if (pastDateActive) {
         const pastDateInput = document.getElementById('pastDateInput').value;
         if (pastDateInput) {
-          if (pastDateInput > getTodayLocal()) {
-            alert('Past date cannot be in the future.');
-            return;
-          }
+          if (pastDateInput > getTodayLocal()) { alert('Past date cannot be in the future.'); return; }
           entryDate = pastDateInput;
         }
       }
@@ -639,10 +727,9 @@
         amountInput.value = '';
         sourceSelect.value = 'UberEats';
         updateEarningsSourceSelect();
-        // Clear past date selection after adding
         if (pastDateActive) clearPastDate();
-        showToast('Earning added' + (entryDate !== currentDay ? ' (date: ' + entryDate + ')' : '') + '!');
-      } catch (e) { console.error(e); showToast('Error adding earning: ' + e.message, true); }
+        showToast('Earning added!');
+      } catch (e) { console.error(e); showToast('Error: ' + e.message, true); }
     });
 
     document.getElementById('earningsCancelBtn').addEventListener('click', () => {
@@ -655,8 +742,27 @@
       updateEarningsSourceSelect();
     });
 
+    // Get involves list from checkboxes
+    function getInvolves() {
+      const involves = [];
+      if (document.getElementById('involvesAbhi').checked) involves.push('Abhi');
+      if (document.getElementById('involvesGian').checked) involves.push('Gian');
+      return involves;
+    }
+
+    function setInvolves(involves) {
+      if (!involves || involves.length === 0) {
+        document.getElementById('involvesAbhi').checked = true;
+        document.getElementById('involvesGian').checked = true;
+      } else {
+        document.getElementById('involvesAbhi').checked = involves.includes('Abhi');
+        document.getElementById('involvesGian').checked = involves.includes('Gian');
+      }
+    }
+
+    // EXPENSES
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
-      if (!householdId) { showToast('Create or join a household first!', true); return; }
+      if (!householdId) return;
       const dateInput = document.getElementById('expenseDateInput');
       const amountInput = document.getElementById('expenseAmountInput');
       const catSelect = document.getElementById('expenseCategorySelect');
@@ -668,13 +774,16 @@
       if (!date) { alert('Select a date.'); return; }
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
       if (category === '__custom__') { alert('Save custom category first.'); return; }
-      const entry = { type: expenseType, date, amount, category, note: note, addedBy: currentUser.email, timestamp: new Date().toISOString() };
+      
+      const entry = { type: expenseType, date, amount, category, note, addedBy: currentUser.email, timestamp: new Date().toISOString() };
       if (expenseType === 'personal') {
         const paidBy = document.getElementById('personalPaidBySelect').value;
         let share = document.getElementById('personalShareSelect').value;
         if (share === '__custom__') share = document.getElementById('personalCustomShareInput').value;
         entry.paidBy = paidBy;
         entry.share = share;
+        // Get involves from checkboxes
+        entry.involves = getInvolves();
       }
       try {
         if (editingExpenseId) {
@@ -692,11 +801,12 @@
           document.getElementById('personalPaidBySelect').value = 'Abhi';
           document.getElementById('personalShareSelect').value = '100';
           document.getElementById('personalCustomShareRow').classList.add('hidden');
+          setInvolves(['Abhi', 'Gian']); // reset to default
         }
         catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
         handleCategoryChange();
         showToast('Expense added!');
-      } catch (e) { console.error(e); showToast('Error adding expense: ' + e.message, true); }
+      } catch (e) { console.error(e); showToast('Error: ' + e.message, true); }
     });
 
     document.getElementById('expenseCancelBtn').addEventListener('click', () => {
@@ -706,30 +816,32 @@
       document.getElementById('expenseNoteInput').value = '';
       document.getElementById('expenseAddBtn').textContent = t('add');
       document.getElementById('expenseCancelBtn').style.display = 'none';
-      setExpenseType('personal');
+      setInvolves(['Abhi', 'Gian']);
+      setExpenseType(userRole === 'limited' ? 'personal' : 'personal');
     });
 
     window.deleteEarnings = async (id) => {
+      if (userRole !== 'owner') return;
       if (!householdId) return;
       if (!confirm('Delete?')) return;
       try { await db.collection('households').doc(householdId).collection('earnings').doc(id).delete(); showToast('Deleted'); }
-      catch (e) { showToast('Error deleting', true); }
+      catch (e) { showToast('Error', true); }
     };
 
     window.deleteExpense = async (id) => {
       if (!householdId) return;
       if (!confirm('Delete?')) return;
       try { await db.collection('households').doc(householdId).collection('expenses').doc(id).delete(); showToast('Deleted'); }
-      catch (e) { showToast('Error deleting', true); }
+      catch (e) { showToast('Error', true); }
     };
 
     window.startEditEarnings = (id) => {
+      if (userRole !== 'owner') return;
       const entry = earnings.find(e => e.id === id);
       if (!entry) return;
       editingEarningsId = id;
       document.getElementById('earningsAmountInput').value = entry.amount;
       document.getElementById('earningsSourceSelect').value = entry.source;
-      // Show the entry's date in past date picker if it's not currentDay
       if (entry.date !== currentDay) {
         if (!pastDateActive) togglePastDate();
         document.getElementById('pastDateInput').value = entry.date;
@@ -758,12 +870,14 @@
         else if (entry.share == 50) shareSelect.value = '50';
         else { shareSelect.value = '__custom__'; shareInput.value = entry.share; }
         handleShareChange();
+        setInvolves(entry.involves || ['Abhi', 'Gian']);
       }
       document.getElementById('expenseAddBtn').textContent = t('update');
       document.getElementById('expenseCancelBtn').style.display = 'inline-block';
     };
 
     document.getElementById('saveCustomSourceBtn').addEventListener('click', async () => {
+      if (userRole !== 'owner') return;
       if (!householdId) return;
       const input = document.getElementById('earningsCustomInput');
       const name = input.value.trim();
@@ -793,6 +907,7 @@
     });
 
     document.getElementById('saveWorkCatBtn').addEventListener('click', async () => {
+      if (userRole !== 'owner') return;
       if (!householdId) return;
       const input = document.getElementById('workCustomCatInput');
       const name = input.value.trim();
@@ -816,11 +931,14 @@
     });
 
     function setExpenseType(type) {
+      // Limited users can only use personal
+      if (userRole === 'limited' && type !== 'personal') return;
       expenseType = type;
       document.getElementById('typePersonalBtn').classList.toggle('active', type === 'personal');
       document.getElementById('typeWorkBtn').classList.toggle('active', type === 'work');
       document.getElementById('personalFields').classList.toggle('hidden', type !== 'personal');
       document.getElementById('workFields').classList.toggle('hidden', type !== 'work');
+      document.getElementById('involvesSection').classList.toggle('hidden', type !== 'personal');
       updateExpenseCategorySelect();
     }
 
@@ -833,12 +951,10 @@
       const catRow = expenseType === 'personal' ? document.getElementById('personalCustomCatRow') : document.getElementById('workCustomCatRow');
       catRow.classList.toggle('hidden', !isCustom);
     }
-
     function handleShareChange() {
       const select = document.getElementById('personalShareSelect');
       document.getElementById('personalCustomShareRow').classList.toggle('hidden', select.value !== '__custom__');
     }
-
     document.getElementById('personalShareSelect').addEventListener('change', handleShareChange);
     document.getElementById('expenseCategorySelect').addEventListener('change', handleCategoryChange);
 
@@ -860,7 +976,10 @@
       const customs = expenseType === 'personal' ? customPersonalCats : customWorkCats;
       defaults.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
       customs.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
-      const optCustom = document.createElement('option'); optCustom.value = '__custom__'; optCustom.textContent = '+ Add custom…'; select.add(optCustom);
+      // Only show "+ Add custom" for owner
+      if (userRole === 'owner') {
+        const optCustom = document.createElement('option'); optCustom.value = '__custom__'; optCustom.textContent = '+ Add custom…'; select.add(optCustom);
+      }
       if (current && current !== '__custom__' && [...select.options].some(o => o.value === current)) select.value = current;
       else select.value = expenseType === 'personal' ? 'Food' : 'Gas';
       handleCategoryChange();
@@ -884,25 +1003,44 @@
     }
 
     function renderExpenseLists() {
+      // Filter for limited user: only show personal expenses that involve them
+      let visibleExpenses = expenses;
+      if (userRole === 'limited') {
+        visibleExpenses = expenses.filter(e => {
+          if (e.type !== 'personal') return false; // hide work
+          // Show if Gian is in involves, OR if no involves field (backward compat)
+          if (!e.involves || e.involves.length === 0) return true;
+          return e.involves.includes('Gian');
+        });
+      }
+
       const filter = (e) => e.type === 'personal' && (isYTD || e.date.substring(0,7) === selectedMonth);
       const filterWork = (e) => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth);
+      
       const pList = document.getElementById('personalList');
       pList.innerHTML = '';
-      expenses.filter(filter).forEach(e => {
+      visibleExpenses.filter(filter).forEach(e => {
         const li = document.createElement('li');
         let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
-        html += '<div class="meta">' + e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date + '</div>';
+        let metaLine = e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date;
+        if (e.involves && e.involves.length === 1) {
+          metaLine += ' (only ' + e.involves[0] + ')';
+        }
+        html += '<div class="meta">' + metaLine + '</div>';
         if (e.note && e.note.trim() !== '') {
           html += '<div class="note">📝 ' + e.note + '</div>';
         }
+        // Limited users: only show edit/delete for their own entries? For now, allow edit/delete for all visible
         html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         li.innerHTML = html;
         pList.appendChild(li);
       });
-      if (expenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">' + t('noPersonal') + '</li>';
+      if (visibleExpenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">' + t('noPersonal') + '</li>';
+
+      // Work list (owner only)
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
-      expenses.filter(filterWork).forEach(e => {
+      visibleExpenses.filter(filterWork).forEach(e => {
         const li = document.createElement('li');
         let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
         html += '<div class="meta">' + e.category + ' · ' + e.date + '</div>';
@@ -913,24 +1051,25 @@
         li.innerHTML = html;
         wList.appendChild(li);
       });
-      if (expenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">' + t('noWork') + '</li>';
+      if (visibleExpenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">' + t('noWork') + '</li>';
+
+      // Work total
       let workTotal = 0;
-      expenses.filter(filterWork).forEach(e => workTotal += parseFloat(e.amount)||0);
+      visibleExpenses.filter(filterWork).forEach(e => workTotal += parseFloat(e.amount)||0);
       document.getElementById('workTotalDisplay').textContent = '$' + workTotal.toFixed(2);
       if (workBreakdownVisible) toggleWorkBreakdown();
       updateOweBalance();
     }
 
     function updateEarningsSummary() {
+      if (userRole !== 'owner') return;
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
       let total = 0;
       let label = '';
 
       if (summaryMode === 'day') {
-        earnings.filter(e => e.date === currentDay).forEach(e => {
-          total += parseFloat(e.amount) || 0;
-        });
+        earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount) || 0);
         label = t('dayTotal');
       } else if (summaryMode === 'week') {
         const mondayStr = getMondayOfWeek(currentDay);
@@ -938,18 +1077,11 @@
         const sundayDate = new Date(mondayDate);
         sundayDate.setDate(mondayDate.getDate() + 6);
         const sundayStr = formatDateForCompare(sundayDate);
-
-        earnings.filter(e => {
-          return e.date >= mondayStr && e.date <= sundayStr;
-        }).forEach(e => {
-          total += parseFloat(e.amount) || 0;
-        });
+        earnings.filter(e => e.date >= mondayStr && e.date <= sundayStr).forEach(e => total += parseFloat(e.amount) || 0);
         label = t('weekTotal');
       } else if (summaryMode === 'month') {
         const monthPrefix = currentDay.substring(0, 7);
-        earnings.filter(e => e.date.startsWith(monthPrefix)).forEach(e => {
-          total += parseFloat(e.amount) || 0;
-        });
+        earnings.filter(e => e.date.startsWith(monthPrefix)).forEach(e => total += parseFloat(e.amount) || 0);
         label = t('monthTotal');
       }
 
@@ -964,8 +1096,15 @@
     });
 
     function updateOweBalance() {
+      // Only count expenses that involve BOTH Abhi and Gian (shared expenses)
       let gianOwesAbhi = 0;
-      expenses.filter(e => e.type === 'personal').forEach(e => {
+      const sharedExpenses = expenses.filter(e => {
+        if (e.type !== 'personal') return false;
+        const involves = e.involves || ['Abhi', 'Gian']; // backward compat
+        return involves.includes('Abhi') && involves.includes('Gian');
+      });
+      
+      sharedExpenses.forEach(e => {
         const amount = parseFloat(e.amount) || 0;
         const share = parseFloat(e.share) || 100;
         const paidBy = e.paidBy;
@@ -973,6 +1112,7 @@
         if (paidBy === 'Abhi') gianOwesAbhi += otherShare;
         else if (paidBy === 'Gian') gianOwesAbhi -= otherShare;
       });
+      
       const net = gianOwesAbhi - totalPaymentsRecorded;
       const amountEl = document.getElementById('balanceAmount');
       const labelEl = document.getElementById('balanceLabel');
@@ -984,6 +1124,7 @@
     }
 
     function updateDayStatus() {
+      if (userRole !== 'owner') return;
       const el = document.getElementById('dayStatus');
       if (!dayOpen) { el.classList.add('closed'); el.classList.remove('open'); el.textContent = 'Day closed'; }
       else { el.classList.add('open'); el.classList.remove('closed'); el.textContent = 'Active day: Today'; }
@@ -1028,6 +1169,7 @@
     document.getElementById('ytdBtn').addEventListener('click', () => { if (!householdId) return; isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); });
 
     document.getElementById('workCard').addEventListener('click', () => {
+      if (userRole !== 'owner') return;
       if (!householdId) return;
       workBreakdownVisible = !workBreakdownVisible;
       const el = document.getElementById('workBreakdown');
@@ -1040,16 +1182,16 @@
       } else { el.classList.remove('show'); }
     });
 
-    // End day slider
+    // End day slider (owner only)
     let isDragging = false, handleLeft = 4;
     const slideTrack = document.getElementById('slideTrack');
     const slideHandle = document.getElementById('slideHandle');
     const slideText = document.getElementById('slideText');
     function maxLeft() { return slideTrack.getBoundingClientRect().width - 4 - slideHandle.offsetWidth; }
     function resetSlide() { isDragging = false; handleLeft = 4; slideHandle.style.left = '4px'; slideTrack.classList.remove('completed','dragging'); updateSlideState(); }
-    slideTrack.addEventListener('pointerdown', e => { if (!householdId || !dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
+    slideTrack.addEventListener('pointerdown', e => { if (userRole !== 'owner' || !householdId || !dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
     slideTrack.addEventListener('pointermove', e => { if (!isDragging) return; const rect = slideTrack.getBoundingClientRect(); let left = e.clientX - rect.left - slideHandle.offsetWidth / 2; left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px'; if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; } else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; } });
-    slideTrack.addEventListener('pointerup', async () => { if (!isDragging || !householdId) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; try { await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); } catch(e){console.error(e);} updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
+    slideTrack.addEventListener('pointerup', async () => { if (!isDragging || userRole !== 'owner' || !householdId) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; try { await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); } catch(e){console.error(e);} updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
     slideTrack.addEventListener('pointercancel', resetSlide);
 
     // Payment slider
@@ -1061,10 +1203,12 @@
     function resetPaymentSlide() { paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px'; paymentTrack.classList.remove('completed','dragging'); paymentText.textContent = 'Slide to Record Payment'; }
     paymentTrack.addEventListener('pointerdown', e => { if (!householdId) return; paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
     paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
-    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; expenses.filter(e => e.type === 'personal').forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; try { await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); } catch(e){console.error(e);} updateOweBalance(); showToast('Payment recorded'); } });
+    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; const sharedExpenses = expenses.filter(e => { if (e.type !== 'personal') return false; const involves = e.involves || ['Abhi', 'Gian']; return involves.includes('Abhi') && involves.includes('Gian'); }); sharedExpenses.forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; try { await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); } catch(e){console.error(e);} updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
+    // Settings (owner only)
     document.getElementById('exportBtn').addEventListener('click', () => {
+      if (userRole !== 'owner') return;
       const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
       const dataStr = JSON.stringify(backup, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
@@ -1080,6 +1224,7 @@
     });
 
     document.getElementById('fileInput').addEventListener('change', async (event) => {
+      if (userRole !== 'owner') return;
       if (!householdId) return;
       const file = event.target.files[0];
       if (!file) return;
@@ -1098,6 +1243,7 @@
     });
 
     document.getElementById('clearBtn').addEventListener('click', async () => {
+      if (userRole !== 'owner') return;
       if (!householdId) return;
       if (!confirm('⚠️ DELETE ALL DATA? This cannot be undone.')) return;
       if (!confirm('Are you ABSOLUTELY SURE?')) return;
@@ -1120,6 +1266,7 @@
     });
 
     document.getElementById('expenseDateInput').value = getTodayLocal();
+    setInvolves(['Abhi', 'Gian']);
   </script>
 </body>
 </html>
