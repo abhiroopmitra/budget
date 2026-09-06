@@ -34,8 +34,6 @@
     .household-info { background: #1f6feb; color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; display: none; }
     .app-container { display: none; }
     .app-container.show { display: block; }
-    .no-household-banner { background: #f85149; color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 16px; text-align: center; display: none; }
-    .no-household-banner.show { display: block; }
     .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
     .tab { flex: 1; padding: 10px; font-size: 16px; background: #161b22; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
     .tab.active { background: #2ea043; }
@@ -90,7 +88,6 @@
     .entry-form button { padding: 12px 18px; font-size: 16px; border: none; border-radius: 10px; background: #2ea043; color: #fff; }
     .entry-form #cancelEditBtn { background: #f85149; display: none; }
     .past-date-toggle { padding: 12px 14px; font-size: 14px; border: none; border-radius: 10px; background: #30363d; color: #fff; cursor: pointer; white-space: nowrap; }
-    .past-date-toggle:hover { background: #484f58; }
     .past-date-row { display: none; gap: 8px; margin-bottom: 12px; align-items: center; background: #161b22; padding: 10px; border-radius: 10px; }
     .past-date-row.show { display: flex; }
     .past-date-row label { font-size: 12px; opacity: 0.7; }
@@ -102,16 +99,10 @@
     .custom-row { display: flex; gap: 8px; margin-top: -8px; margin-bottom: 8px; }
     .custom-row input { flex: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: none; }
     .custom-row button { padding: 10px 16px; border: none; border-radius: 8px; background: #2ea043; color: #fff; }
-    .involves-section {
-      background: #161b22; border-radius: 10px; padding: 12px; margin-bottom: 12px;
-    }
+    .involves-section { background: #161b22; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
     .involves-title { font-size: 13px; opacity: 0.7; margin-bottom: 8px; }
-    .checkbox-row {
-      display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 15px;
-    }
-    .checkbox-row input[type="checkbox"] {
-      width: 20px; height: 20px; cursor: pointer; accent-color: #2ea043;
-    }
+    .checkbox-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 15px; }
+    .checkbox-row input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #2ea043; }
     .lists-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .list-column { background: #161b22; border-radius: 10px; padding: 12px; max-height: 400px; overflow-y: auto; }
     .list-header { font-size: 14px; font-weight: bold; opacity: 0.8; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #30363d; }
@@ -139,11 +130,7 @@
     .section { margin-bottom: 12px; }
     .user-info { font-size: 12px; opacity: 0.6; margin-top: 10px; text-align: center; }
     .household-id { font-size: 11px; opacity: 0.5; margin-top: 5px; text-align: center; font-family: monospace; }
-    .content-disabled { opacity: 0.3; pointer-events: none; }
-    .welcome-banner {
-      background: linear-gradient(135deg, #2ea043 0%, #1a7a2e 100%);
-      border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;
-    }
+    .welcome-banner { background: linear-gradient(135deg, #2ea043 0%, #1a7a2e 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center; }
     .welcome-banner h2 { font-size: 20px; margin-bottom: 6px; }
     .welcome-banner p { font-size: 13px; opacity: 0.9; }
   </style>
@@ -170,7 +157,6 @@
   </div>
 
   <div class="app-container" id="appContainer">
-    <div class="no-household-banner" id="noHouseholdBanner">⚠️ <strong>No Household!</strong> Please create or join a household in Settings to start adding data.</div>
     <div class="header">
       <h1>💰 Budget</h1>
       <div style="display:flex; align-items:center;">
@@ -179,14 +165,12 @@
       </div>
     </div>
 
-    <!-- OWNER TABS (Abhi only) -->
     <div class="tabs" id="ownerTabs">
       <button class="tab active" id="earningsTabBtn">Earnings</button>
       <button class="tab" id="expensesTabBtn">Expenses</button>
     </div>
 
-    <!-- EARNINGS SECTION (Abhi only) -->
-    <div id="earningsSection" class="content-disabled">
+    <div id="earningsSection" class="hidden">
       <button class="summary-btn" id="summaryBtn">
         <span class="period-label" id="summaryPeriodLabel">Day Total</span>
         <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
@@ -222,9 +206,7 @@
       <ul id="earningsList"></ul>
     </div>
 
-    <!-- EXPENSES SECTION (both can see, but limited view) -->
-    <div id="expensesSection" class="hidden content-disabled">
-      <!-- Welcome banner for limited users -->
+    <div id="expensesSection" class="hidden">
       <div id="limitedWelcome" class="welcome-banner hidden">
         <h2>👋 Welcome, Gian</h2>
         <p>You can view and add shared personal expenses with Abhi.</p>
@@ -247,7 +229,6 @@
         </div>
       </div>
 
-      <!-- Work expenses (OWNER ONLY) -->
       <div id="workExpensesBlock" class="owner-only">
         <div class="work-card" id="workCard">
           <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
@@ -256,7 +237,6 @@
         </div>
       </div>
 
-      <!-- Type toggle (OWNER ONLY - can choose Personal/Work) -->
       <div class="type-toggle owner-only" id="typeToggle">
         <button class="type-btn active" id="typePersonalBtn">Personal</button>
         <button class="type-btn" id="typeWorkBtn">Work</button>
@@ -269,9 +249,8 @@
         <button id="expenseAddBtn">Add</button>
         <button id="expenseCancelBtn" style="display:none;">Cancel</button>
       </div>
-      <input type="text" id="expenseNoteInput" class="note-input" placeholder="Note (optional) — e.g. Birthday dinner, Cash tip, etc.">
+      <input type="text" id="expenseNoteInput" class="note-input" placeholder="Note (optional)">
 
-      <!-- Personal-specific fields (always shown for personal expenses) -->
       <div id="personalFields" class="section">
         <div class="entry-form">
           <select id="personalPaidBySelect">
@@ -294,7 +273,6 @@
         </div>
       </div>
 
-      <!-- Work-specific fields (OWNER ONLY) -->
       <div id="workFields" class="section owner-only hidden">
         <div id="workCustomCatRow" class="custom-row hidden">
           <input type="text" id="workCustomCatInput" placeholder="New category">
@@ -302,7 +280,6 @@
         </div>
       </div>
 
-      <!-- INVOLVES section (for personal expenses) -->
       <div class="involves-section owner-only" id="involvesSection">
         <div class="involves-title">This expense involves:</div>
         <div class="checkbox-row">
@@ -317,7 +294,7 @@
 
       <div class="lists-container">
         <div class="list-column">
-          <div class="list-header" data-list-type="personal">PERSONAL</div>
+          <div class="list-header">PERSONAL</div>
           <ul id="personalList"></ul>
         </div>
         <div class="list-column owner-only" id="workListColumn">
@@ -326,7 +303,6 @@
         </div>
       </div>
 
-      <!-- Settings (OWNER ONLY) -->
       <div class="settings-section owner-only" id="settingsSection">
         <div class="settings-title">⚙️ Settings</div>
         <div class="settings-grid">
@@ -338,17 +314,18 @@
         <div class="household-id" id="householdIdDisplay"></div>
       </div>
 
-      <!-- Logout for limited users only -->
       <div class="settings-section limited-only hidden" id="limitedLogoutSection">
-        <button class="settings-btn logout" id="limitedLogoutBtn" style="grid-column: span 2;">🚪 Logout</button>
+        <div class="settings-grid">
+          <button class="settings-btn logout" id="limitedLogoutBtn" style="grid-column: span 2;">🚪 Logout</button>
+        </div>
       </div>
     </div>
   </div>
   <div id="toast"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCw-VlPowIAzY0ylq2-WK39Jo-L0ELn414",
@@ -386,7 +363,7 @@
 
     let currentUser = null;
     let householdId = null;
-    let userRole = null; // 'owner' or 'limited'
+    let userRole = null;
     let earnings = [];
     let expenses = [];
     let customSources = [];
@@ -444,7 +421,6 @@
     }
 
     function applyRoleUI() {
-      // Hide/show owner-only and limited-only elements
       const ownerEls = document.querySelectorAll('.owner-only');
       const limitedEls = document.querySelectorAll('.limited-only');
       const roleBadge = document.getElementById('roleBadge');
@@ -461,12 +437,9 @@
         roleBadge.textContent = '👤 Shared';
         roleBadge.className = 'role-badge limited';
         document.getElementById('ownerTabs').classList.add('hidden');
-        // Force show expenses section for limited users
         document.getElementById('expensesSection').classList.remove('hidden');
         document.getElementById('earningsSection').classList.add('hidden');
-        // Show welcome banner
         document.getElementById('limitedWelcome').classList.remove('hidden');
-        // Force personal type
         setExpenseType('personal');
       }
     }
@@ -496,14 +469,12 @@
           householdId = userData.householdId;
           userRole = userData.role;
           if (householdId) {
-            // If role not set, determine from household
             if (!userRole) {
               const householdDoc = await db.collection('households').doc(householdId).get();
               if (householdDoc.exists) {
                 const hData = householdDoc.data();
                 const ownerEmail = hData.ownerEmail;
                 userRole = (ownerEmail && currentUser.email === ownerEmail) ? 'owner' : 'limited';
-                // Save role to user profile
                 await db.collection('users').doc(currentUser.uid).update({ role: userRole });
               } else {
                 userRole = 'limited';
@@ -546,7 +517,6 @@
         }
       }, error => { console.error('Error listening to household:', error); });
       
-      // Earnings (owner only)
       if (userRole === 'owner') {
         db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
           earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -555,7 +525,6 @@
         }, error => console.error('Error loading earnings:', error));
       }
       
-      // Expenses (both)
       db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
@@ -633,13 +602,11 @@
         const hDoc = await db.collection('households').doc(hid).get();
         if (!hDoc.exists) { throw new Error('Household not found'); }
         
-        // Determine role: if no ownerEmail set, first member is owner
         const hData = hDoc.data();
         let determinedRole = 'limited';
         if (hData.ownerEmail && currentUser.email === hData.ownerEmail) {
           determinedRole = 'owner';
         } else if (!hData.ownerEmail && hData.members && hData.members.length === 1) {
-          // First member becomes owner if no ownerEmail set
           determinedRole = 'owner';
           await db.collection('households').doc(hid).update({ 
             members: firebase.firestore.FieldValue.arrayUnion(currentUser.email),
@@ -694,7 +661,6 @@
       renderExpenseLists();
     });
 
-    // EARNINGS (owner only)
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (userRole !== 'owner') return;
       if (!householdId) return;
@@ -742,7 +708,6 @@
       updateEarningsSourceSelect();
     });
 
-    // Get involves list from checkboxes
     function getInvolves() {
       const involves = [];
       if (document.getElementById('involvesAbhi').checked) involves.push('Abhi');
@@ -760,7 +725,6 @@
       }
     }
 
-    // EXPENSES
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) return;
       const dateInput = document.getElementById('expenseDateInput');
@@ -782,7 +746,6 @@
         if (share === '__custom__') share = document.getElementById('personalCustomShareInput').value;
         entry.paidBy = paidBy;
         entry.share = share;
-        // Get involves from checkboxes
         entry.involves = getInvolves();
       }
       try {
@@ -801,7 +764,7 @@
           document.getElementById('personalPaidBySelect').value = 'Abhi';
           document.getElementById('personalShareSelect').value = '100';
           document.getElementById('personalCustomShareRow').classList.add('hidden');
-          setInvolves(['Abhi', 'Gian']); // reset to default
+          setInvolves(['Abhi', 'Gian']);
         }
         catSelect.value = expenseType === 'personal' ? 'Food' : 'Gas';
         handleCategoryChange();
@@ -817,7 +780,7 @@
       document.getElementById('expenseAddBtn').textContent = t('add');
       document.getElementById('expenseCancelBtn').style.display = 'none';
       setInvolves(['Abhi', 'Gian']);
-      setExpenseType(userRole === 'limited' ? 'personal' : 'personal');
+      setExpenseType('personal');
     });
 
     window.deleteEarnings = async (id) => {
@@ -931,7 +894,6 @@
     });
 
     function setExpenseType(type) {
-      // Limited users can only use personal
       if (userRole === 'limited' && type !== 'personal') return;
       expenseType = type;
       document.getElementById('typePersonalBtn').classList.toggle('active', type === 'personal');
@@ -976,7 +938,6 @@
       const customs = expenseType === 'personal' ? customPersonalCats : customWorkCats;
       defaults.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
       customs.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; select.add(opt); });
-      // Only show "+ Add custom" for owner
       if (userRole === 'owner') {
         const optCustom = document.createElement('option'); optCustom.value = '__custom__'; optCustom.textContent = '+ Add custom…'; select.add(optCustom);
       }
@@ -1003,12 +964,10 @@
     }
 
     function renderExpenseLists() {
-      // Filter for limited user: only show personal expenses that involve them
       let visibleExpenses = expenses;
       if (userRole === 'limited') {
         visibleExpenses = expenses.filter(e => {
-          if (e.type !== 'personal') return false; // hide work
-          // Show if Gian is in involves, OR if no involves field (backward compat)
+          if (e.type !== 'personal') return false;
           if (!e.involves || e.involves.length === 0) return true;
           return e.involves.includes('Gian');
         });
@@ -1030,14 +989,12 @@
         if (e.note && e.note.trim() !== '') {
           html += '<div class="note">📝 ' + e.note + '</div>';
         }
-        // Limited users: only show edit/delete for their own entries? For now, allow edit/delete for all visible
         html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         li.innerHTML = html;
         pList.appendChild(li);
       });
       if (visibleExpenses.filter(filter).length === 0) pList.innerHTML = '<li style="opacity:0.6;">' + t('noPersonal') + '</li>';
 
-      // Work list (owner only)
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
       visibleExpenses.filter(filterWork).forEach(e => {
@@ -1053,7 +1010,6 @@
       });
       if (visibleExpenses.filter(filterWork).length === 0) wList.innerHTML = '<li style="opacity:0.6;">' + t('noWork') + '</li>';
 
-      // Work total
       let workTotal = 0;
       visibleExpenses.filter(filterWork).forEach(e => workTotal += parseFloat(e.amount)||0);
       document.getElementById('workTotalDisplay').textContent = '$' + workTotal.toFixed(2);
@@ -1096,11 +1052,10 @@
     });
 
     function updateOweBalance() {
-      // Only count expenses that involve BOTH Abhi and Gian (shared expenses)
       let gianOwesAbhi = 0;
       const sharedExpenses = expenses.filter(e => {
         if (e.type !== 'personal') return false;
-        const involves = e.involves || ['Abhi', 'Gian']; // backward compat
+        const involves = e.involves || ['Abhi', 'Gian'];
         return involves.includes('Abhi') && involves.includes('Gian');
       });
       
@@ -1182,7 +1137,6 @@
       } else { el.classList.remove('show'); }
     });
 
-    // End day slider (owner only)
     let isDragging = false, handleLeft = 4;
     const slideTrack = document.getElementById('slideTrack');
     const slideHandle = document.getElementById('slideHandle');
@@ -1194,7 +1148,6 @@
     slideTrack.addEventListener('pointerup', async () => { if (!isDragging || userRole !== 'owner' || !householdId) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; try { await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); } catch(e){console.error(e);} updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
     slideTrack.addEventListener('pointercancel', resetSlide);
 
-    // Payment slider
     let paymentDragging = false, paymentHandleLeft = 4;
     const paymentTrack = document.getElementById('paymentSliderTrack');
     const paymentHandle = document.getElementById('paymentSliderHandle');
@@ -1206,7 +1159,6 @@
     paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; const sharedExpenses = expenses.filter(e => { if (e.type !== 'personal') return false; const involves = e.involves || ['Abhi', 'Gian']; return involves.includes('Abhi') && involves.includes('Gian'); }); sharedExpenses.forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; try { await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); } catch(e){console.error(e);} updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
-    // Settings (owner only)
     document.getElementById('exportBtn').addEventListener('click', () => {
       if (userRole !== 'owner') return;
       const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
