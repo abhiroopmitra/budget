@@ -115,6 +115,7 @@
     li .actions button { background: none; border: none; font-size: 14px; padding: 2px; }
     li .actions button.edit { color: #58a6ff; }
     li .actions button.delete { color: #f85149; }
+    .empty-message { opacity: 0.6; text-align: center; padding: 20px; font-size: 13px; }
     .settings-section { background: #161b22; border-radius: 10px; padding: 16px; margin-top: 20px; }
     .settings-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; opacity: 0.9; }
     .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -347,6 +348,17 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
     function getCurrentMonthLocal() { return getTodayLocal().slice(0, 7); }
+    
+    // Convert YYYY-MM to readable month name without timezone issues
+    function getMonthName(monthStr) {
+      const parts = monthStr.split('-');
+      const year = parts[0];
+      const month = parseInt(parts[1], 10);
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+      return monthNames[month - 1] + ' ' + year;
+    }
+    
     function formatDateForCompare(date) {
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
@@ -1035,65 +1047,66 @@
         li.innerHTML = html;
         list.appendChild(li);
       });
-      if (earnings.length === 0) list.innerHTML = '<li style="opacity:0.6;">No earnings yet.</li>';
+      if (earnings.length === 0) list.innerHTML = '<li class="empty-message">No earnings yet.</li>';
     }
 
-    // FIXED: renderExpenseLists now shows all personal expenses for owner
+    // FIXED: renderExpenseLists now correctly filters by month using string comparison
     function renderExpenseLists() {
-      // For the owner: show ALL personal expenses (no filter by involves)
-      // For the limited user (Gian): show personal expenses that involve him
-      let visibleExpenses;
+      let visibleExpenses = expenses;
       if (userRole === 'limited') {
         visibleExpenses = expenses.filter(e => {
-          if (e.type !== 'personal') return false;
-          // Old entries without involves field: show them
           if (!e.involves || e.involves.length === 0) return true;
           return e.involves.includes('Gian');
         });
-      } else {
-        // Owner: show all personal expenses, ignore involves filter
-        visibleExpenses = expenses.filter(e => e.type === 'personal');
       }
 
-      const filter = (e) => e.type === 'personal' && (isYTD || e.date.substring(0,7) === selectedMonth);
-      const filterWork = (e) => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth);
+      // Date filter using string comparison (avoids timezone issues)
+      const dateFilter = (e) => isYTD || (e.date && e.date.substring(0,7) === selectedMonth);
+      
+      // Personal list: show all expenses that are not work (including old data without type)
+      const personalFilter = (e) => !e.type || e.type === 'personal';
       
       const pList = document.getElementById('personalList');
       pList.innerHTML = '';
-      const sortedPersonal = [...visibleExpenses].filter(filter).sort((a, b) => {
+      const sortedPersonal = visibleExpenses.filter(e => personalFilter(e) && dateFilter(e)).sort((a, b) => {
         if (b.date !== a.date) return b.date.localeCompare(a.date);
         return (b.timestamp || '').localeCompare(a.timestamp || '');
       });
       sortedPersonal.forEach(e => {
         const li = document.createElement('li');
-        let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
-        let metaLine = e.category + ' · ' + e.paidBy + ' (' + e.share + '%) · ' + e.date;
+        let html = '<div class="amount">$' + parseFloat(e.amount).toFixed(2) + '</div>';
+        let metaLine = (e.category || 'Uncategorized') + ' · ' + (e.paidBy || 'Unknown') + ' · ' + e.date;
+        if (e.share != null) metaLine += ' (' + e.share + '%)';
         if (e.share == 0) metaLine += ' (personal)';
-        else metaLine += ' (shared)';
+        else if (e.share > 0) metaLine += ' (shared)';
         html += '<div class="meta">' + metaLine + '</div>';
         if (e.note && e.note.trim() !== '') html += '<div class="note">📝 ' + e.note + '</div>';
         html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         li.innerHTML = html;
         pList.appendChild(li);
       });
-      if (sortedPersonal.length === 0) pList.innerHTML = '<li style="opacity:0.6;">No personal expenses.</li>';
+      if (sortedPersonal.length === 0) {
+        pList.innerHTML = '<li class="empty-message">No expenses for this month.<br><br>Try:<br>• Click <b>YTD</b> to see all data<br>• Click the month name to select a different month</li>';
+      }
 
+      // Work list: show only work expenses
+      const filterWork = (e) => e.type === 'work' && dateFilter(e);
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
-      const sortedWork = [...visibleExpenses].filter(filterWork).sort((a, b) => {
+      const sortedWork = visibleExpenses.filter(filterWork).sort((a, b) => {
         if (b.date !== a.date) return b.date.localeCompare(a.date);
         return (b.timestamp || '').localeCompare(a.timestamp || '');
       });
       sortedWork.forEach(e => {
         const li = document.createElement('li');
-        let html = '<div class="amount">$' + e.amount.toFixed(2) + '</div>';
-        html += '<div class="meta">' + e.category + ' · ' + e.date + '</div>';
+        let html = '<div class="amount">$' + parseFloat(e.amount).toFixed(2) + '</div>';
+        html += '<div class="meta">' + (e.category || 'Other') + ' · ' + e.date + '</div>';
         if (e.note && e.note.trim() !== '') html += '<div class="note">📝 ' + e.note + '</div>';
         html += '<div class="actions"><button class="edit" onclick="startEditExpense(\'' + e.id + '\')">✏️</button><button class="delete" onclick="deleteExpense(\'' + e.id + '\')">🗑️</button></div>';
         li.innerHTML = html;
         wList.appendChild(li);
       });
-      if (sortedWork.length === 0) wList.innerHTML = '<li style="opacity:0.6;">No work expenses.</li>';
+      if (sortedWork.length === 0) wList.innerHTML = '<li class="empty-message">No work expenses.</li>';
 
       let workTotal = 0;
       sortedWork.forEach(e => workTotal += parseFloat(e.amount)||0);
@@ -1161,35 +1174,59 @@
       else { container.classList.add('disabled'); text.textContent = 'Day already closed'; }
     }
 
+    // FIXED: updateMonthDisplay uses string manipulation to avoid timezone issues
     function updateMonthDisplay() {
       const display = document.getElementById('monthDisplay');
-      const d = new Date(selectedMonth + '-01');
-      display.textContent = d.toLocaleDateString('en-US', { month:'long', year:'numeric' }) + ' ▼';
+      display.textContent = getMonthName(selectedMonth) + ' ▼';
       document.getElementById('workMonthLabel').textContent = isYTD ? 'YTD' : 'This Month';
     }
 
+    // FIXED: month dropdown uses string-based month names (no timezone issues)
     document.getElementById('monthDisplay').addEventListener('click', () => {
       if (!householdId) return;
       monthDropdownOpen = !monthDropdownOpen;
       const dropdown = document.getElementById('monthDropdown');
       if (monthDropdownOpen) {
         dropdown.innerHTML = '';
+        // Collect ALL months that have data from BOTH earnings and expenses
         const months = new Set();
-        expenses.forEach(e => months.add(e.date.substring(0, 7)));
+        expenses.forEach(e => { if (e.date) months.add(e.date.substring(0, 7)); });
+        earnings.forEach(e => { if (e.date) months.add(e.date.substring(0, 7)); });
         months.add(getCurrentMonthLocal());
-        Array.from(months).sort().reverse().forEach(m => {
+        // Sort months in descending order (newest first) using string comparison
+        const sortedMonths = Array.from(months).sort().reverse();
+        sortedMonths.forEach(m => {
           const div = document.createElement('div');
           div.className = 'month-option' + (m === selectedMonth && !isYTD ? ' selected' : '');
-          const d = new Date(m + '-01');
-          div.textContent = d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
-          div.addEventListener('click', () => { selectedMonth = m; isYTD = false; monthDropdownOpen = false; dropdown.style.display = 'none'; document.getElementById('ytdBtn').classList.remove('active'); updateMonthDisplay(); renderExpenseLists(); });
+          const monthName = getMonthName(m);
+          // Check if this month has any data
+          const hasData = expenses.some(e => e.date && e.date.substring(0,7) === m) || 
+                          earnings.some(e => e.date && e.date.substring(0,7) === m);
+          div.textContent = monthName + (hasData ? ' 📊' : '');
+          div.addEventListener('click', () => { 
+            selectedMonth = m; 
+            isYTD = false; 
+            monthDropdownOpen = false; 
+            dropdown.style.display = 'none'; 
+            document.getElementById('ytdBtn').classList.remove('active'); 
+            updateMonthDisplay(); 
+            renderExpenseLists(); 
+          });
           dropdown.appendChild(div);
         });
         dropdown.style.display = 'block';
-      } else { dropdown.style.display = 'none'; }
+      } else { 
+        dropdown.style.display = 'none'; 
+      }
     });
 
-    document.getElementById('ytdBtn').addEventListener('click', () => { if (!householdId) return; isYTD = !isYTD; document.getElementById('ytdBtn').classList.toggle('active', isYTD); updateMonthDisplay(); renderExpenseLists(); });
+    document.getElementById('ytdBtn').addEventListener('click', () => { 
+      if (!householdId) return; 
+      isYTD = !isYTD; 
+      document.getElementById('ytdBtn').classList.toggle('active', isYTD); 
+      updateMonthDisplay(); 
+      renderExpenseLists(); 
+    });
 
     document.getElementById('workCard').addEventListener('click', () => {
       if (userRole !== 'owner') return;
@@ -1197,7 +1234,7 @@
       const el = document.getElementById('workBreakdown');
       if (workBreakdownVisible) {
         const breakdown = {};
-        expenses.filter(e => e.type === 'work' && (isYTD || e.date.substring(0,7) === selectedMonth)).forEach(e => { breakdown[e.category] = (breakdown[e.category] || 0) + (parseFloat(e.amount)||0); });
+        expenses.filter(e => e.type === 'work' && (isYTD || (e.date && e.date.substring(0,7) === selectedMonth))).forEach(e => { breakdown[e.category] = (breakdown[e.category] || 0) + (parseFloat(e.amount)||0); });
         el.innerHTML = '';
         for (const [cat, amt] of Object.entries(breakdown)) { el.innerHTML += '<div class="breakdown-row"><span>' + cat + '</span><span>$' + amt.toFixed(2) + '</span></div>'; }
         el.classList.add('show');
