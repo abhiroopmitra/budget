@@ -134,8 +134,6 @@
     .welcome-banner { background: linear-gradient(135deg, #2ea043 0%, #1a7a2e 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center; }
     .welcome-banner h2 { font-size: 20px; margin-bottom: 6px; }
     .welcome-banner p { font-size: 13px; opacity: 0.9; }
-    
-    /* Target Widget Styles */
     .target-widget {
       background: #161b22;
       border-radius: 12px;
@@ -143,81 +141,34 @@
       margin-bottom: 14px;
       cursor: pointer;
       border: 1px solid #30363d;
-      transition: border-color 0.2s;
     }
-    .target-widget:active {
-      border-color: #1f6feb;
-    }
+    .target-widget:active { border-color: #1f6feb; }
     .target-widget-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      opacity: 0.7;
-      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; opacity: 0.7; margin-bottom: 8px;
     }
     .target-widget-left {
-      font-size: 36px;
-      font-weight: bold;
-      text-align: center;
-      margin: 8px 0;
-      line-height: 1.2;
+      font-size: 36px; font-weight: bold; text-align: center;
+      margin: 8px 0; line-height: 1.2;
     }
     .target-widget-left.red { color: #f85149; }
     .target-widget-left.orange { color: #f0883e; }
     .target-widget-left.green { color: #3fb950; }
-    .target-widget-sub {
-      font-size: 14px;
-      text-align: center;
-      opacity: 0.7;
-      margin-bottom: 8px;
-    }
-    .target-widget-bar {
-      height: 6px;
-      background: #30363d;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .target-widget-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.3s ease;
-    }
+    .target-widget-sub { font-size: 14px; text-align: center; opacity: 0.7; margin-bottom: 8px; }
+    .target-widget-bar { height: 6px; background: #30363d; border-radius: 3px; overflow: hidden; }
+    .target-widget-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
     .target-widget-bar-fill.red { background: #f85149; }
     .target-widget-bar-fill.orange { background: #f0883e; }
     .target-widget-bar-fill.green { background: #3fb950; }
-    .target-widget-settings {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #30363d;
-    }
-    .target-widget-settings label {
-      display: block;
-      font-size: 12px;
-      opacity: 0.7;
-      margin-bottom: 4px;
-      margin-top: 8px;
-    }
+    .target-widget-settings { margin-top: 12px; padding-top: 12px; border-top: 1px solid #30363d; }
+    .target-widget-settings label { display: block; font-size: 12px; opacity: 0.7; margin-bottom: 4px; margin-top: 8px; }
     .target-widget-settings input {
-      width: 100%;
-      padding: 8px;
-      font-size: 14px;
-      border-radius: 6px;
-      border: 1px solid #30363d;
-      background: #0d1117;
-      color: #fff;
-      margin-bottom: 4px;
+      width: 100%; padding: 8px; font-size: 14px; border-radius: 6px;
+      border: 1px solid #30363d; background: #0d1117; color: #fff; margin-bottom: 4px;
     }
     .target-widget-save-btn {
-      width: 100%;
-      padding: 8px;
-      margin-top: 8px;
-      background: #2ea043;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
+      width: 100%; padding: 8px; margin-top: 8px; background: #2ea043;
+      color: #fff; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;
     }
   </style>
 </head>
@@ -263,7 +214,6 @@
         <span class="hint">tap to switch: day → week → month</span>
       </button>
       
-      <!-- TARGET WIDGET (Owner Only) -->
       <div class="target-widget" id="targetWidget" style="display:none;" onclick="cycleTargetMode()">
         <div class="target-widget-label" id="targetWidgetLabel">🎯 DAILY TARGET · tap to switch</div>
         <div class="target-widget-left" id="targetWidgetLeft">$0</div>
@@ -322,7 +272,6 @@
         <h2>👋 Welcome</h2>
         <p>You can view and add shared personal expenses.</p>
       </div>
-
       <div class="month-header">
         <div class="month-display" id="monthDisplay">Loading...</div>
         <button class="ytd-btn" id="ytdBtn">YTD</button>
@@ -339,7 +288,6 @@
           <div class="payment-slider-handle" id="paymentSliderHandle">💰</div>
         </div>
       </div>
-
       <div id="workExpensesBlock" style="display:none;">
         <div class="work-card" id="workCard">
           <div class="work-card-title">Work Expenses (<span id="workMonthLabel">This Month</span>)</div>
@@ -347,12 +295,10 @@
           <div id="workBreakdown" class="breakdown"></div>
         </div>
       </div>
-
       <div class="type-toggle" id="typeToggle" style="display:none;">
         <button class="type-btn active" id="typePersonalBtn">Personal</button>
         <button class="type-btn" id="typeWorkBtn">Work</button>
       </div>
-
       <div class="entry-form">
         <input type="date" id="expenseDateInput">
         <input type="number" id="expenseAmountInput" placeholder="Amount (CAD)" step="0.01" min="0">
@@ -361,7 +307,6 @@
         <button id="expenseCancelBtn" style="display:none;">Cancel</button>
       </div>
       <input type="text" id="expenseNoteInput" class="note-input" placeholder="Note (optional)">
-
       <div id="personalFields" class="section">
         <div class="entry-form">
           <select id="personalPaidBySelect">
@@ -384,14 +329,12 @@
           <button id="savePersonalCatBtn">Save</button>
         </div>
       </div>
-
       <div id="workFields" class="section hidden" style="display:none;">
         <div id="workCustomCatRow" class="custom-row hidden">
           <input type="text" id="workCustomCatInput" placeholder="New category">
           <button id="saveWorkCatBtn">Save</button>
         </div>
       </div>
-
       <div class="involves-section" id="involvesSection" style="display:none;">
         <div class="involves-title">Share with Gian?</div>
         <div class="checkbox-row">
@@ -399,7 +342,6 @@
           <label for="involvesGian">Yes, this is a shared expense with Gian</label>
         </div>
       </div>
-
       <div class="lists-container">
         <div class="list-column">
           <div class="list-header">PERSONAL</div>
@@ -410,7 +352,6 @@
           <ul id="workList"></ul>
         </div>
       </div>
-
       <div class="settings-section" id="settingsSection" style="display:none;">
         <div class="settings-title">⚙️ Settings</div>
         <div class="settings-grid">
@@ -421,7 +362,6 @@
         <input type="file" id="fileInput" accept=".json">
         <div class="household-id" id="householdIdDisplay"></div>
       </div>
-
       <div class="settings-section" id="limitedLogoutSection" style="display:none;">
         <div class="settings-grid">
           <button class="settings-btn logout" id="limitedLogoutBtn" style="grid-column: span 2;">🚪 Logout</button>
@@ -431,9 +371,9 @@
   </div>
   <div id="toast"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.6.0/firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCw-VlPowIAzY0ylq2-WK39Jo-L0ELn414",
@@ -499,13 +439,8 @@
     let isLoginMode = true;
     let currentLang = localStorage.getItem('appLang') || 'en';
     let pastDateActive = false;
-    let targetMode = 'daily'; // 'daily', 'weekly', 'monthly'
-    let targetSettings = {
-      netTarget: 2500,
-      workExpenses: 900,
-      taxRate: 30,
-      daysPerWeek: 6
-    };
+    let targetMode = 'daily';
+    let targetSettings = { netTarget: 2500, workExpenses: 900, taxRate: 30, daysPerWeek: 6 };
 
     const translations = {
       en: { add: "Add", update: "Update" },
@@ -520,8 +455,6 @@
       clearTimeout(el._timer);
       el._timer = setTimeout(() => el.classList.remove('show'), 2600);
     }
-
-    // ===== TARGET WIDGET FUNCTIONS =====
 
     function calculateRequiredGross() {
       const { netTarget, workExpenses, taxRate } = targetSettings;
@@ -550,14 +483,10 @@
     function getTargetForPeriod(period) {
       const requiredGrossMonthly = calculateRequiredGross();
       const { daysPerWeek } = targetSettings;
-      const workDaysPerMonth = (52 / 12) * daysPerWeek; // ~4.33 * daysPerWeek
-      if (period === 'daily') {
-        return requiredGrossMonthly / workDaysPerMonth;
-      } else if (period === 'weekly') {
-        return (requiredGrossMonthly / workDaysPerMonth) * daysPerWeek;
-      } else if (period === 'monthly') {
-        return requiredGrossMonthly;
-      }
+      const workDaysPerMonth = (52 / 12) * daysPerWeek;
+      if (period === 'daily') return requiredGrossMonthly / workDaysPerMonth;
+      else if (period === 'weekly') return (requiredGrossMonthly / workDaysPerMonth) * daysPerWeek;
+      else if (period === 'monthly') return requiredGrossMonthly;
       return 0;
     }
 
@@ -567,58 +496,26 @@
         return;
       }
       document.getElementById('targetWidget').style.display = 'block';
-      
       const target = getTargetForPeriod(targetMode);
       const earned = getEarningsForPeriod(targetMode);
       const remaining = target - earned;
-      
       const labelEl = document.getElementById('targetWidgetLabel');
       const leftEl = document.getElementById('targetWidgetLeft');
       const subEl = document.getElementById('targetWidgetSub');
       const barEl = document.getElementById('targetWidgetBar');
-      
       const modeLabel = targetMode.charAt(0).toUpperCase() + targetMode.slice(1);
       labelEl.textContent = `🎯 ${modeLabel.toUpperCase()} TARGET · tap to switch`;
-      
-      // Color based on remaining
-      let color = 'red';
-      let displayAmount = '';
-      let subText = 'to go';
-      
-      if (remaining > 20) {
-        color = 'red';
-        displayAmount = '$' + remaining.toFixed(0);
-        subText = 'to go';
-      } else if (remaining > 0 && remaining <= 20) {
-        color = 'orange';
-        displayAmount = '$' + remaining.toFixed(0);
-        subText = 'to go';
-      } else if (remaining === 0) {
-        color = 'green';
-        displayAmount = '🎉 Target met!';
-        subText = '$' + target.toFixed(0) + ' target';
-      } else {
-        // remaining is negative (exceeded target)
-        color = 'green';
-        const over = Math.abs(remaining);
-        displayAmount = '+$' + over.toFixed(0);
-        subText = 'over!';
-      }
-      
+      let color, displayAmount;
+      if (remaining > 20) { color = 'red'; displayAmount = '$' + remaining.toFixed(0); }
+      else if (remaining > 0 && remaining <= 20) { color = 'orange'; displayAmount = '$' + remaining.toFixed(0); }
+      else if (remaining === 0) { color = 'green'; displayAmount = '🎉 Target met!'; }
+      else { color = 'green'; displayAmount = '+$' + Math.abs(remaining).toFixed(0); }
       leftEl.textContent = displayAmount;
       leftEl.className = 'target-widget-left ' + color;
-      subEl.textContent = subText;
-      
-      // Progress bar
       const percent = target > 0 ? Math.min(100, (earned / target) * 100) : 0;
       barEl.style.width = percent + '%';
       barEl.className = 'target-widget-bar-fill ' + color;
-      
-      // Sub line: % achieved · Target: $X
       const percentAchieved = target > 0 ? Math.round((earned / target) * 100) : 0;
-      subEl.textContent = percentAchieved + '% achieved · Target: $' + target.toFixed(0);
-      
-      // If target met or exceeded, show different sub
       if (remaining <= 0) {
         subEl.textContent = percentAchieved + '% achieved · ' + (remaining === 0 ? 'Target met!' : '+$' + Math.abs(remaining).toFixed(0) + ' over!');
       } else {
@@ -627,9 +524,7 @@
     }
 
     window.cycleTargetMode = function() {
-      // Don't cycle if settings panel is open
       if (document.getElementById('targetWidgetSettings').style.display === 'block') return;
-      
       if (targetMode === 'daily') targetMode = 'weekly';
       else if (targetMode === 'weekly') targetMode = 'monthly';
       else targetMode = 'daily';
@@ -654,15 +549,7 @@
       const newWork = parseFloat(document.getElementById('workExpensesInput').value) || 900;
       const newTax = parseFloat(document.getElementById('taxRateInput').value) || 30;
       const newDays = parseFloat(document.getElementById('daysPerWeekInput').value) || 6;
-      
-      targetSettings = {
-        netTarget: newNet,
-        workExpenses: newWork,
-        taxRate: newTax,
-        daysPerWeek: newDays
-      };
-      
-      // Save to Firebase
+      targetSettings = { netTarget: newNet, workExpenses: newWork, taxRate: newTax, daysPerWeek: newDays };
       try {
         await db.collection('households').doc(householdId).update({
           targetNet: newNet,
@@ -675,12 +562,9 @@
         console.error('Error saving settings:', e);
         showToast('Saved locally', true);
       }
-      
       document.getElementById('targetWidgetSettings').style.display = 'none';
       updateTargetWidget();
     };
-
-    // ===== END TARGET WIDGET FUNCTIONS =====
 
     function togglePastDate() {
       const row = document.getElementById('pastDateRow');
@@ -709,7 +593,6 @@
       const earningsSection = document.getElementById('earningsSection');
       const expensesSection = document.getElementById('expensesSection');
       const ownerTabs = document.getElementById('ownerTabs');
-      
       if (userRole === 'owner') {
         roleBadge.textContent = '👑 Owner';
         roleBadge.className = 'role-badge owner';
@@ -726,7 +609,6 @@
         document.getElementById('earningsTabBtn').classList.add('active');
         document.getElementById('expensesTabBtn').classList.remove('active');
         document.getElementById('personalShareSelect').value = '0';
-        // Show target widget for owner
         updateTargetWidget();
       } else if (userRole === 'limited') {
         roleBadge.textContent = '👤 Shared';
@@ -743,7 +625,6 @@
         document.getElementById('limitedLogoutSection').style.display = 'block';
         document.getElementById('personalShareSelect').value = '50';
         setExpenseType('personal');
-        // Hide target widget for limited user
         document.getElementById('targetWidget').style.display = 'none';
       }
     }
@@ -784,7 +665,6 @@
                 userRole = 'limited';
               }
             }
-            // Load target settings
             const householdDoc = await db.collection('households').doc(householdId).get();
             if (householdDoc.exists) {
               const hData = householdDoc.data();
@@ -816,7 +696,6 @@
 
     function loadHouseholdData() {
       if (!householdId) return;
-      
       db.collection('households').doc(householdId).onSnapshot((doc) => {
         if (doc.exists) {
           const data = doc.data();
@@ -826,7 +705,6 @@
           customWorkCats = data.customWorkCats || [];
           currentDay = data.currentDay || getTodayLocal();
           dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
-          // Reload target settings if they changed
           if (data.targetNet) targetSettings.netTarget = data.targetNet;
           if (data.workExpensesEst) targetSettings.workExpenses = data.workExpensesEst;
           if (data.taxRate !== undefined) targetSettings.taxRate = data.taxRate;
@@ -840,7 +718,6 @@
           updateMonthDisplay();
         }
       }, error => { console.error('Error:', error); });
-      
       if (userRole === 'owner') {
         db.collection('households').doc(householdId).collection('earnings').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
           earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -849,7 +726,6 @@
           updateTargetWidget();
         }, error => console.error('Error:', error));
       }
-      
       db.collection('households').doc(householdId).collection('expenses').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
@@ -902,7 +778,6 @@
           customSources: [],
           customPersonalCats: [],
           customWorkCats: [],
-          // Default target settings
           targetNet: 2500,
           workExpensesEst: 900,
           taxRate: 30,
@@ -916,12 +791,7 @@
         });
         householdId = newHouseholdId;
         userRole = 'owner';
-        targetSettings = {
-          netTarget: 2500,
-          workExpenses: 900,
-          taxRate: 30,
-          daysPerWeek: 6
-        };
+        targetSettings = { netTarget: 2500, workExpenses: 900, taxRate: 30, daysPerWeek: 6 };
         document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
         const infoEl = document.getElementById('householdInfo');
         infoEl.style.display = 'block';
@@ -994,22 +864,14 @@
       document.getElementById('expensesTabBtn').classList.add('active');
       document.getElementById('earningsTabBtn').classList.remove('active');
       window.scrollTo(0, 0);
-      try {
-        updateMonthDisplay();
-        renderExpenseLists();
-      } catch (e) { console.error('Tab switch error:', e); }
+      try { updateMonthDisplay(); renderExpenseLists(); } catch (e) { console.error('Tab switch error:', e); }
     });
 
     function onInvolvesChange() {
       const checkbox = document.getElementById('involvesGian');
       const shareSelect = document.getElementById('personalShareSelect');
-      if (checkbox.checked) {
-        shareSelect.value = '50';
-        handleShareChange();
-      } else {
-        shareSelect.value = '0';
-        handleShareChange();
-      }
+      if (checkbox.checked) { shareSelect.value = '50'; handleShareChange(); }
+      else { shareSelect.value = '0'; handleShareChange(); }
     }
     document.getElementById('involvesGian').addEventListener('change', onInvolvesChange);
 
@@ -1032,27 +894,21 @@
     document.getElementById('earningsAddBtn').addEventListener('click', async () => {
       if (userRole !== 'owner') return;
       if (!householdId) return;
-      
       if (!dayOpen && !pastDateActive) {
         currentDay = getTodayLocal();
         dayOpen = true;
         try {
-          await db.collection('households').doc(householdId).update({
-            dayOpen: true,
-            currentDay: currentDay
-          });
+          await db.collection('households').doc(householdId).update({ dayOpen: true, currentDay: currentDay });
           updateDayStatus();
           showToast('New day started');
         } catch(e) { console.error(e); }
       }
-      
       const amountInput = document.getElementById('earningsAmountInput');
       const sourceSelect = document.getElementById('earningsSourceSelect');
       const amount = parseFloat(amountInput.value);
       const source = sourceSelect.value;
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
       if (source === '__custom__') { alert('Save custom source first.'); return; }
-
       let entryDate = currentDay;
       if (pastDateActive) {
         const pastDateInput = document.getElementById('pastDateInput').value;
@@ -1061,7 +917,6 @@
           entryDate = pastDateInput;
         }
       }
-
       const entry = { amount, source, date: entryDate, addedBy: currentUser.email, timestamp: new Date().toISOString() };
       try {
         if (editingEarningsId) {
@@ -1092,20 +947,15 @@
 
     document.getElementById('expenseAddBtn').addEventListener('click', async () => {
       if (!householdId) return;
-      
       if (!dayOpen && !pastDateActive) {
         currentDay = getTodayLocal();
         dayOpen = true;
         try {
-          await db.collection('households').doc(householdId).update({
-            dayOpen: true,
-            currentDay: currentDay
-          });
+          await db.collection('households').doc(householdId).update({ dayOpen: true, currentDay: currentDay });
           if (userRole === 'owner') updateDayStatus();
           showToast('New day started');
         } catch(e) { console.error(e); }
       }
-      
       const dateInput = document.getElementById('expenseDateInput');
       const amountInput = document.getElementById('expenseAmountInput');
       const catSelect = document.getElementById('expenseCategorySelect');
@@ -1117,7 +967,6 @@
       if (!date) { alert('Select a date.'); return; }
       if (!amount || amount <= 0) { alert('Valid amount required.'); return; }
       if (category === '__custom__') { alert('Save custom category first.'); return; }
-      
       const entry = { type: expenseType, date, amount, category, note, addedBy: currentUser.email, timestamp: new Date().toISOString() };
       if (expenseType === 'personal') {
         const paidBy = document.getElementById('personalPaidBySelect').value;
@@ -1368,10 +1217,8 @@
           return e.involves.includes('Gian');
         });
       }
-
       const dateFilter = (e) => isYTD || (e.date && e.date.substring(0,7) === selectedMonth);
       const personalFilter = (e) => !e.type || e.type === 'personal';
-      
       const pList = document.getElementById('personalList');
       pList.innerHTML = '';
       const sortedPersonal = visibleExpenses.filter(e => personalFilter(e) && dateFilter(e)).sort((a, b) => {
@@ -1392,9 +1239,8 @@
         pList.appendChild(li);
       });
       if (sortedPersonal.length === 0) {
-        pList.innerHTML = '<li class="empty-message">No expenses for this month.<br><br>Try:<br>• Click <b>YTD</b> to see all data<br>• Click the month name to select a different month</li>';
+        pList.innerHTML = '<li class="empty-message">No expenses for this month.<br><br>Try:<br>• Click <b>YTD</b><br>• Click the month name</li>';
       }
-
       const filterWork = (e) => e.type === 'work' && dateFilter(e);
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
@@ -1412,7 +1258,6 @@
         wList.appendChild(li);
       });
       if (sortedWork.length === 0) wList.innerHTML = '<li class="empty-message">No work expenses.</li>';
-
       let workTotal = 0;
       sortedWork.forEach(e => workTotal += parseFloat(e.amount)||0);
       document.getElementById('workTotalDisplay').textContent = '$' + workTotal.toFixed(2);
@@ -1499,33 +1344,24 @@
         sortedMonths.forEach(m => {
           const div = document.createElement('div');
           div.className = 'month-option' + (m === selectedMonth && !isYTD ? ' selected' : '');
-          const monthName = getMonthName(m);
-          const hasData = expenses.some(e => e.date && e.date.substring(0,7) === m) || 
-                          earnings.some(e => e.date && e.date.substring(0,7) === m);
-          div.textContent = monthName + (hasData ? ' 📊' : '');
+          div.textContent = getMonthName(m);
           div.addEventListener('click', () => { 
-            selectedMonth = m; 
-            isYTD = false; 
-            monthDropdownOpen = false; 
+            selectedMonth = m; isYTD = false; monthDropdownOpen = false; 
             dropdown.style.display = 'none'; 
             document.getElementById('ytdBtn').classList.remove('active'); 
-            updateMonthDisplay(); 
-            renderExpenseLists(); 
+            updateMonthDisplay(); renderExpenseLists(); 
           });
           dropdown.appendChild(div);
         });
         dropdown.style.display = 'block';
-      } else { 
-        dropdown.style.display = 'none'; 
-      }
+      } else { dropdown.style.display = 'none'; }
     });
 
     document.getElementById('ytdBtn').addEventListener('click', () => { 
       if (!householdId) return; 
       isYTD = !isYTD; 
       document.getElementById('ytdBtn').classList.toggle('active', isYTD); 
-      updateMonthDisplay(); 
-      renderExpenseLists(); 
+      updateMonthDisplay(); renderExpenseLists(); 
     });
 
     document.getElementById('workCard').addEventListener('click', () => {
@@ -1593,12 +1429,7 @@
           await db.collection('households').doc(householdId).update({ customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || getTodayLocal(), dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
           if (backup.targetSettings) {
             targetSettings = backup.targetSettings;
-            await db.collection('households').doc(householdId).update({
-              targetNet: targetSettings.netTarget,
-              workExpensesEst: targetSettings.workExpenses,
-              taxRate: targetSettings.taxRate,
-              daysPerWeek: targetSettings.daysPerWeek
-            });
+            await db.collection('households').doc(householdId).update({ targetNet: targetSettings.netTarget, workExpensesEst: targetSettings.workExpenses, taxRate: targetSettings.taxRate, daysPerWeek: targetSettings.daysPerWeek });
           }
           showToast('Data imported!');
         } catch (err) { showToast('Invalid file: ' + err.message, true); }
