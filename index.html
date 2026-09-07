@@ -67,7 +67,7 @@
     .balance-who { font-size: 18px; opacity: 0.9; }
     .balance-who.positive { color: #f85149; }
     .balance-who.negative { color: #7ee787; }
-    .payment-slider-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 16px; user-select: none; touch-action: none; }
+    .payment-slider-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 14px; user-select: none; touch-action: none; }
     .payment-slider-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
     .payment-slider-handle { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; background: #1f6feb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; pointer-events: none; transition: left 0.15s ease-out; }
     .payment-slider-track.dragging .payment-slider-handle { transition: none; }
@@ -711,6 +711,7 @@
           if (data.daysPerWeek) targetSettings.daysPerWeek = data.daysPerWeek;
           if (userRole === 'owner') {
             updateDayStatus();
+            updateEarningsSummary();
             updateTargetWidget();
           }
           if (userRole === 'owner') updateEarningsSourceSelect();
@@ -855,6 +856,7 @@
       document.getElementById('earningsTabBtn').classList.add('active');
       document.getElementById('expensesTabBtn').classList.remove('active');
       window.scrollTo(0, 0);
+      updateEarningsSummary();
       updateTargetWidget();
     });
 
@@ -1264,14 +1266,30 @@
       updateOweBalance();
     }
 
+    // FIXED: updateEarningsSummary now updates for day/week/month
     function updateEarningsSummary() {
       if (userRole !== 'owner') return;
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
       let total = 0, label = 'Day Total';
-      if (summaryMode === 'week') label = 'Week Total';
-      else if (summaryMode === 'month') label = 'Month Total';
-      earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount) || 0);
+      const today = getTodayLocal();
+      
+      if (summaryMode === 'day') {
+        earnings.filter(e => e.date === today).forEach(e => total += parseFloat(e.amount) || 0);
+        label = 'Day Total';
+      } else if (summaryMode === 'week') {
+        const mondayStr = getMondayOfWeek(today);
+        const mondayDate = new Date(mondayStr + 'T00:00:00');
+        const sundayDate = new Date(mondayDate);
+        sundayDate.setDate(mondayDate.getDate() + 6);
+        const sundayStr = formatDateForCompare(sundayDate);
+        earnings.filter(e => e.date >= mondayStr && e.date <= sundayStr).forEach(e => total += parseFloat(e.amount) || 0);
+        label = 'Week Total';
+      } else if (summaryMode === 'month') {
+        const monthPrefix = getCurrentMonthLocal();
+        earnings.filter(e => e.date && e.date.substring(0,7) === monthPrefix).forEach(e => total += parseFloat(e.amount) || 0);
+        label = 'Month Total';
+      }
       labelEl.textContent = label;
       amountEl.textContent = total.toFixed(2);
     }
