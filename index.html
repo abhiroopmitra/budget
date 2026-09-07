@@ -462,24 +462,24 @@
       return (netTarget + workExpenses) / (1 - taxDecimal);
     }
 
-    function getEarningsForPeriod(period) {
-      const today = getTodayLocal();
+        function getEarningsForPeriod(period) {
+      // Use currentDay (the active day controlled by the close day button) instead of today's actual date
       if (period === 'daily') {
-        return earnings.filter(e => e.date === today).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+        return earnings.filter(e => e.date === currentDay).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
       } else if (period === 'weekly') {
-        const mondayStr = getMondayOfWeek(today);
+        const mondayStr = getMondayOfWeek(currentDay);
         const mondayDate = new Date(mondayStr + 'T00:00:00');
         const sundayDate = new Date(mondayDate);
         sundayDate.setDate(mondayDate.getDate() + 6);
         const sundayStr = formatDateForCompare(sundayDate);
         return earnings.filter(e => e.date >= mondayStr && e.date <= sundayStr).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
       } else if (period === 'monthly') {
-        const monthPrefix = getCurrentMonthLocal();
+        const monthPrefix = currentDay.substring(0, 7);
         return earnings.filter(e => e.date && e.date.substring(0,7) === monthPrefix).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
       }
       return 0;
     }
-
+    
     function getTargetForPeriod(period) {
       const requiredGrossMonthly = calculateRequiredGross();
       const { daysPerWeek } = targetSettings;
@@ -1272,13 +1272,13 @@
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
       let total = 0, label = 'Day Total';
-      const today = getTodayLocal();
       
+      // Use currentDay (the active day) instead of today's actual date
       if (summaryMode === 'day') {
-        earnings.filter(e => e.date === today).forEach(e => total += parseFloat(e.amount) || 0);
+        earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount) || 0);
         label = 'Day Total';
       } else if (summaryMode === 'week') {
-        const mondayStr = getMondayOfWeek(today);
+        const mondayStr = getMondayOfWeek(currentDay);
         const mondayDate = new Date(mondayStr + 'T00:00:00');
         const sundayDate = new Date(mondayDate);
         sundayDate.setDate(mondayDate.getDate() + 6);
@@ -1286,14 +1286,13 @@
         earnings.filter(e => e.date >= mondayStr && e.date <= sundayStr).forEach(e => total += parseFloat(e.amount) || 0);
         label = 'Week Total';
       } else if (summaryMode === 'month') {
-        const monthPrefix = getCurrentMonthLocal();
+        const monthPrefix = currentDay.substring(0, 7);
         earnings.filter(e => e.date && e.date.substring(0,7) === monthPrefix).forEach(e => total += parseFloat(e.amount) || 0);
         label = 'Month Total';
       }
       labelEl.textContent = label;
       amountEl.textContent = total.toFixed(2);
     }
-
     document.getElementById('summaryBtn').addEventListener('click', () => {
       const modes = ['day','week','month'];
       summaryMode = modes[(modes.indexOf(summaryMode) + 1) % modes.length];
