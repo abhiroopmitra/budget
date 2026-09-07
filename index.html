@@ -67,7 +67,7 @@
     .balance-who { font-size: 18px; opacity: 0.9; }
     .balance-who.positive { color: #f85149; }
     .balance-who.negative { color: #7ee787; }
-    .payment-slider-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 14px; user-select: none; touch-action: none; }
+    .payment-slider-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 16px; user-select: none; touch-action: none; }
     .payment-slider-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
     .payment-slider-handle { position: absolute; left: 4px; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; background: #1f6feb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; pointer-events: none; transition: left 0.15s ease-out; }
     .payment-slider-track.dragging .payment-slider-handle { transition: none; }
@@ -134,6 +134,91 @@
     .welcome-banner { background: linear-gradient(135deg, #2ea043 0%, #1a7a2e 100%); border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center; }
     .welcome-banner h2 { font-size: 20px; margin-bottom: 6px; }
     .welcome-banner p { font-size: 13px; opacity: 0.9; }
+    
+    /* Target Widget Styles */
+    .target-widget {
+      background: #161b22;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      border: 1px solid #30363d;
+      transition: border-color 0.2s;
+    }
+    .target-widget:active {
+      border-color: #1f6feb;
+    }
+    .target-widget-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    .target-widget-left {
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      margin: 8px 0;
+      line-height: 1.2;
+    }
+    .target-widget-left.red { color: #f85149; }
+    .target-widget-left.orange { color: #f0883e; }
+    .target-widget-left.green { color: #3fb950; }
+    .target-widget-sub {
+      font-size: 14px;
+      text-align: center;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    .target-widget-bar {
+      height: 6px;
+      background: #30363d;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .target-widget-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    .target-widget-bar-fill.red { background: #f85149; }
+    .target-widget-bar-fill.orange { background: #f0883e; }
+    .target-widget-bar-fill.green { background: #3fb950; }
+    .target-widget-settings {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #30363d;
+    }
+    .target-widget-settings label {
+      display: block;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 4px;
+      margin-top: 8px;
+    }
+    .target-widget-settings input {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #30363d;
+      background: #0d1117;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .target-widget-save-btn {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      background: #2ea043;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -177,6 +262,31 @@
         <span class="big-amount">$<span id="summaryAmount">0.00</span></span>
         <span class="hint">tap to switch: day → week → month</span>
       </button>
+      
+      <!-- TARGET WIDGET (Owner Only) -->
+      <div class="target-widget" id="targetWidget" style="display:none;" onclick="cycleTargetMode()">
+        <div class="target-widget-label" id="targetWidgetLabel">🎯 DAILY TARGET · tap to switch</div>
+        <div class="target-widget-left" id="targetWidgetLeft">$0</div>
+        <div class="target-widget-sub" id="targetWidgetSub">to go</div>
+        <div class="target-widget-bar">
+          <div class="target-widget-bar-fill" id="targetWidgetBar" style="width: 0%;"></div>
+        </div>
+        <div class="target-widget-settings" id="targetWidgetSettings" style="display:none;">
+          <label>Monthly Net Target ($)</label>
+          <input type="number" id="targetNetInput" placeholder="2500" step="100">
+          <label>Work Expenses Estimate ($/month)</label>
+          <input type="number" id="workExpensesInput" placeholder="900" step="50">
+          <label>Tax Rate (%)</label>
+          <input type="number" id="taxRateInput" placeholder="30" step="1" min="0" max="100">
+          <label>Days per Week</label>
+          <input type="number" id="daysPerWeekInput" placeholder="6" step="1" min="1" max="7">
+          <button class="target-widget-save-btn" onclick="event.stopPropagation(); saveTargetSettings();">Save Settings</button>
+        </div>
+        <div style="text-align: center; margin-top: 8px;">
+          <button onclick="event.stopPropagation(); toggleTargetSettings();" style="background: none; border: none; color: #1f6feb; font-size: 12px; cursor: pointer; text-decoration: underline;">⚙️ Edit Settings</button>
+        </div>
+      </div>
+      
       <div class="day-status open" id="dayStatus">Active day: Today</div>
       <div class="slide-container" id="slideContainer">
         <div class="slide-track" id="slideTrack">
@@ -323,7 +433,7 @@
 
   <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.6.0/firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCw-VlPowIAzY0ylq2-WK39Jo-L0ELn414",
@@ -348,8 +458,6 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
     function getCurrentMonthLocal() { return getTodayLocal().slice(0, 7); }
-    
-    // Convert YYYY-MM to readable month name without timezone issues
     function getMonthName(monthStr) {
       const parts = monthStr.split('-');
       const year = parts[0];
@@ -358,7 +466,6 @@
                           'July', 'August', 'September', 'October', 'November', 'December'];
       return monthNames[month - 1] + ' ' + year;
     }
-    
     function formatDateForCompare(date) {
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
@@ -392,6 +499,13 @@
     let isLoginMode = true;
     let currentLang = localStorage.getItem('appLang') || 'en';
     let pastDateActive = false;
+    let targetMode = 'daily'; // 'daily', 'weekly', 'monthly'
+    let targetSettings = {
+      netTarget: 2500,
+      workExpenses: 900,
+      taxRate: 30,
+      daysPerWeek: 6
+    };
 
     const translations = {
       en: { add: "Add", update: "Update" },
@@ -406,6 +520,167 @@
       clearTimeout(el._timer);
       el._timer = setTimeout(() => el.classList.remove('show'), 2600);
     }
+
+    // ===== TARGET WIDGET FUNCTIONS =====
+
+    function calculateRequiredGross() {
+      const { netTarget, workExpenses, taxRate } = targetSettings;
+      const taxDecimal = taxRate / 100;
+      return (netTarget + workExpenses) / (1 - taxDecimal);
+    }
+
+    function getEarningsForPeriod(period) {
+      const today = getTodayLocal();
+      if (period === 'daily') {
+        return earnings.filter(e => e.date === today).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      } else if (period === 'weekly') {
+        const mondayStr = getMondayOfWeek(today);
+        const mondayDate = new Date(mondayStr + 'T00:00:00');
+        const sundayDate = new Date(mondayDate);
+        sundayDate.setDate(mondayDate.getDate() + 6);
+        const sundayStr = formatDateForCompare(sundayDate);
+        return earnings.filter(e => e.date >= mondayStr && e.date <= sundayStr).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      } else if (period === 'monthly') {
+        const monthPrefix = getCurrentMonthLocal();
+        return earnings.filter(e => e.date && e.date.substring(0,7) === monthPrefix).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+      }
+      return 0;
+    }
+
+    function getTargetForPeriod(period) {
+      const requiredGrossMonthly = calculateRequiredGross();
+      const { daysPerWeek } = targetSettings;
+      const workDaysPerMonth = (52 / 12) * daysPerWeek; // ~4.33 * daysPerWeek
+      if (period === 'daily') {
+        return requiredGrossMonthly / workDaysPerMonth;
+      } else if (period === 'weekly') {
+        return (requiredGrossMonthly / workDaysPerMonth) * daysPerWeek;
+      } else if (period === 'monthly') {
+        return requiredGrossMonthly;
+      }
+      return 0;
+    }
+
+    function updateTargetWidget() {
+      if (userRole !== 'owner') {
+        document.getElementById('targetWidget').style.display = 'none';
+        return;
+      }
+      document.getElementById('targetWidget').style.display = 'block';
+      
+      const target = getTargetForPeriod(targetMode);
+      const earned = getEarningsForPeriod(targetMode);
+      const remaining = target - earned;
+      
+      const labelEl = document.getElementById('targetWidgetLabel');
+      const leftEl = document.getElementById('targetWidgetLeft');
+      const subEl = document.getElementById('targetWidgetSub');
+      const barEl = document.getElementById('targetWidgetBar');
+      
+      const modeLabel = targetMode.charAt(0).toUpperCase() + targetMode.slice(1);
+      labelEl.textContent = `🎯 ${modeLabel.toUpperCase()} TARGET · tap to switch`;
+      
+      // Color based on remaining
+      let color = 'red';
+      let displayAmount = '';
+      let subText = 'to go';
+      
+      if (remaining > 20) {
+        color = 'red';
+        displayAmount = '$' + remaining.toFixed(0);
+        subText = 'to go';
+      } else if (remaining > 0 && remaining <= 20) {
+        color = 'orange';
+        displayAmount = '$' + remaining.toFixed(0);
+        subText = 'to go';
+      } else if (remaining === 0) {
+        color = 'green';
+        displayAmount = '🎉 Target met!';
+        subText = '$' + target.toFixed(0) + ' target';
+      } else {
+        // remaining is negative (exceeded target)
+        color = 'green';
+        const over = Math.abs(remaining);
+        displayAmount = '+$' + over.toFixed(0);
+        subText = 'over!';
+      }
+      
+      leftEl.textContent = displayAmount;
+      leftEl.className = 'target-widget-left ' + color;
+      subEl.textContent = subText;
+      
+      // Progress bar
+      const percent = target > 0 ? Math.min(100, (earned / target) * 100) : 0;
+      barEl.style.width = percent + '%';
+      barEl.className = 'target-widget-bar-fill ' + color;
+      
+      // Sub line: % achieved · Target: $X
+      const percentAchieved = target > 0 ? Math.round((earned / target) * 100) : 0;
+      subEl.textContent = percentAchieved + '% achieved · Target: $' + target.toFixed(0);
+      
+      // If target met or exceeded, show different sub
+      if (remaining <= 0) {
+        subEl.textContent = percentAchieved + '% achieved · ' + (remaining === 0 ? 'Target met!' : '+$' + Math.abs(remaining).toFixed(0) + ' over!');
+      } else {
+        subEl.textContent = percentAchieved + '% achieved · $' + remaining.toFixed(0) + ' to go · Target $' + target.toFixed(0);
+      }
+    }
+
+    window.cycleTargetMode = function() {
+      // Don't cycle if settings panel is open
+      if (document.getElementById('targetWidgetSettings').style.display === 'block') return;
+      
+      if (targetMode === 'daily') targetMode = 'weekly';
+      else if (targetMode === 'weekly') targetMode = 'monthly';
+      else targetMode = 'daily';
+      updateTargetWidget();
+    };
+
+    window.toggleTargetSettings = function() {
+      const settings = document.getElementById('targetWidgetSettings');
+      if (settings.style.display === 'block') {
+        settings.style.display = 'none';
+      } else {
+        settings.style.display = 'block';
+        document.getElementById('targetNetInput').value = targetSettings.netTarget;
+        document.getElementById('workExpensesInput').value = targetSettings.workExpenses;
+        document.getElementById('taxRateInput').value = targetSettings.taxRate;
+        document.getElementById('daysPerWeekInput').value = targetSettings.daysPerWeek;
+      }
+    };
+
+    window.saveTargetSettings = async function() {
+      const newNet = parseFloat(document.getElementById('targetNetInput').value) || 2500;
+      const newWork = parseFloat(document.getElementById('workExpensesInput').value) || 900;
+      const newTax = parseFloat(document.getElementById('taxRateInput').value) || 30;
+      const newDays = parseFloat(document.getElementById('daysPerWeekInput').value) || 6;
+      
+      targetSettings = {
+        netTarget: newNet,
+        workExpenses: newWork,
+        taxRate: newTax,
+        daysPerWeek: newDays
+      };
+      
+      // Save to Firebase
+      try {
+        await db.collection('households').doc(householdId).update({
+          targetNet: newNet,
+          workExpensesEst: newWork,
+          taxRate: newTax,
+          daysPerWeek: newDays
+        });
+        showToast('Settings saved!');
+      } catch (e) {
+        console.error('Error saving settings:', e);
+        showToast('Saved locally', true);
+      }
+      
+      document.getElementById('targetWidgetSettings').style.display = 'none';
+      updateTargetWidget();
+    };
+
+    // ===== END TARGET WIDGET FUNCTIONS =====
 
     function togglePastDate() {
       const row = document.getElementById('pastDateRow');
@@ -451,6 +726,8 @@
         document.getElementById('earningsTabBtn').classList.add('active');
         document.getElementById('expensesTabBtn').classList.remove('active');
         document.getElementById('personalShareSelect').value = '0';
+        // Show target widget for owner
+        updateTargetWidget();
       } else if (userRole === 'limited') {
         roleBadge.textContent = '👤 Shared';
         roleBadge.className = 'role-badge limited';
@@ -466,6 +743,8 @@
         document.getElementById('limitedLogoutSection').style.display = 'block';
         document.getElementById('personalShareSelect').value = '50';
         setExpenseType('personal');
+        // Hide target widget for limited user
+        document.getElementById('targetWidget').style.display = 'none';
       }
     }
 
@@ -505,6 +784,15 @@
                 userRole = 'limited';
               }
             }
+            // Load target settings
+            const householdDoc = await db.collection('households').doc(householdId).get();
+            if (householdDoc.exists) {
+              const hData = householdDoc.data();
+              if (hData.targetNet) targetSettings.netTarget = hData.targetNet;
+              if (hData.workExpensesEst) targetSettings.workExpenses = hData.workExpensesEst;
+              if (hData.taxRate !== undefined) targetSettings.taxRate = hData.taxRate;
+              if (hData.daysPerWeek) targetSettings.daysPerWeek = hData.daysPerWeek;
+            }
             applyRoleUI();
             document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
             selectedMonth = getCurrentMonthLocal();
@@ -538,7 +826,15 @@
           customWorkCats = data.customWorkCats || [];
           currentDay = data.currentDay || getTodayLocal();
           dayOpen = data.dayOpen !== undefined ? data.dayOpen : true;
-          if (userRole === 'owner') updateDayStatus();
+          // Reload target settings if they changed
+          if (data.targetNet) targetSettings.netTarget = data.targetNet;
+          if (data.workExpensesEst) targetSettings.workExpenses = data.workExpensesEst;
+          if (data.taxRate !== undefined) targetSettings.taxRate = data.taxRate;
+          if (data.daysPerWeek) targetSettings.daysPerWeek = data.daysPerWeek;
+          if (userRole === 'owner') {
+            updateDayStatus();
+            updateTargetWidget();
+          }
           if (userRole === 'owner') updateEarningsSourceSelect();
           updateExpenseCategorySelect();
           updateMonthDisplay();
@@ -550,6 +846,7 @@
           earnings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           renderEarningsList();
           updateEarningsSummary();
+          updateTargetWidget();
         }, error => console.error('Error:', error));
       }
       
@@ -557,6 +854,7 @@
         expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderExpenseLists();
         updateOweBalance();
+        if (userRole === 'owner') updateTargetWidget();
       }, error => console.error('Error:', error));
     }
 
@@ -603,7 +901,12 @@
           dayOpen: true,
           customSources: [],
           customPersonalCats: [],
-          customWorkCats: []
+          customWorkCats: [],
+          // Default target settings
+          targetNet: 2500,
+          workExpensesEst: 900,
+          taxRate: 30,
+          daysPerWeek: 6
         });
         await db.collection('users').doc(currentUser.uid).set({
           email: currentUser.email,
@@ -613,6 +916,12 @@
         });
         householdId = newHouseholdId;
         userRole = 'owner';
+        targetSettings = {
+          netTarget: 2500,
+          workExpenses: 900,
+          taxRate: 30,
+          daysPerWeek: 6
+        };
         document.getElementById('householdIdDisplay').textContent = 'Household ID: ' + householdId;
         const infoEl = document.getElementById('householdInfo');
         infoEl.style.display = 'block';
@@ -676,6 +985,7 @@
       document.getElementById('earningsTabBtn').classList.add('active');
       document.getElementById('expensesTabBtn').classList.remove('active');
       window.scrollTo(0, 0);
+      updateTargetWidget();
     });
 
     document.getElementById('expensesTabBtn').addEventListener('click', () => {
@@ -1050,7 +1360,6 @@
       if (earnings.length === 0) list.innerHTML = '<li class="empty-message">No earnings yet.</li>';
     }
 
-    // FIXED: renderExpenseLists now correctly filters by month using string comparison
     function renderExpenseLists() {
       let visibleExpenses = expenses;
       if (userRole === 'limited') {
@@ -1060,10 +1369,7 @@
         });
       }
 
-      // Date filter using string comparison (avoids timezone issues)
       const dateFilter = (e) => isYTD || (e.date && e.date.substring(0,7) === selectedMonth);
-      
-      // Personal list: show all expenses that are not work (including old data without type)
       const personalFilter = (e) => !e.type || e.type === 'personal';
       
       const pList = document.getElementById('personalList');
@@ -1089,7 +1395,6 @@
         pList.innerHTML = '<li class="empty-message">No expenses for this month.<br><br>Try:<br>• Click <b>YTD</b> to see all data<br>• Click the month name to select a different month</li>';
       }
 
-      // Work list: show only work expenses
       const filterWork = (e) => e.type === 'work' && dateFilter(e);
       const wList = document.getElementById('workList');
       wList.innerHTML = '';
@@ -1174,32 +1479,27 @@
       else { container.classList.add('disabled'); text.textContent = 'Day already closed'; }
     }
 
-    // FIXED: updateMonthDisplay uses string manipulation to avoid timezone issues
     function updateMonthDisplay() {
       const display = document.getElementById('monthDisplay');
       display.textContent = getMonthName(selectedMonth) + ' ▼';
       document.getElementById('workMonthLabel').textContent = isYTD ? 'YTD' : 'This Month';
     }
 
-    // FIXED: month dropdown uses string-based month names (no timezone issues)
     document.getElementById('monthDisplay').addEventListener('click', () => {
       if (!householdId) return;
       monthDropdownOpen = !monthDropdownOpen;
       const dropdown = document.getElementById('monthDropdown');
       if (monthDropdownOpen) {
         dropdown.innerHTML = '';
-        // Collect ALL months that have data from BOTH earnings and expenses
         const months = new Set();
         expenses.forEach(e => { if (e.date) months.add(e.date.substring(0, 7)); });
         earnings.forEach(e => { if (e.date) months.add(e.date.substring(0, 7)); });
         months.add(getCurrentMonthLocal());
-        // Sort months in descending order (newest first) using string comparison
         const sortedMonths = Array.from(months).sort().reverse();
         sortedMonths.forEach(m => {
           const div = document.createElement('div');
           div.className = 'month-option' + (m === selectedMonth && !isYTD ? ' selected' : '');
           const monthName = getMonthName(m);
-          // Check if this month has any data
           const hasData = expenses.some(e => e.date && e.date.substring(0,7) === m) || 
                           earnings.some(e => e.date && e.date.substring(0,7) === m);
           div.textContent = monthName + (hasData ? ' 📊' : '');
@@ -1265,7 +1565,7 @@
 
     document.getElementById('exportBtn').addEventListener('click', () => {
       if (userRole !== 'owner') return;
-      const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen };
+      const backup = { earnings, expenses, customSources, customPersonalCats, customWorkCats, totalPaymentsRecorded, currentDay, dayOpen, targetSettings };
       const dataStr = JSON.stringify(backup, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -1291,6 +1591,15 @@
           if (!backup.earnings || !backup.expenses) throw new Error('Invalid file');
           if (!confirm('This will replace ALL data. Continue?')) { event.target.value = ''; return; }
           await db.collection('households').doc(householdId).update({ customSources: backup.customSources || [], customPersonalCats: backup.customPersonalCats || [], customWorkCats: backup.customWorkCats || [], totalPaymentsRecorded: backup.totalPaymentsRecorded || 0, currentDay: backup.currentDay || getTodayLocal(), dayOpen: backup.dayOpen !== undefined ? backup.dayOpen : true });
+          if (backup.targetSettings) {
+            targetSettings = backup.targetSettings;
+            await db.collection('households').doc(householdId).update({
+              targetNet: targetSettings.netTarget,
+              workExpensesEst: targetSettings.workExpenses,
+              taxRate: targetSettings.taxRate,
+              daysPerWeek: targetSettings.daysPerWeek
+            });
+          }
           showToast('Data imported!');
         } catch (err) { showToast('Invalid file: ' + err.message, true); }
         event.target.value = '';
