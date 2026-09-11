@@ -44,6 +44,7 @@
     .day-status { text-align: center; font-size: 13px; margin-bottom: 12px; padding: 8px; border-radius: 8px; background: #161b22; }
     .day-status.open { color: #7ee787; }
     .day-status.closed { color: #8b949e; }
+    .reopen-btn { width: 100%; padding: 10px; margin-bottom: 12px; background: #1f6feb; color: #fff; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; }
     .slide-container { width: 100%; background: #2b3a4a; border-radius: 25px; padding: 4px; margin-bottom: 14px; user-select: none; touch-action: none; }
     .slide-container.disabled { opacity: 0.4; }
     .slide-track { position: relative; height: 50px; background: #1e2a36; border-radius: 25px; overflow: hidden; }
@@ -238,6 +239,7 @@
       </div>
       
       <div class="day-status open" id="dayStatus">Active day: Today</div>
+      <button class="reopen-btn" id="reopenDayBtn" style="display:none;" onclick="reopenDay()">↺ Reopen Day (if closed by mistake)</button>
       <div class="slide-container" id="slideContainer">
         <div class="slide-track" id="slideTrack">
           <span class="slide-text" id="slideText">Slide to End Day</span>
@@ -462,8 +464,7 @@
       return (netTarget + workExpenses) / (1 - taxDecimal);
     }
 
-        function getEarningsForPeriod(period) {
-      // Use currentDay (the active day controlled by the close day button) instead of today's actual date
+    function getEarningsForPeriod(period) {
       if (period === 'daily') {
         return earnings.filter(e => e.date === currentDay).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
       } else if (period === 'weekly') {
@@ -479,7 +480,7 @@
       }
       return 0;
     }
-    
+
     function getTargetForPeriod(period) {
       const requiredGrossMonthly = calculateRequiredGross();
       const { daysPerWeek } = targetSettings;
@@ -1266,14 +1267,12 @@
       updateOweBalance();
     }
 
-    // FIXED: updateEarningsSummary now updates for day/week/month
     function updateEarningsSummary() {
       if (userRole !== 'owner') return;
       const labelEl = document.getElementById('summaryPeriodLabel');
       const amountEl = document.getElementById('summaryAmount');
       let total = 0, label = 'Day Total';
       
-      // Use currentDay (the active day) instead of today's actual date
       if (summaryMode === 'day') {
         earnings.filter(e => e.date === currentDay).forEach(e => total += parseFloat(e.amount) || 0);
         label = 'Day Total';
@@ -1293,6 +1292,7 @@
       labelEl.textContent = label;
       amountEl.textContent = total.toFixed(2);
     }
+
     document.getElementById('summaryBtn').addEventListener('click', () => {
       const modes = ['day','week','month'];
       summaryMode = modes[(modes.indexOf(summaryMode) + 1) % modes.length];
@@ -1329,8 +1329,18 @@
     function updateDayStatus() {
       if (userRole !== 'owner') return;
       const el = document.getElementById('dayStatus');
-      if (!dayOpen) { el.classList.add('closed'); el.classList.remove('open'); el.textContent = 'Day closed'; }
-      else { el.classList.add('open'); el.classList.remove('closed'); el.textContent = 'Active day: Today'; }
+      const reopenBtn = document.getElementById('reopenDayBtn');
+      if (!dayOpen) { 
+        el.classList.add('closed'); 
+        el.classList.remove('open'); 
+        el.textContent = 'Day closed'; 
+        if (reopenBtn) reopenBtn.style.display = 'block';
+      } else { 
+        el.classList.add('open'); 
+        el.classList.remove('closed'); 
+        el.textContent = 'Active day: Today'; 
+        if (reopenBtn) reopenBtn.style.display = 'none';
+      }
       updateSlideState();
     }
 
@@ -1340,6 +1350,31 @@
       if (dayOpen) { container.classList.remove('disabled'); text.textContent = 'Slide to End Day'; }
       else { container.classList.add('disabled'); text.textContent = 'Day already closed'; }
     }
+
+    window.reopenDay = async function() {
+      const dateInput = prompt('Enter the date to reopen (YYYY-MM-DD):', getTodayLocal());
+      if (!dateInput) return;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+        alert('Invalid date format. Use YYYY-MM-DD.');
+        return;
+      }
+      if (dateInput > getTodayLocal()) {
+        alert('Cannot reopen a future date.');
+        return;
+      }
+      if (!confirm('Reopen ' + dateInput + '? This will allow you to add entries to that day again.')) return;
+      dayOpen = true;
+      currentDay = dateInput;
+      try {
+        await db.collection('households').doc(householdId).update({
+          dayOpen: true,
+          currentDay: currentDay
+        });
+        updateDayStatus();
+        updateEarningsSummary();
+        showToast('Day reopened: ' + dateInput);
+      } catch(e) { console.error(e); showToast('Error reopening', true); }
+    };
 
     function updateMonthDisplay() {
       const display = document.getElementById('monthDisplay');
@@ -1401,8 +1436,8 @@
     function maxLeft() { return slideTrack.getBoundingClientRect().width - 4 - slideHandle.offsetWidth; }
     function resetSlide() { isDragging = false; handleLeft = 4; slideHandle.style.left = '4px'; slideTrack.classList.remove('completed','dragging'); updateSlideState(); }
     slideTrack.addEventListener('pointerdown', e => { if (userRole !== 'owner' || !householdId || !dayOpen) return; isDragging = true; slideTrack.classList.add('dragging'); slideTrack.setPointerCapture(e.pointerId); });
-    slideTrack.addEventListener('pointermove', e => { if (!isDragging) return; const rect = slideTrack.getBoundingClientRect(); let left = e.clientX - rect.left - slideHandle.offsetWidth / 2; left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px'; if (left >= maxLeft() * 0.92) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; } else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; } });
-    slideTrack.addEventListener('pointerup', async () => { if (!isDragging || userRole !== 'owner' || !householdId) return; const done = handleLeft >= maxLeft() * 0.92; resetSlide(); if (done) { dayOpen = false; try { await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); } catch(e){console.error(e);} updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
+    slideTrack.addEventListener('pointermove', e => { if (!isDragging) return; const rect = slideTrack.getBoundingClientRect(); let left = e.clientX - rect.left - slideHandle.offsetWidth / 2; left = Math.max(4, Math.min(maxLeft(), left)); handleLeft = left; slideHandle.style.left = left + 'px'; if (left >= maxLeft() * 0.98) { slideTrack.classList.add('completed'); slideText.textContent = 'Release to end day'; } else { slideTrack.classList.remove('completed'); slideText.textContent = 'Slide to End Day'; } });
+    slideTrack.addEventListener('pointerup', async () => { if (!isDragging || userRole !== 'owner' || !householdId) return; const done = handleLeft >= maxLeft() * 0.98; resetSlide(); if (done) { if (!confirm('End the day? This means all new entries will go to the new day.')) return; dayOpen = false; try { await db.collection('households').doc(householdId).update({ dayOpen: false, currentDay }); } catch(e){console.error(e);} updateDayStatus(); updateEarningsSummary(); showToast('Day closed'); } });
     slideTrack.addEventListener('pointercancel', resetSlide);
 
     let paymentDragging = false, paymentHandleLeft = 4;
@@ -1412,8 +1447,8 @@
     function paymentMaxLeft() { return paymentTrack.getBoundingClientRect().width - 4 - paymentHandle.offsetWidth; }
     function resetPaymentSlide() { paymentDragging = false; paymentHandleLeft = 4; paymentHandle.style.left = '4px'; paymentTrack.classList.remove('completed','dragging'); paymentText.textContent = 'Slide to Record Payment'; }
     paymentTrack.addEventListener('pointerdown', e => { if (!householdId) return; paymentDragging = true; paymentTrack.classList.add('dragging'); paymentTrack.setPointerCapture(e.pointerId); });
-    paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.92) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
-    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.92; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; const sharedExpenses = expenses.filter(e => { if (e.type !== 'personal') return false; const involves = e.involves || ['Abhi', 'Gian']; if (!involves.includes('Abhi') || !involves.includes('Gian')) return false; const share = parseFloat(e.share) || 0; if (share === 0) return false; return true; }); sharedExpenses.forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; try { await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); } catch(e){console.error(e);} updateOweBalance(); showToast('Payment recorded'); } });
+    paymentTrack.addEventListener('pointermove', e => { if (!paymentDragging) return; const rect = paymentTrack.getBoundingClientRect(); let left = e.clientX - rect.left - paymentHandle.offsetWidth / 2; left = Math.max(4, Math.min(paymentMaxLeft(), left)); paymentHandleLeft = left; paymentHandle.style.left = left + 'px'; if (left >= paymentMaxLeft() * 0.98) { paymentTrack.classList.add('completed'); paymentText.textContent = 'Release to record'; } else { paymentTrack.classList.remove('completed'); paymentText.textContent = 'Slide to Record Payment'; } });
+    paymentTrack.addEventListener('pointerup', async () => { if (!paymentDragging || !householdId) return; const done = paymentHandleLeft >= paymentMaxLeft() * 0.98; resetPaymentSlide(); if (done) { let gianOwesAbhi = 0; const sharedExpenses = expenses.filter(e => { if (e.type !== 'personal') return false; const involves = e.involves || ['Abhi', 'Gian']; if (!involves.includes('Abhi') || !involves.includes('Gian')) return false; const share = parseFloat(e.share) || 0; if (share === 0) return false; return true; }); sharedExpenses.forEach(e => { const amount = parseFloat(e.amount) || 0; const share = parseFloat(e.share) || 100; const otherShare = (share / 100) * amount; if (e.paidBy === 'Abhi') gianOwesAbhi += otherShare; else if (e.paidBy === 'Gian') gianOwesAbhi -= otherShare; }); const net = gianOwesAbhi - totalPaymentsRecorded; totalPaymentsRecorded += net; try { await db.collection('households').doc(householdId).update({ totalPaymentsRecorded }); } catch(e){console.error(e);} updateOweBalance(); showToast('Payment recorded'); } });
     paymentTrack.addEventListener('pointercancel', resetPaymentSlide);
 
     document.getElementById('exportBtn').addEventListener('click', () => {
